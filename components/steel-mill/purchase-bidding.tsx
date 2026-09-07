@@ -154,7 +154,7 @@ export function PurchaseBidding() {
         </span>
       </div>
 
-      <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />
+      <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} stickyLastColumn />
     </div>
   )
 }
