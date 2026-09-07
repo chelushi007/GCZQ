@@ -756,6 +756,9 @@ function SelectContent() {
 
   const pickedRow = candidateRows.find((c) => c.name === picked)
   const nonTopPicked = picked && candidateRows[0].name !== picked
+  const priceValues = candidateRows.map((c) => Number(c.price.replace(/,/g, "")))
+  const maxPrice = Math.max(...priceValues)
+  const minPrice = Math.min(...priceValues)
 
   return (
     <div className="space-y-4">
@@ -799,8 +802,17 @@ function SelectContent() {
                       <span className="text-sm font-semibold text-foreground">{c.name}</span>
                       {c.rank === 1 && <StatusPill tone="blue">报价第一</StatusPill>}
                     </div>
-                    <div className="mt-0.5 text-xs text-muted-foreground">
-                      报价 {c.price} 元/吨 · 综合得分 {c.score} · 成交金额 ¥{c.amount}
+                    <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5">
+                        报价 <span className="font-semibold text-foreground">{c.price}</span> 元/吨
+                        {Number(c.price.replace(/,/g, "")) === minPrice && (
+                          <StatusPill tone="green">最低价</StatusPill>
+                        )}
+                        {Number(c.price.replace(/,/g, "")) === maxPrice && (
+                          <StatusPill tone="red">最高价</StatusPill>
+                        )}
+                      </span>
+                      <span>· 综合得分 {c.score} · 成交金额 ¥{c.amount}</span>
                     </div>
                   </div>
                 </div>
