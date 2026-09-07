@@ -1,10 +1,21 @@
-import { Recycle, Truck, Cog, type LucideIcon } from "lucide-react"
+import { Recycle, Truck, Cog, Factory, type LucideIcon } from "lucide-react"
 import type { WorkspaceKey } from "@/lib/steel-data"
 
 const config: Record<
   string,
   { icon: LucideIcon; title: string; desc: string; points: string[] }
 > = {
+  "portal-steel": {
+    icon: Factory,
+    title: "门户 · 钢厂专区",
+    desc: "钢厂专区属于门户前端展示内容，面向公众访客，暂不设计。",
+    points: [
+      "对外展示钢厂采购需求与专区介绍",
+      "访客可浏览竞价 / 固定价 / 协议采购公告",
+      "引导注册认证会员后进入工作台参与交易",
+      "与「用户工作台 · 钢厂」的后台管理功能相互独立",
+    ],
+  },
   station: {
     icon: Recycle,
     title: "回收站工作台",

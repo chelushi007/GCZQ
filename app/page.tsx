@@ -16,6 +16,15 @@ const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
   return m
 })()
 
+const millSectionLabel: Record<MillMenuKey, string> = {
+  overview: "总览",
+  "purchase-bidding": "竞价回收",
+  "purchase-fixed": "固定价（一口价）回收",
+  "purchase-agreement": "协议回收",
+  orders: "订单管理",
+  suppliers: "供应商管理",
+}
+
 export default function Page() {
   const [active, setActive] = useState<WorkspaceKey>("portal-home")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
@@ -40,7 +49,15 @@ export default function Page() {
             <ChevronRight className="size-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">{crumb.group}</span>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span className="font-medium text-foreground">{crumb.leaf}</span>
+            <span className={active === "mill" ? "text-muted-foreground" : "font-medium text-foreground"}>
+              {crumb.leaf}
+            </span>
+            {active === "mill" && (
+              <>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+                <span className="font-medium text-foreground">{millSectionLabel[millSection]}</span>
+              </>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">演示集团</span>
@@ -56,10 +73,11 @@ export default function Page() {
               <PortalHome onNavigateSteel={() => setActive("portal-steel")} />
             </div>
           )}
-          {(active === "mill" || active === "portal-steel") && <SteelMillWorkspace section={millSection} />}
-          {(active === "station" || active === "supplier" || active === "ops-tbd") && (
-            <PlaceholderWorkspace workspace={active} />
-          )}
+          {active === "mill" && <SteelMillWorkspace section={millSection} />}
+          {(active === "portal-steel" ||
+            active === "station" ||
+            active === "supplier" ||
+            active === "ops-tbd") && <PlaceholderWorkspace workspace={active} />}
         </div>
       </main>
     </div>
