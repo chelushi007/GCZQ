@@ -124,18 +124,19 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       {/* 基本信息 */}
       <SectionCard title="基本信息">
         <div className="grid gap-x-8 gap-y-5 lg:grid-cols-2">
-          <Field label="标段/包名称" required>
-            <input className={inputCls} placeholder="请输入标段/包名称" />
+          <Field label="公告标题" required>
+            <input className={inputCls} placeholder="请输入公告标题" />
           </Field>
           <Field label="采购预算(元)" required>
             <input className={inputCls} inputMode="numeric" placeholder="请输入预算金额" />
           </Field>
           <Field label="采购方式" required>
-            <select className={selectCls} defaultValue={purchaseMethods[0]}>
-              {purchaseMethods.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </select>
+            <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm text-foreground">
+              {purchaseMethods[0]}
+            </div>
+          </Field>
+          <Field label="采购联系人" required>
+            <input className={inputCls} placeholder="请输入联系人姓名及电话" />
           </Field>
           <Field label="是否允许自然人(个人)参与" required>
             <div className="flex h-10 items-center gap-6 text-sm">

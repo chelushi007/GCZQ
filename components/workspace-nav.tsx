@@ -97,11 +97,14 @@ export function WorkspaceNav({
   }
 
   function MillBtn({ node }: { node: MillNode }) {
-    const isActive = millSection === node.key
+    const isActive = active === "mill" && millSection === node.key
     const Icon = node.icon
     return (
       <button
-        onClick={() => onMillSectionChange(node.key)}
+        onClick={() => {
+          onSelect("mill")
+          onMillSectionChange(node.key)
+        }}
         title={node.label}
         className={cn(
           "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",

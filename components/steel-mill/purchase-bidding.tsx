@@ -40,47 +40,31 @@ export function PurchaseBidding() {
   }
 
   const columns: Column<BiddingItem>[] = [
-    { key: "id", header: "竞价单号", render: (r) => <span className="font-medium text-foreground">{r.id}</span> },
-    { key: "title", header: "标的名称" },
-    { key: "category", header: "废钢类别", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
-    { key: "purchaseMethod", header: "采购方式", className: "text-muted-foreground whitespace-nowrap" },
-    { key: "region", header: "区域", className: "text-muted-foreground" },
-    { key: "qty", header: "数量" },
-    { key: "basePrice", header: "起拍价" },
+    { key: "id", header: "竞价单号", className: "whitespace-nowrap", render: (r) => <span className="font-medium text-foreground">{r.id}</span> },
+    { key: "title", header: "公告标题", className: "whitespace-nowrap" },
+    { key: "category", header: "废钢类别", className: "whitespace-nowrap", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "region", header: "区域", className: "text-muted-foreground whitespace-nowrap" },
+    { key: "qty", header: "数量", className: "whitespace-nowrap" },
+    { key: "basePrice", header: "起拍价", className: "whitespace-nowrap" },
     { key: "budget", header: "采购预算", className: "whitespace-nowrap tabular-nums" },
-    {
-      key: "signup",
-      header: "报名开始 / 结束",
-      className: "text-muted-foreground whitespace-nowrap",
-      render: (r) => (
-        <div className="text-xs tabular-nums leading-relaxed">
-          <div>{r.signupStart}</div>
-          <div>{r.signupEnd}</div>
-        </div>
-      ),
-    },
-    {
-      key: "bid",
-      header: "竞价开始 / 结束",
-      className: "text-muted-foreground whitespace-nowrap",
-      render: (r) => (
-        <div className="text-xs tabular-nums leading-relaxed">
-          <div>{r.bidStart}</div>
-          <div>{r.bidEnd}</div>
-        </div>
-      ),
-    },
+    { key: "contact", header: "采购联系人", className: "text-muted-foreground whitespace-nowrap" },
+    { key: "signupStart", header: "报名开始", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
+    { key: "signupEnd", header: "报名结束", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
+    { key: "bidStart", header: "竞价开始", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
+    { key: "bidEnd", header: "竞价结束", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
     {
       key: "topQuote",
       header: "当前最高价",
+      className: "whitespace-nowrap",
       render: (r) => <span className="font-medium text-primary">{r.topQuote}</span>,
     },
-    { key: "status", header: "状态", render: (r) => <StatusPill tone={statusTone(r.status)}>{r.status}</StatusPill> },
+    { key: "status", header: "状态", className: "whitespace-nowrap", render: (r) => <StatusPill tone={statusTone(r.status)}>{r.status}</StatusPill> },
     {
       key: "op",
       header: "操作",
+      className: "whitespace-nowrap",
       render: (r) => (
-        <Button variant="ghost" size="sm" onClick={() => setManageItem(r)}>
+        <Button size="sm" onClick={() => setManageItem(r)}>
           <Settings2 />
           管理项目
         </Button>
