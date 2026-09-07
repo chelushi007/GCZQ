@@ -163,6 +163,12 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
           <Field label="采购预算(元)" required>
             <input className={inputCls} inputMode="numeric" placeholder="请输入预算金额" />
           </Field>
+          <Field label="采购单位" required>
+            <input className={inputCls} placeholder="请输入采购单位名称" />
+          </Field>
+          <Field label="采购单位地址" required>
+            <input className={inputCls} placeholder="请输入采购单位地址" />
+          </Field>
           <Field label="采购方式" required>
             <div className="flex h-10 items-center rounded-md border border-border bg-muted/40 px-3 text-sm text-foreground">
               {purchaseMethods[0]}
