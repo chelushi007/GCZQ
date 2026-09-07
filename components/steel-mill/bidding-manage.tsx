@@ -798,10 +798,9 @@ function SelectContent() {
                     {c.rank}
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-foreground">{c.name}</span>
-                      {c.rank === 1 && <StatusPill tone="blue">报价第一</StatusPill>}
-                    </div>
+  <div className="flex items-center gap-2">
+  <span className="text-sm font-semibold text-foreground">{c.name}</span>
+  </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5">
                         报价 <span className="font-semibold text-foreground">{c.price}</span> 元/吨
