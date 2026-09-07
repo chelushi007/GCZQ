@@ -31,7 +31,8 @@ const groupIcon: Record<string, LucideIcon> = {
 }
 
 const leafIcon: Record<WorkspaceKey, LucideIcon> = {
-  "home-entry": Home,
+  "portal-home": Home,
+  "portal-steel": Factory,
   mill: Factory,
   station: Recycle,
   supplier: Truck,
@@ -131,7 +132,7 @@ export function WorkspaceNav({
                 {group.children.map((leaf) => {
                   const Icon = leafIcon[leaf.key]
                   const isActive = active === leaf.key
-                  const showMillMenu = leaf.key === "mill" && isActive && !collapsed
+                  const showMillMenu = (leaf.key === "mill" || leaf.key === "portal-steel") && isActive && !collapsed
                   return (
                     <li key={leaf.key}>
                       <button

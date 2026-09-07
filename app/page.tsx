@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { ChevronRight } from "lucide-react"
 import { WorkspaceNav } from "@/components/workspace-nav"
-import { HomeEntry } from "@/components/home-entry"
+import { PortalHome } from "@/components/portal-home"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
 import { PlaceholderWorkspace } from "@/components/placeholder-workspace"
 import { workspaceNav, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
@@ -17,7 +17,7 @@ const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
 })()
 
 export default function Page() {
-  const [active, setActive] = useState<WorkspaceKey>("mill")
+  const [active, setActive] = useState<WorkspaceKey>("portal-home")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
 
   const crumb = titleMap[active]
@@ -36,7 +36,7 @@ export default function Page() {
       <main className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-6">
           <div className="flex items-center gap-1.5 text-sm">
-            <span className="font-semibold text-foreground">钢厂专区</span>
+            <span className="font-semibold text-foreground">盘古循环资源</span>
             <ChevronRight className="size-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">{crumb.group}</span>
             <ChevronRight className="size-3.5 text-muted-foreground" />
@@ -51,12 +51,12 @@ export default function Page() {
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden">
-          {active === "home-entry" && (
+          {active === "portal-home" && (
             <div className="h-full overflow-y-auto">
-              <HomeEntry />
+              <PortalHome onNavigateSteel={() => setActive("portal-steel")} />
             </div>
           )}
-          {active === "mill" && <SteelMillWorkspace section={millSection} />}
+          {(active === "mill" || active === "portal-steel") && <SteelMillWorkspace section={millSection} />}
           {(active === "station" || active === "supplier" || active === "ops-tbd") && (
             <PlaceholderWorkspace workspace={active} />
           )}

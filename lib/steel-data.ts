@@ -1,7 +1,8 @@
 // 钢厂专区工作台 - 静态原型数据
 
 export type WorkspaceKey =
-  | "home-entry"
+  | "portal-home"
+  | "portal-steel"
   | "mill"
   | "station"
   | "supplier"
@@ -22,9 +23,12 @@ export interface NavGroup {
 // 中间栏「钢厂专区」菜单：前台 / 用户工作台 / 运营工作台
 export const workspaceNav: NavGroup[] = [
   {
-    id: "front",
-    label: "前台",
-    children: [{ key: "home-entry", label: "首页入口", desc: "钢厂专区门户" }],
+    id: "portal",
+    label: "门户",
+    children: [
+      { key: "portal-home", label: "首页", desc: "盘古循环资源" },
+      { key: "portal-steel", label: "钢厂专区", desc: "专区工作台" },
+    ],
   },
   {
     id: "user",
@@ -44,7 +48,8 @@ export const workspaceNav: NavGroup[] = [
 
 // 最左侧「钢厂专区设计稿」导航（原型索引）
 export const designNav: { key: WorkspaceKey; label: string }[] = [
-  { key: "home-entry", label: "前台 · 首页入口" },
+  { key: "portal-home", label: "门户 · 首页" },
+  { key: "portal-steel", label: "门户 · 钢厂专区" },
   { key: "mill", label: "工作台 · 钢厂" },
   { key: "station", label: "工作台 · 回收站" },
   { key: "supplier", label: "工作台 · 供应商" },
