@@ -1,6 +1,20 @@
 import { MapPin, Search, ChevronDown, Recycle, ShoppingCart, Factory, Zap, Warehouse, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+const newsList = [
+  { title: "中国铁建循环物资平台与资环链金共商平台合作新篇章", date: "2026-09-05", featured: true },
+  { title: "盘古循环资源平台上线钢厂废钢竞价回收新模式", date: "2026-09-04" },
+  { title: "关于规范废旧物资回收交易流程的公告", date: "2026-09-02" },
+  { title: "平台2026年第三季度绿色处置成果发布", date: "2026-08-30" },
+]
+
+const dealList = [
+  { title: "dean-废旧电脑-090302 成交公告", date: "2026-09-03" },
+  { title: "华东-废钢边角料-090215 成交公告", date: "2026-09-02" },
+  { title: "西南-报废设备-083008 成交公告", date: "2026-08-30" },
+  { title: "华北-废旧钢材-082906 成交公告", date: "2026-08-29" },
+]
+
 const topNav = [
   "首页",
   "资源盘活",
@@ -148,6 +162,64 @@ export function PortalHome({ onNavigateSteel }: { onNavigateSteel: () => void })
               </button>
             )
           })}
+        </div>
+      </section>
+
+      {/* 新闻资讯 & 成交公告 */}
+      <section className="mx-auto mt-10 grid max-w-6xl gap-5 px-6 lg:grid-cols-[1.6fr_1fr]">
+        {/* 新闻资讯 */}
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="h-4 w-1 rounded bg-primary" />
+              新闻资讯
+            </h2>
+            <button className="text-xs text-muted-foreground hover:text-primary">更多</button>
+          </div>
+          <div className="flex gap-4">
+            <img
+              src="/images/news-tech.png"
+              alt="循环物资平台合作新闻配图"
+              className="hidden h-28 w-44 shrink-0 rounded-md object-cover sm:block"
+            />
+            <ul className="min-w-0 flex-1 divide-y divide-border">
+              {newsList.map((n) => (
+                <li key={n.title} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                  <span className="size-1.5 shrink-0 rounded-full bg-primary/60" />
+                  <button className="min-w-0 flex-1 truncate text-left text-sm text-foreground/90 hover:text-primary">
+                    {n.title}
+                  </button>
+                  <span className="shrink-0 text-xs text-muted-foreground">{n.date}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* 成交公告 */}
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <span className="h-4 w-1 rounded bg-primary" />
+              成交公告
+            </h2>
+            <button className="text-xs text-muted-foreground hover:text-primary">更多</button>
+          </div>
+          <ul className="divide-y divide-border">
+            {dealList.map((d) => (
+              <li key={d.title} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                <div className="min-w-0 flex-1">
+                  <button className="block w-full truncate text-left text-sm text-foreground/90 hover:text-primary">
+                    {d.title}
+                  </button>
+                  <span className="text-xs text-muted-foreground">{d.date}</span>
+                </div>
+                <button className="flex shrink-0 items-center gap-0.5 text-xs text-primary hover:underline">
+                  详情 <ArrowRight className="size-3" />
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </div>
