@@ -766,7 +766,7 @@ function SelectContent() {
         </div>
       ) : (
         <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
-          请采购方在候选供应商中确定最终中标单位。默认推荐报价排名第一的供应商，如选择非第一名需填写择标理由。
+          请采购方在候选供应商中确定最终中标单位。本次采用减价竞价方式，报价越低对采购方越有利，采购方可自主选择任一候选供应商，无需填写择标理由。
         </div>
       )}
 
@@ -817,12 +817,12 @@ function SelectContent() {
           })}
         </div>
 
-        {nonTopPicked && !confirmed && (
+        {picked && !confirmed && (
           <div className="mt-4">
-            <FormRow label="择标理由（选择非报价第一名时必填）" required>
+            <FormRow label="择标说明（选填）">
               <textarea
                 rows={3}
-                placeholder="请说明选择该供应商而非报价第一名的理由"
+                placeholder="如有需要可补充择标说明，选填"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
@@ -836,7 +836,7 @@ function SelectContent() {
             <Button
               size="sm"
               className="h-9 gap-1"
-              disabled={!picked || (Boolean(nonTopPicked) && !reason.trim())}
+              disabled={!picked}
               onClick={() => setConfirmOpen(true)}
             >
               <ClipboardCheck className="size-4" />
