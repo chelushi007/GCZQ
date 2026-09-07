@@ -8,6 +8,7 @@ import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { biddingList, type BiddingItem } from "@/lib/steel-data"
 import { BiddingManage } from "./bidding-manage"
+import { BiddingPublish } from "./bidding-publish"
 
 const tabs = ["全部", "进行中", "待开标", "已成交", "已流标"]
 const categories = ["全部类别", "重废", "统废", "生铁"]
@@ -19,6 +20,7 @@ export function PurchaseBidding() {
   const [region, setRegion] = useState("全部区域")
   const [keyword, setKeyword] = useState("")
   const [manageItem, setManageItem] = useState<BiddingItem | null>(null)
+  const [publishing, setPublishing] = useState(false)
 
   const rows = useMemo(() => {
     return biddingList.filter((b) => {
@@ -41,9 +43,11 @@ export function PurchaseBidding() {
     { key: "id", header: "竞价单号", render: (r) => <span className="font-medium text-foreground">{r.id}</span> },
     { key: "title", header: "标的名称" },
     { key: "category", header: "废钢类别", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "purchaseMethod", header: "采购方式", className: "text-muted-foreground whitespace-nowrap" },
     { key: "region", header: "区域", className: "text-muted-foreground" },
     { key: "qty", header: "数量" },
     { key: "basePrice", header: "起拍价" },
+    { key: "budget", header: "采购预算", className: "whitespace-nowrap tabular-nums" },
     {
       key: "signup",
       header: "报名开始 / 结束",
@@ -88,13 +92,17 @@ export function PurchaseBidding() {
     return <BiddingManage item={manageItem} onBack={() => setManageItem(null)} />
   }
 
+  if (publishing) {
+    return <BiddingPublish onBack={() => setPublishing(false)} />
+  }
+
   return (
     <div className="space-y-5">
       <PageHeader
         title="竞价回收"
         desc="发布竞价采购需求，供应商在线报价，价高（低）者得，公开透明"
         action={
-          <Button>
+          <Button onClick={() => setPublishing(true)}>
             <Plus />
             发布竞价需求
           </Button>
