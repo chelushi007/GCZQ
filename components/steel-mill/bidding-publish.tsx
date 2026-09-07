@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { ArrowLeft, Plus, Trash2, Layers } from "lucide-react"
+import { useRef, useState } from "react"
+import { ArrowLeft, Plus, Trash2, Layers, Upload, FileText, Paperclip } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   purchaseMethods,
@@ -23,7 +23,21 @@ interface MaterialRow {
   detail: string
 }
 
+interface AttachmentRow {
+  id: number
+  name: string
+  size: string
+  uploadedAt: string
+}
+
 let seq = 1
+let fileSeq = 1
+
+function formatSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
 
 function SectionCard({
   title,
@@ -73,6 +87,25 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
   const [allowPerson, setAllowPerson] = useState(false)
   const [materials, setMaterials] = useState<MaterialRow[]>([])
   const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [attachments, setAttachments] = useState<AttachmentRow[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const onPickFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    const now = new Date()
+    const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+    const rows: AttachmentRow[] = Array.from(files).map((f) => ({
+      id: fileSeq++,
+      name: f.name,
+      size: formatSize(f.size),
+      uploadedAt: stamp,
+    }))
+    setAttachments((a) => [...a, ...rows])
+  }
+
+  const removeAttachment = (id: number) => {
+    setAttachments((a) => a.filter((f) => f.id !== id))
+  }
 
   const addMaterial = () => {
     setMaterials((m) => [
@@ -136,7 +169,10 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
             </div>
           </Field>
           <Field label="采购联系人" required>
-            <input className={inputCls} placeholder="请输入联系人姓名及电话" />
+            <input className={inputCls} placeholder="请输入联系人姓名" />
+          </Field>
+          <Field label="联系方式" required>
+            <input className={inputCls} inputMode="tel" placeholder="请输入联系电话" />
           </Field>
           <Field label="是否允许自然人(个人)参与" required>
             <div className="flex h-10 items-center gap-6 text-sm">
@@ -181,17 +217,6 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
                 />
                 <span className="pointer-events-none absolute bottom-2 right-3 text-xs text-muted-foreground/60">0 / 1000</span>
               </div>
-            </div>
-          </Field>
-          <Field label="技术参数及需求" className="lg:col-span-2">
-            <div className="relative">
-              <textarea
-                rows={3}
-                maxLength={1000}
-                className={inputCls.replace("h-10", "min-h-24") + " resize-y py-2.5"}
-                placeholder="请输入"
-              />
-              <span className="pointer-events-none absolute bottom-2 right-3 text-xs text-muted-foreground/60">0 / 1000</span>
             </div>
           </Field>
         </div>
@@ -405,6 +430,66 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
             </tbody>
           </table>
         </div>
+      </SectionCard>
+
+      {/* 附件 */}
+      <SectionCard title="附件">
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            onPickFiles(e.target.files)
+            e.target.value = ""
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-6 py-8 text-center transition-colors hover:border-primary hover:bg-primary/5"
+        >
+          <span className="grid size-11 place-items-center rounded-full bg-primary/10 text-primary">
+            <Upload className="size-5" />
+          </span>
+          <span className="text-sm font-medium text-foreground">点击上传附件</span>
+          <span className="text-xs text-muted-foreground">
+            支持 PDF、Word、Excel、图片等格式，单个文件不超过 20MB
+          </span>
+        </button>
+
+        {attachments.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Paperclip className="size-3.5" />
+              已上传 {attachments.length} 个附件
+            </div>
+            <ul className="divide-y divide-border overflow-hidden rounded-md border border-border">
+              {attachments.map((f) => (
+                <li key={f.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+                    <FileText className="size-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-foreground">{f.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {f.size} · 上传于 {f.uploadedAt}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(f.id)}
+                    className="flex items-center gap-1 rounded px-2 py-1 text-xs text-destructive transition-colors hover:bg-destructive/10"
+                  >
+                    <Trash2 className="size-3.5" />
+                    删除
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </SectionCard>
 
       {/* 底部操作条 */}
