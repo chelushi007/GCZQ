@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { ChevronRight } from "lucide-react"
-import { DesignNav } from "@/components/design-nav"
 import { WorkspaceNav } from "@/components/workspace-nav"
 import { HomeEntry } from "@/components/home-entry"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
@@ -18,7 +17,6 @@ const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
 })()
 
 export default function Page() {
-  const [collapsed, setCollapsed] = useState(false)
   const [active, setActive] = useState<WorkspaceKey>("mill")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
 
@@ -26,15 +24,7 @@ export default function Page() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
-      {/* 1. 设计稿导航 */}
-      <DesignNav
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((v) => !v)}
-        active={active}
-        onSelect={setActive}
-      />
-
-      {/* 2. 统一工作台菜单栏（角色 + 钢厂子菜单合并） */}
+      {/* 统一工作台菜单栏（彩色，可收起/展开） */}
       <WorkspaceNav
         active={active}
         onSelect={setActive}

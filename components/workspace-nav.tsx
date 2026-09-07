@@ -17,6 +17,8 @@ import {
   Tag,
   FileSignature,
   ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -66,6 +68,7 @@ export function WorkspaceNav({
   millSection: MillMenuKey
   onMillSectionChange: (key: MillMenuKey) => void
 }) {
+  const [collapsed, setCollapsed] = useState(false)
   const [purchaseOpen, setPurchaseOpen] = useState(true)
 
   function MillBtn({ node }: { node: MillNode }) {
@@ -74,11 +77,12 @@ export function WorkspaceNav({
     return (
       <button
         onClick={() => onMillSectionChange(node.key)}
+        title={node.label}
         className={cn(
           "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
           isActive
-            ? "bg-primary/10 font-medium text-primary"
-            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
         )}
       >
         <Icon className="size-3.5 shrink-0" />
@@ -88,15 +92,33 @@ export function WorkspaceNav({
   }
 
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-sidebar">
-      <div className="flex h-14 items-center gap-2 border-b border-border px-4">
-        <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-          <Factory className="size-4" />
+    <aside
+      className={cn(
+        "flex h-full shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200",
+        collapsed ? "w-16" : "w-64",
+      )}
+    >
+      {/* 顶部品牌 + 折叠按钮 */}
+      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+          <Factory className="size-4.5" />
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">钢厂专区</p>
-          <p className="text-[11px] text-muted-foreground">工作台菜单</p>
-        </div>
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">钢厂专区</p>
+            <p className="truncate text-[11px] text-sidebar-foreground/60">工作台</p>
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          title={collapsed ? "展开菜单" : "收起菜单"}
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            collapsed && "mx-auto",
+          )}
+        >
+          {collapsed ? <PanelLeftOpen className="size-4.5" /> : <PanelLeftClose className="size-4.5" />}
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-3">
@@ -104,36 +126,56 @@ export function WorkspaceNav({
           const GroupIcon = groupIcon[group.id]
           return (
             <div key={group.id} className="mb-4">
-              <div className="flex items-center gap-1.5 px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                {GroupIcon && <GroupIcon className="size-3.5" />}
-                {group.label}
-              </div>
+              {!collapsed && (
+                <div className="flex items-center gap-1.5 px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-sidebar-foreground/50">
+                  {GroupIcon && <GroupIcon className="size-3.5" />}
+                  {group.label}
+                </div>
+              )}
               <ul className="space-y-0.5">
                 {group.children.map((leaf) => {
                   const Icon = leafIcon[leaf.key]
                   const isActive = active === leaf.key
-                  const showMillMenu = leaf.key === "mill" && isActive
+                  const showMillMenu = leaf.key === "mill" && isActive && !collapsed
                   return (
                     <li key={leaf.key}>
                       <button
                         onClick={() => onSelect(leaf.key)}
+                        title={leaf.label}
                         className={cn(
-                          "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+                          "flex w-full items-center gap-2.5 rounded-md py-2 text-sm transition-colors",
+                          collapsed ? "justify-center px-0" : "px-2.5",
                           isActive
-                            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-muted",
+                            ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
+                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                         )}
                       >
-                        <Icon className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
-                        <span className="flex-1 text-left">{leaf.label}</span>
-                        {leaf.desc && !showMillMenu && (
-                          <span className="text-[10px] text-muted-foreground">{leaf.desc}</span>
+                        <Icon
+                          className={cn(
+                            "size-4 shrink-0",
+                            isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/70",
+                          )}
+                        />
+                        {!collapsed && (
+                          <>
+                            <span className="flex-1 text-left">{leaf.label}</span>
+                            {leaf.desc && !showMillMenu && (
+                              <span
+                                className={cn(
+                                  "text-[10px]",
+                                  isActive ? "text-sidebar-primary-foreground/70" : "text-sidebar-foreground/50",
+                                )}
+                              >
+                                {leaf.desc}
+                              </span>
+                            )}
+                          </>
                         )}
                       </button>
 
                       {/* 选中「钢厂」时内联展开其工作台子菜单 */}
                       {showMillMenu && (
-                        <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-border pl-3">
+                        <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                           {millMenu.top.map((n) => (
                             <MillBtn key={n.key} node={n} />
                           ))}
@@ -141,7 +183,7 @@ export function WorkspaceNav({
                           <div>
                             <button
                               onClick={() => setPurchaseOpen((v) => !v)}
-                              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
                             >
                               <ShoppingCart className="size-3.5 shrink-0" />
                               <span className="flex-1 text-left">采购管理</span>
@@ -150,7 +192,7 @@ export function WorkspaceNav({
                               />
                             </button>
                             {purchaseOpen && (
-                              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-border pl-2">
+                              <div className="ml-3 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-2">
                                 {millMenu.purchase.map((n) => (
                                   <MillBtn key={n.key} node={n} />
                                 ))}
