@@ -5,8 +5,9 @@ import { ChevronRight } from "lucide-react"
 import { WorkspaceNav } from "@/components/workspace-nav"
 import { PortalHome } from "@/components/portal-home"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
+import { StationWorkspace } from "@/components/station/station-workspace"
 import { PlaceholderWorkspace } from "@/components/placeholder-workspace"
-import { workspaceNav, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
+import { workspaceNav, stationLeafPath, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
 
 const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
   const m = {} as Record<WorkspaceKey, { group: string; leaf: string }>
@@ -28,8 +29,10 @@ const millSectionLabel: Record<MillMenuKey, string> = {
 export default function Page() {
   const [active, setActive] = useState<WorkspaceKey>("portal-home")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
+  const [stationLeaf, setStationLeaf] = useState<string>("station-supplier-bidding-signup")
 
   const crumb = titleMap[active]
+  const stationPath = active === "station" ? stationLeafPath[stationLeaf] : null
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
@@ -39,6 +42,8 @@ export default function Page() {
         onSelect={setActive}
         millSection={millSection}
         onMillSectionChange={setMillSection}
+        stationLeaf={stationLeaf}
+        onStationLeafChange={setStationLeaf}
       />
 
       {/* 3. 工作台内容 */}
@@ -49,7 +54,11 @@ export default function Page() {
             <ChevronRight className="size-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">{crumb.group}</span>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span className={active === "mill" ? "text-muted-foreground" : "font-medium text-foreground"}>
+            <span
+              className={
+                active === "mill" || active === "station" ? "text-muted-foreground" : "font-medium text-foreground"
+              }
+            >
               {crumb.leaf}
             </span>
             {active === "mill" && (
@@ -58,6 +67,19 @@ export default function Page() {
                 <span className="font-medium text-foreground">{millSectionLabel[millSection]}</span>
               </>
             )}
+            {active === "station" &&
+              stationPath?.map((seg, i) => (
+                <span key={seg} className="flex items-center gap-1.5">
+                  <ChevronRight className="size-3.5 text-muted-foreground" />
+                  <span
+                    className={
+                      i === stationPath.length - 1 ? "font-medium text-foreground" : "text-muted-foreground"
+                    }
+                  >
+                    {seg}
+                  </span>
+                </span>
+              ))}
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">演示集团</span>
@@ -74,10 +96,10 @@ export default function Page() {
             </div>
           )}
           {active === "mill" && <SteelMillWorkspace section={millSection} />}
-          {(active === "portal-steel" ||
-            active === "station" ||
-            active === "supplier" ||
-            active === "ops-tbd") && <PlaceholderWorkspace workspace={active} />}
+          {active === "station" && <StationWorkspace leaf={stationLeaf} />}
+          {(active === "portal-steel" || active === "supplier" || active === "ops-tbd") && (
+            <PlaceholderWorkspace workspace={active} />
+          )}
         </div>
       </main>
     </div>

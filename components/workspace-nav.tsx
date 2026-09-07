@@ -22,7 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { workspaceNav, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
+import { workspaceNav, stationTree, type StationTreeNode, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
 
 const groupIcon: Record<string, LucideIcon> = {
   front: Monitor,
@@ -58,13 +58,8 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
   ],
 }
 
-// 用户工作台各子项的占位子菜单（回收站 / 供应商）
+// 用户工作台各子项的占位子菜单（供应商）
 const leafSubMenu: Partial<Record<WorkspaceKey, { label: string; icon: LucideIcon }[]>> = {
-  station: [
-    { label: "回收总览", icon: LayoutDashboard },
-    { label: "回收订单", icon: ClipboardList },
-    { label: "结算管理", icon: FileSignature },
-  ],
   supplier: [
     { label: "供货总览", icon: LayoutDashboard },
     { label: "报价管理", icon: Tag },
@@ -77,15 +72,23 @@ export function WorkspaceNav({
   onSelect,
   millSection,
   onMillSectionChange,
+  stationLeaf,
+  onStationLeafChange,
 }: {
   active: WorkspaceKey
   onSelect: (key: WorkspaceKey) => void
   millSection: MillMenuKey
   onMillSectionChange: (key: MillMenuKey) => void
+  stationLeaf: string
+  onStationLeafChange: (key: string) => void
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [purchaseOpen, setPurchaseOpen] = useState(true)
   const [openLeaves, setOpenLeaves] = useState<Set<WorkspaceKey>>(new Set(["mill"]))
+  // 回收站树形节点的展开状态（默认展开供应商 → 竞价管理）
+  const [openStationNodes, setOpenStationNodes] = useState<Set<string>>(
+    new Set(["station-supplier", "station-supplier-bidding"]),
+  )
 
   function toggleLeaf(key: WorkspaceKey) {
     setOpenLeaves((prev) => {
@@ -94,6 +97,59 @@ export function WorkspaceNav({
       else next.add(key)
       return next
     })
+  }
+
+  function toggleStationNode(key: string) {
+    setOpenStationNodes((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  // 递归渲染回收站树：有 children 的节点仅作可展开父级，叶子节点点击进入内容
+  function StationTree({ nodes, depth }: { nodes: StationTreeNode[]; depth: number }) {
+    return (
+      <div className="space-y-0.5">
+        {nodes.map((node) => {
+          const hasChildren = !!node.children?.length
+          const isOpen = openStationNodes.has(node.key)
+          const isActive = active === "station" && stationLeaf === node.key && !hasChildren
+          return (
+            <div key={node.key}>
+              <button
+                onClick={() => {
+                  if (hasChildren) {
+                    toggleStationNode(node.key)
+                  } else {
+                    onSelect("station")
+                    onStationLeafChange(node.key)
+                  }
+                }}
+                title={node.label}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
+                  isActive
+                    ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                )}
+              >
+                <span className="flex-1 text-left">{node.label}</span>
+                {hasChildren && (
+                  <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", isOpen && "rotate-180")} />
+                )}
+              </button>
+              {hasChildren && isOpen && (
+                <div className="ml-2 mt-0.5 border-l border-sidebar-border pl-2">
+                  <StationTree nodes={node.children!} depth={depth + 1} />
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   function MillBtn({ node }: { node: MillNode }) {
@@ -159,9 +215,10 @@ export function WorkspaceNav({
                 {group.children.map((leaf) => {
                   const Icon = leafIcon[leaf.key]
                   const hasMillMenu = leaf.key === "mill"
+                  const hasStationTree = leaf.key === "station"
                   const subMenu = leafSubMenu[leaf.key]
                   // 用户工作台下的钢厂/回收站/供应商仅作为可展开父级，不承载页面内容
-                  const isParent = (hasMillMenu || !!subMenu) && group.id === "user"
+                  const isParent = (hasMillMenu || hasStationTree || !!subMenu) && group.id === "user"
                   const expandable = isParent
                   // 父级本身永不高亮；是否有子级被选中由子菜单自行控制
                   const isActive = !isParent && active === leaf.key
@@ -269,7 +326,14 @@ export function WorkspaceNav({
                         </div>
                       )}
 
-                      {/* 回收站 / 供应商：内联展开占位子菜单 */}
+                      {/* 回收站：内联展开多层树形菜单（供应商 / 回收商 / 销售方） */}
+                      {showChildren && hasStationTree && (
+                        <div className="mb-1 ml-4 mt-1 border-l border-sidebar-border pl-3">
+                          <StationTree nodes={stationTree} depth={0} />
+                        </div>
+                      )}
+
+                      {/* 供应商：内联展开占位子菜单 */}
                       {showChildren && subMenu && (
                         <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                           {subMenu.map((n) => {

@@ -65,6 +65,54 @@ export type MillMenuKey =
   | "orders"
   | "suppliers"
 
+// ---------- 回收站工作台树形菜单（可多层嵌套） ----------
+export interface StationTreeNode {
+  key: string
+  label: string
+  children?: StationTreeNode[]
+}
+
+// 回收站下级：供应商 / 回收商 / 销售方
+// 其中「供应商」下含「竞价管理」，竞价管理展开含五个业务项
+export const stationTree: StationTreeNode[] = [
+  {
+    key: "station-supplier",
+    label: "供应商",
+    children: [
+      {
+        key: "station-supplier-bidding",
+        label: "竞价管理",
+        children: [
+          { key: "station-supplier-bidding-signup", label: "网上报名" },
+          { key: "station-supplier-bidding-mine", label: "我的竞价" },
+          { key: "station-supplier-bidding-fee", label: "缴纳报名费" },
+          { key: "station-supplier-bidding-deposit", label: "缴纳保证金" },
+          { key: "station-supplier-bidding-service", label: "缴纳服务费" },
+        ],
+      },
+    ],
+  },
+  {
+    key: "station-recycler",
+    label: "回收商",
+  },
+  {
+    key: "station-seller",
+    label: "销售方",
+  },
+]
+
+// 回收站叶子节点 -> 面包屑路径（父级链），用于内容页标题与面包屑
+export const stationLeafPath: Record<string, string[]> = {
+  "station-supplier-bidding-signup": ["供应商", "竞价管理", "网上报名"],
+  "station-supplier-bidding-mine": ["供应商", "竞价管理", "我的竞价"],
+  "station-supplier-bidding-fee": ["供应商", "竞价管理", "缴纳报名费"],
+  "station-supplier-bidding-deposit": ["供应商", "竞价管理", "缴纳保证金"],
+  "station-supplier-bidding-service": ["供应商", "竞价管理", "缴纳服务费"],
+  "station-recycler": ["回收商"],
+  "station-seller": ["销售方"],
+}
+
 // ---------- 概览统计 ----------
 export const overviewStats = [
   { label: "进行中采购需求", value: "18", unit: "单", trend: "+3", tone: "primary" },
