@@ -98,16 +98,6 @@ export function WorkspaceNav({
         collapsed ? "w-16" : "w-64",
       )}
     >
-      {/* 右侧边缘悬浮折叠按钮：始终醒目，展开/收起均可见 */}
-      <button
-        onClick={() => setCollapsed((v) => !v)}
-        title={collapsed ? "展开菜单" : "收起菜单"}
-        aria-label={collapsed ? "展开菜单" : "收起菜单"}
-        className="absolute -right-3 top-16 z-20 flex size-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-colors hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
-      >
-        {collapsed ? <PanelLeftOpen className="size-3.5" /> : <PanelLeftClose className="size-3.5" />}
-      </button>
-
       {/* 顶部品牌 */}
       <div
         className={cn(
@@ -218,6 +208,26 @@ export function WorkspaceNav({
           )
         })}
       </nav>
+
+      {/* 底部折叠按钮：整行、紧贴最底部、不突出边缘 */}
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        title={collapsed ? "展开菜单" : "收起菜单"}
+        aria-label={collapsed ? "展开菜单" : "收起菜单"}
+        className={cn(
+          "flex h-11 shrink-0 items-center gap-2 border-t border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+          collapsed ? "justify-center px-0" : "px-4",
+        )}
+      >
+        {collapsed ? (
+          <PanelLeftOpen className="size-4 shrink-0" />
+        ) : (
+          <>
+            <PanelLeftClose className="size-4 shrink-0" />
+            <span className="flex-1 text-left">收起菜单</span>
+          </>
+        )}
+      </button>
     </aside>
   )
 }
