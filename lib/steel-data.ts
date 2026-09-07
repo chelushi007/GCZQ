@@ -92,20 +92,25 @@ export interface BiddingItem {
   id: string
   title: string
   category: string
+  region: string
   qty: string
   basePrice: string
   quotes: number
   topQuote: string
+  signupStart: string
+  signupEnd: string
+  bidStart: string
+  bidEnd: string
   deadline: string
   status: "进行中" | "待开标" | "已成交" | "已流标"
 }
 
 export const biddingList: BiddingItem[] = [
-  { id: "JJ20260907-003", title: "重型废钢竞价采购", category: "重废", qty: "500 吨", basePrice: "¥2,500/吨", quotes: 6, topQuote: "¥2,650/吨", deadline: "09-08 18:00", status: "进行中" },
-  { id: "JJ20260907-001", title: "冲花板料竞价采购", category: "统废", qty: "300 吨", basePrice: "¥2,380/吨", quotes: 4, topQuote: "¥2,455/吨", deadline: "09-08 12:00", status: "进行中" },
-  { id: "JJ20260906-008", title: "生铁边角料竞价", category: "生铁", qty: "200 吨", basePrice: "¥2,900/吨", quotes: 3, topQuote: "—", deadline: "09-07 20:00", status: "待开标" },
-  { id: "JJ20260905-004", title: "钢筋头竞价采购", category: "重废", qty: "420 吨", basePrice: "¥2,450/吨", quotes: 9, topQuote: "¥2,620/吨", deadline: "09-06 18:00", status: "已成交" },
-  { id: "JJ20260904-002", title: "马达铁竞价采购", category: "统废", qty: "150 吨", basePrice: "¥2,300/吨", quotes: 1, topQuote: "—", deadline: "09-05 18:00", status: "已流标" },
+  { id: "JJ20260907-003", title: "重型废钢竞价采购", category: "重废", region: "江苏·苏州", qty: "500 吨", basePrice: "¥2,500/吨", quotes: 6, topQuote: "¥2,650/吨", signupStart: "09-05 09:00", signupEnd: "09-07 17:00", bidStart: "09-08 09:00", bidEnd: "09-08 18:00", deadline: "09-08 18:00", status: "进行中" },
+  { id: "JJ20260907-001", title: "冲花板料竞价采购", category: "统废", region: "上海·宝山", qty: "300 吨", basePrice: "¥2,380/吨", quotes: 4, topQuote: "¥2,455/吨", signupStart: "09-05 09:00", signupEnd: "09-07 12:00", bidStart: "09-08 09:00", bidEnd: "09-08 12:00", deadline: "09-08 12:00", status: "进行中" },
+  { id: "JJ20260906-008", title: "生铁边角料竞价", category: "生铁", region: "浙江·嘉兴", qty: "200 吨", basePrice: "¥2,900/吨", quotes: 3, topQuote: "—", signupStart: "09-04 09:00", signupEnd: "09-06 17:00", bidStart: "09-07 14:00", bidEnd: "09-07 20:00", deadline: "09-07 20:00", status: "待开标" },
+  { id: "JJ20260905-004", title: "钢筋头竞价采购", category: "重废", region: "江苏·无锡", qty: "420 吨", basePrice: "¥2,450/吨", quotes: 9, topQuote: "¥2,620/吨", signupStart: "09-03 09:00", signupEnd: "09-05 12:00", bidStart: "09-06 09:00", bidEnd: "09-06 18:00", deadline: "09-06 18:00", status: "已成交" },
+  { id: "JJ20260904-002", title: "马达铁竞价采购", category: "统废", region: "安徽·马鞍山", qty: "150 吨", basePrice: "¥2,300/吨", quotes: 1, topQuote: "—", signupStart: "09-02 09:00", signupEnd: "09-04 12:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", deadline: "09-05 18:00", status: "已流标" },
 ]
 
 // ---------- 固定价回收 ----------

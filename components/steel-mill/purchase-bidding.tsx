@@ -1,48 +1,92 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, Search, Eye } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Plus, Search, Settings2, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { biddingList, type BiddingItem } from "@/lib/steel-data"
+import { BiddingManage } from "./bidding-manage"
 
 const tabs = ["全部", "进行中", "待开标", "已成交", "已流标"]
+const categories = ["全部类别", "重废", "统废", "生铁"]
+const regions = ["全部区域", "江苏·苏州", "上海·宝山", "浙江·嘉兴", "江苏·无锡", "安徽·马鞍山"]
 
 export function PurchaseBidding() {
   const [tab, setTab] = useState("全部")
-  const rows = tab === "全部" ? biddingList : biddingList.filter((b) => b.status === tab)
+  const [category, setCategory] = useState("全部类别")
+  const [region, setRegion] = useState("全部区域")
+  const [keyword, setKeyword] = useState("")
+  const [manageItem, setManageItem] = useState<BiddingItem | null>(null)
+
+  const rows = useMemo(() => {
+    return biddingList.filter((b) => {
+      if (tab !== "全部" && b.status !== tab) return false
+      if (category !== "全部类别" && b.category !== category) return false
+      if (region !== "全部区域" && b.region !== region) return false
+      if (keyword && !`${b.id}${b.title}`.toLowerCase().includes(keyword.toLowerCase())) return false
+      return true
+    })
+  }, [tab, category, region, keyword])
+
+  const resetFilters = () => {
+    setTab("全部")
+    setCategory("全部类别")
+    setRegion("全部区域")
+    setKeyword("")
+  }
 
   const columns: Column<BiddingItem>[] = [
     { key: "id", header: "竞价单号", render: (r) => <span className="font-medium text-foreground">{r.id}</span> },
     { key: "title", header: "标的名称" },
     { key: "category", header: "废钢类别", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "region", header: "区域", className: "text-muted-foreground" },
     { key: "qty", header: "数量" },
     { key: "basePrice", header: "起拍价" },
     {
-      key: "quotes",
-      header: "报价数",
-      render: (r) => <span className="tabular-nums">{r.quotes} 条</span>,
+      key: "signup",
+      header: "报名开始 / 结束",
+      className: "text-muted-foreground whitespace-nowrap",
+      render: (r) => (
+        <div className="text-xs tabular-nums leading-relaxed">
+          <div>{r.signupStart}</div>
+          <div>{r.signupEnd}</div>
+        </div>
+      ),
+    },
+    {
+      key: "bid",
+      header: "竞价开始 / 结束",
+      className: "text-muted-foreground whitespace-nowrap",
+      render: (r) => (
+        <div className="text-xs tabular-nums leading-relaxed">
+          <div>{r.bidStart}</div>
+          <div>{r.bidEnd}</div>
+        </div>
+      ),
     },
     {
       key: "topQuote",
       header: "当前最高价",
       render: (r) => <span className="font-medium text-primary">{r.topQuote}</span>,
     },
-    { key: "deadline", header: "截止时间", className: "text-muted-foreground" },
     { key: "status", header: "状态", render: (r) => <StatusPill tone={statusTone(r.status)}>{r.status}</StatusPill> },
     {
       key: "op",
       header: "操作",
-      render: () => (
-        <Button variant="ghost" size="sm">
-          <Eye />
-          详情
+      render: (r) => (
+        <Button variant="ghost" size="sm" onClick={() => setManageItem(r)}>
+          <Settings2 />
+          管理项目
         </Button>
       ),
     },
   ]
+
+  if (manageItem) {
+    return <BiddingManage item={manageItem} onBack={() => setManageItem(null)} />
+  }
 
   return (
     <div className="space-y-5">
@@ -57,21 +101,65 @@ export function PurchaseBidding() {
         }
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterBar>
-          {tabs.map((t) => (
-            <FilterChip key={t} active={tab === t} onClick={() => setTab(t)}>
-              {t}
-            </FilterChip>
-          ))}
-        </FilterBar>
-        <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 text-sm text-muted-foreground">
-          <Search className="size-4" />
-          <input
-            placeholder="搜索竞价单号 / 标的"
-            className="w-44 bg-transparent outline-none placeholder:text-muted-foreground"
-          />
+      {/* 筛选条件区域 */}
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">废钢类别</span>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+            >
+              {categories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">区域范围</span>
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+            >
+              {regions.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+          </label>
+          <label className="space-y-1.5 lg:col-span-2">
+            <span className="text-xs font-medium text-muted-foreground">关键词</span>
+            <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm focus-within:border-primary">
+              <Search className="size-4 text-muted-foreground" />
+              <input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="搜索竞价单号 / 标的名称"
+                className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          </label>
         </div>
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+          <FilterBar>
+            {tabs.map((t) => (
+              <FilterChip key={t} active={tab === t} onClick={() => setTab(t)}>
+                {t}
+              </FilterChip>
+            ))}
+          </FilterBar>
+          <Button variant="ghost" size="sm" onClick={resetFilters}>
+            <RotateCcw />
+            重置
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>
+          共 <span className="font-medium text-foreground tabular-nums">{rows.length}</span> 条竞价项目
+        </span>
       </div>
 
       <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />
