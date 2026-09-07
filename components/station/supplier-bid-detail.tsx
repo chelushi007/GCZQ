@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { StatusPill } from "@/components/shared/status-pill"
 import { DataTable, type Column } from "@/components/shared/data-table"
 import { Modal } from "@/components/shared/modal"
+import { BiddingHall } from "@/components/station/bidding-hall"
 import type { SupplierBidItem } from "@/lib/steel-data"
 
 // 供应商参与竞价的流程：报名参与 → 缴费缴金 → 在线竞价 → 中标结算
@@ -71,6 +72,11 @@ export function SupplierBidDetail({ item, onBack }: { item: SupplierBidItem; onB
   })
   const [quote, setQuote] = useState("")
   const [confirmQuote, setConfirmQuote] = useState(false)
+  const [inHall, setInHall] = useState(false)
+
+  if (inHall) {
+    return <BiddingHall item={item} onBack={() => setInHall(false)} />
+  }
 
   return (
     <div className="space-y-5">
@@ -203,13 +209,19 @@ export function SupplierBidDetail({ item, onBack }: { item: SupplierBidItem; onB
             </div>
             {item.result === "竞价中" ? (
               <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                  <TrendingDown className="size-4" />
-                  {item.bidMode}进行中，报价越低越有利
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                    <TrendingDown className="size-4" />
+                    {item.bidMode}进行中，报价越低越有利
+                  </div>
+                  <Button onClick={() => setInHall(true)}>
+                    <Gavel />
+                    进入竞价大厅
+                  </Button>
                 </div>
                 <div className="mt-3 flex flex-wrap items-end gap-3">
                   <label className="flex-1 min-w-[200px] space-y-1.5">
-                    <span className="text-xs text-muted-foreground">我的报价 (元/吨)</span>
+                    <span className="text-xs text-muted-foreground">快捷报价 (元/吨)</span>
                     <input
                       value={quote}
                       onChange={(e) => setQuote(e.target.value)}
@@ -217,16 +229,24 @@ export function SupplierBidDetail({ item, onBack }: { item: SupplierBidItem; onB
                       className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
                     />
                   </label>
-                  <Button disabled={!quote} onClick={() => setConfirmQuote(true)}>
+                  <Button variant="outline" disabled={!quote} onClick={() => setConfirmQuote(true)}>
                     <Gavel />
                     提交报价
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="mt-4 flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-                <Clock className="size-4" />
-                {item.result === "待开标" ? "竞价尚未开始，请留意竞价开始时间" : "本轮竞价已结束"}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <Clock className="size-4" />
+                  {item.result === "待开标" ? "竞价尚未开始，请留意竞价开始时间" : "本轮竞价已结束"}
+                </span>
+                {item.result === "待开标" && (
+                  <Button variant="outline" onClick={() => setInHall(true)}>
+                    <Gavel />
+                    进入竞价大厅
+                  </Button>
+                )}
               </div>
             )}
           </div>
