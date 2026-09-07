@@ -140,7 +140,6 @@ function MyBiddingContent({ onOpen }: { onOpen: (i: SupplierBidItem) => void }) 
     { key: "bidMode", header: "竞价方式", className: "whitespace-nowrap text-muted-foreground" },
     { key: "basePrice", header: "起拍价", className: "whitespace-nowrap" },
     { key: "myQuote", header: "我的报价", className: "whitespace-nowrap tabular-nums", render: (r) => <span className="font-medium text-primary">{r.myQuote}</span> },
-    { key: "myRank", header: "当前排名", className: "whitespace-nowrap" },
     { key: "quotes", header: "参与家数", className: "whitespace-nowrap tabular-nums", render: (r) => `${r.quotes} 家` },
     { key: "bidEnd", header: "竞价结束", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
     {

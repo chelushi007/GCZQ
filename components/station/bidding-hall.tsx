@@ -76,6 +76,20 @@ export function BiddingHall({ item, onBack }: { item: SupplierBidItem; onBack: (
 
   const nextPrice = useMemo(() => (isDrop ? best - step * multiplier : best + step * multiplier), [best, isDrop, multiplier, step])
 
+  // 我方最新报价与全场对比：减价竞价看是否最低，加价竞价看排名
+  const myLatest = useMemo(() => {
+    const mine = history.filter((h) => h.mine)
+    return mine.length ? mine[0].price : parsePrice(item.myQuote)
+  }, [history, item.myQuote])
+
+  const others = useMemo(() => history.filter((h) => !h.mine && h.supplier !== "系统").map((h) => h.price), [history])
+  const myIsLowest = others.length ? myLatest <= Math.min(...others) : true
+  // 加价竞价：报价越高排名越靠前
+  const myRank = useMemo(() => {
+    const higher = others.filter((p) => p > myLatest).length
+    return higher + 1
+  }, [others, myLatest])
+
   const statusLabel = running ? "进行中" : ended ? "已结束" : "未开始"
   const statusTone = running ? "text-emerald-400" : ended ? "text-zinc-400" : "text-amber-400"
 
@@ -204,9 +218,31 @@ export function BiddingHall({ item, onBack }: { item: SupplierBidItem; onBack: (
                 <p className="mt-1 flex items-center justify-center gap-2 font-mono text-4xl font-bold text-emerald-400">
                   {isDrop ? <TrendingDown className="size-7" /> : <TrendingUp className="size-7" />}¥{fmt(best)}
                 </p>
-                <p className="mt-1 text-xs text-zinc-500">
-                  当前排名 <span className="font-semibold text-sky-300">{item.myRank}</span> · 参与 {item.quotes} 家
-                </p>
+                {isDrop ? (
+                  /* 减价竞价：提醒当前是最高 / 最低报价 */
+                  <div className="mt-2 flex justify-center text-xs font-medium">
+                    {myIsLowest ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1 text-emerald-400">
+                        <TrendingDown className="size-3.5" />
+                        您当前为最低报价（领先）
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-1 text-red-400">
+                        <TrendingUp className="size-3.5" />
+                        您非最低报价，需继续降价
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  /* 加价竞价：体现排名 */
+                  <p className="mt-1 text-xs text-zinc-500">
+                    当前排名{" "}
+                    <span className={"font-semibold " + (myRank === 1 ? "text-emerald-400" : "text-sky-300")}>
+                      第 {myRank} 名
+                    </span>{" "}
+                    / 共 {item.quotes} 家
+                  </p>
+                )}
               </div>
             </div>
 
