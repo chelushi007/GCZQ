@@ -47,7 +47,7 @@ export function PurchaseBidding() {
     { key: "qty", header: "数量", className: "whitespace-nowrap" },
     { key: "basePrice", header: "起拍价", className: "whitespace-nowrap" },
     { key: "budget", header: "采购预算", className: "whitespace-nowrap tabular-nums" },
-    { key: "contact", header: "采购联系人", className: "text-muted-foreground whitespace-nowrap" },
+    { key: "publishTime", header: "发布时间", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
     { key: "signupStart", header: "报名开始", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
     { key: "signupEnd", header: "报名结束", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
     { key: "bidStart", header: "竞价开始", className: "text-muted-foreground whitespace-nowrap tabular-nums" },
