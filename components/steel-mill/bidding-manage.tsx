@@ -89,7 +89,6 @@ function buildNodes(item: BiddingItem): ProcessNode[] {
       icon: Award,
       state: isSettled ? "active" : "todo",
       actions: [
-        { key: "shortlist", label: "入围候选人公示", icon: Trophy, desc: "公示进入定标环节的候选供应商名单" },
         { key: "select", label: "竞价择标", icon: ClipboardCheck, desc: "采购方从候选供应商中确定中标单位" },
         { key: "result", label: "中标结果公告", icon: Award, desc: "发布最终中标供应商与成交结果" },
       ],
