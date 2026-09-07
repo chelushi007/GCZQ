@@ -1,18 +1,32 @@
 "use client"
 
-import { Recycle, ClipboardList, FileText, Wallet, ShieldCheck, HandCoins, type LucideIcon } from "lucide-react"
+import { useMemo, useState } from "react"
+import {
+  Recycle,
+  Search,
+  RotateCcw,
+  FileSearch,
+  Wallet,
+  ShieldCheck,
+  HandCoins,
+  ClipboardList,
+  FileText,
+  type LucideIcon,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
-import { DataTable, type Column } from "@/components/shared/data-table"
+import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { StatusPill } from "@/components/shared/status-pill"
+import { supplierBidList, supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
+import { SupplierBidDetail } from "./supplier-bid-detail"
 
-// 各回收站叶子节点对应的内容渲染
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
     icon: ClipboardList,
     title: "网上报名",
-    desc: "浏览钢厂竞价公告并在线报名参与竞价",
+    desc: "浏览钢厂竞价采购公告并在线报名参与竞价",
   },
-  "station-supplier-bidding-mine": { icon: FileText, title: "我的竞价", desc: "查看已报名 / 进行中 / 已结束的竞价项目" },
+  "station-supplier-bidding-mine": { icon: FileText, title: "我的竞价", desc: "查看已报名 / 竞价中 / 已结束的竞价项目并参与报价" },
   "station-supplier-bidding-fee": { icon: Wallet, title: "缴纳报名费", desc: "缴纳竞价项目报名费，缴费后方可参与竞价" },
   "station-supplier-bidding-deposit": { icon: ShieldCheck, title: "缴纳保证金", desc: "缴纳投标保证金，未中标后按规则退还" },
   "station-supplier-bidding-service": { icon: HandCoins, title: "缴纳服务费", desc: "中标后缴纳平台交易服务费" },
@@ -20,97 +34,267 @@ const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }
   "station-seller": { icon: Recycle, title: "销售方", desc: "销售方角色工作台设计中" },
 }
 
-type SignupRow = { no: string; title: string; region: string; deadline: string; status: string; tone: "green" | "amber" }
+const categories = ["全部类别", "重废", "统废", "生铁"]
+const regions = ["全部区域", "江苏·苏州", "上海·宝山", "浙江·嘉兴", "江苏·无锡", "江苏·常州", "江苏·张家港", "安徽·马鞍山"]
 
-function SignupContent() {
-  const rows: SignupRow[] = [
-    { no: "JJ20260907-003", title: "华东厂区废钢竞价回收", region: "华东", deadline: "2026-09-10 17:00", status: "报名中", tone: "green" },
-    { no: "JJ20260906-011", title: "重废工业边角料竞价", region: "华北", deadline: "2026-09-09 12:00", status: "报名中", tone: "green" },
-    { no: "JJ20260905-008", title: "机械设备拆解废钢", region: "华南", deadline: "2026-09-08 18:00", status: "即将截止", tone: "amber" },
-  ]
-  const columns: Column<SignupRow>[] = [
-    { key: "no", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
+/* ---------------- 网上报名 ---------------- */
+function SignupContent({ onOpen }: { onOpen: (i: SupplierBidItem) => void }) {
+  const [category, setCategory] = useState("全部类别")
+  const [region, setRegion] = useState("全部区域")
+  const [keyword, setKeyword] = useState("")
+  // 网上报名：仅展示还可报名 / 报名中的项目
+  const source = supplierBidList.filter((b) => b.result === "报名中" || b.signupStatus === "未报名" || b.signupStatus === "报名待审")
+
+  const rows = useMemo(
+    () =>
+      source.filter((b) => {
+        if (category !== "全部类别" && b.category !== category) return false
+        if (region !== "全部区域" && b.region !== region) return false
+        if (keyword && !`${b.id}${b.title}${b.buyer}`.toLowerCase().includes(keyword.toLowerCase())) return false
+        return true
+      }),
+    [category, region, keyword, source],
+  )
+
+  const columns: Column<SupplierBidItem>[] = [
+    { key: "id", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
     { key: "title", header: "公告标题", className: "whitespace-nowrap" },
-    { key: "region", header: "区域", className: "whitespace-nowrap" },
-    { key: "deadline", header: "报名截止时间", className: "whitespace-nowrap tabular-nums" },
-    { key: "status", header: "报名状态", render: (r) => <StatusPill label={r.status} tone={r.tone} /> },
+    { key: "buyer", header: "采购单位", className: "whitespace-nowrap" },
+    { key: "category", header: "类别", className: "whitespace-nowrap", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "region", header: "区域", className: "whitespace-nowrap text-muted-foreground" },
+    { key: "qty", header: "数量", className: "whitespace-nowrap" },
+    { key: "basePrice", header: "起拍价", className: "whitespace-nowrap" },
+    { key: "signupFee", header: "报名费", className: "whitespace-nowrap tabular-nums" },
+    { key: "deposit", header: "保证金", className: "whitespace-nowrap tabular-nums" },
+    { key: "signupEnd", header: "报名截止", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
+    { key: "bidStart", header: "竞价开始", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
+    {
+      key: "signupStatus",
+      header: "报名状态",
+      className: "whitespace-nowrap",
+      render: (r) => (
+        <StatusPill tone={r.signupStatus === "报名待审" ? "amber" : r.signupStatus === "报名通过" ? "green" : "gray"}>
+          {r.signupStatus}
+        </StatusPill>
+      ),
+    },
     {
       key: "op",
       header: "操作",
-      render: () => (
-        <button className="whitespace-nowrap rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-          立即报名
-        </button>
+      className: "whitespace-nowrap",
+      render: (r) => (
+        <Button size="sm" onClick={() => onOpen(r)}>
+          {r.signupStatus === "未报名" ? "立即报名" : "查看详情"}
+        </Button>
       ),
     },
   ]
-  return <DataTable columns={columns} rows={rows} rowKey={(r) => r.no} stickyLastColumn />
+
+  return (
+    <div className="space-y-5">
+      <FilterCard
+        category={category}
+        setCategory={setCategory}
+        region={region}
+        setRegion={setRegion}
+        keyword={keyword}
+        setKeyword={setKeyword}
+        onReset={() => {
+          setCategory("全部类别")
+          setRegion("全部区域")
+          setKeyword("")
+        }}
+      />
+      <p className="text-sm text-muted-foreground">
+        共 <span className="font-medium text-foreground tabular-nums">{rows.length}</span> 条可报名竞价
+      </p>
+      <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} stickyLastColumn />
+    </div>
+  )
 }
 
-type MyBidRow = { no: string; title: string; price: string; state: string; tone: "primary" | "green" | "gray" }
+/* ---------------- 我的竞价 ---------------- */
+const myTabs = ["全部", "报名中", "竞价中", "待开标", "已中标", "未中标"]
 
-function MyBiddingContent() {
-  const rows: MyBidRow[] = [
-    { no: "JJ20260907-003", title: "华东厂区废钢竞价回收", state: "进行中", tone: "primary", price: "2,650" },
-    { no: "JJ20260904-006", title: "拆船板废钢竞价", state: "已中标", tone: "green", price: "2,880" },
-    { no: "JJ20260901-002", title: "汽车压块竞价回收", state: "未中标", tone: "gray", price: "3,010" },
-  ]
-  const columns: Column<MyBidRow>[] = [
-    { key: "no", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
+function MyBiddingContent({ onOpen }: { onOpen: (i: SupplierBidItem) => void }) {
+  const [tab, setTab] = useState("全部")
+  const [keyword, setKeyword] = useState("")
+  // 我的竞价：已报名的项目
+  const source = supplierBidList.filter((b) => b.signupStatus !== "未报名")
+
+  const rows = useMemo(
+    () =>
+      source.filter((b) => {
+        if (tab !== "全部" && b.result !== tab) return false
+        if (keyword && !`${b.id}${b.title}${b.buyer}`.toLowerCase().includes(keyword.toLowerCase())) return false
+        return true
+      }),
+    [tab, keyword, source],
+  )
+
+  const columns: Column<SupplierBidItem>[] = [
+    { key: "id", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
     { key: "title", header: "公告标题", className: "whitespace-nowrap" },
-    { key: "price", header: "我的报价(元/吨)", className: "whitespace-nowrap tabular-nums" },
-    { key: "state", header: "竞价状态", render: (r) => <StatusPill label={r.state} tone={r.tone} /> },
+    { key: "buyer", header: "采购单位", className: "whitespace-nowrap" },
+    { key: "category", header: "类别", className: "whitespace-nowrap", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "bidMode", header: "竞价方式", className: "whitespace-nowrap text-muted-foreground" },
+    { key: "basePrice", header: "起拍价", className: "whitespace-nowrap" },
+    { key: "myQuote", header: "我的报价", className: "whitespace-nowrap tabular-nums", render: (r) => <span className="font-medium text-primary">{r.myQuote}</span> },
+    { key: "myRank", header: "当前排名", className: "whitespace-nowrap" },
+    { key: "quotes", header: "参与家数", className: "whitespace-nowrap tabular-nums", render: (r) => `${r.quotes} 家` },
+    { key: "bidEnd", header: "竞价结束", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
+    {
+      key: "result",
+      header: "竞价结果",
+      className: "whitespace-nowrap",
+      render: (r) => <StatusPill tone={supplierBidResultTone[r.result]}>{r.result}</StatusPill>,
+    },
     {
       key: "op",
       header: "操作",
-      render: () => (
-        <button className="whitespace-nowrap rounded-md border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-accent">
-          查看详情
-        </button>
+      className: "whitespace-nowrap",
+      render: (r) => (
+        <Button size="sm" onClick={() => onOpen(r)}>
+          <FileSearch />
+          {r.result === "竞价中" ? "进入竞价" : "查看详情"}
+        </Button>
       ),
     },
   ]
-  return <DataTable columns={columns} rows={rows} rowKey={(r) => r.no} stickyLastColumn />
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <FilterBar>
+            {myTabs.map((t) => (
+              <FilterChip key={t} active={tab === t} onClick={() => setTab(t)}>
+                {t}
+              </FilterChip>
+            ))}
+          </FilterBar>
+          <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm focus-within:border-primary">
+            <Search className="size-4 text-muted-foreground" />
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="搜索单号 / 标题 / 采购单位"
+              className="w-56 bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        共 <span className="font-medium text-foreground tabular-nums">{rows.length}</span> 条竞价记录
+      </p>
+      <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} stickyLastColumn />
+    </div>
+  )
 }
 
-type PayRow = { no: string; title: string; amount: string; status: string; tone: "amber" | "green" }
+function FilterCard({
+  category,
+  setCategory,
+  region,
+  setRegion,
+  keyword,
+  setKeyword,
+  onReset,
+}: {
+  category: string
+  setCategory: (v: string) => void
+  region: string
+  setRegion: (v: string) => void
+  keyword: string
+  setKeyword: (v: string) => void
+  onReset: () => void
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label className="space-y-1.5">
+          <span className="text-xs font-medium text-muted-foreground">废钢类别</span>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+          >
+            {categories.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1.5">
+          <span className="text-xs font-medium text-muted-foreground">区域范围</span>
+          <select
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
+            className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary"
+          >
+            {regions.map((r) => (
+              <option key={r}>{r}</option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1.5 lg:col-span-2">
+          <span className="text-xs font-medium text-muted-foreground">关键词</span>
+          <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-3 text-sm focus-within:border-primary">
+            <Search className="size-4 text-muted-foreground" />
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="搜索竞价单号 / 标题 / 采购单位"
+              className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+        </label>
+      </div>
+      <div className="mt-4 flex justify-end border-t border-border pt-4">
+        <Button variant="ghost" size="sm" onClick={onReset}>
+          <RotateCcw />
+          重置
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+/* ---------------- 缴费类页面 ---------------- */
+type PayRow = { no: string; title: string; buyer: string; amount: string; status: string; tone: "amber" | "green" | "gray" }
 
 function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
   const label = kind === "fee" ? "报名费" : kind === "deposit" ? "保证金" : "服务费"
-  const rows: PayRow[] = [
-    {
-      no: "JJ20260907-003",
-      title: "华东厂区废钢竞价回收",
-      amount: kind === "deposit" ? "50,000" : kind === "service" ? "3,200" : "500",
-      status: "待缴纳",
-      tone: "amber",
-    },
-    {
-      no: "JJ20260904-006",
-      title: "拆船板废钢竞价",
-      amount: kind === "deposit" ? "80,000" : kind === "service" ? "4,800" : "500",
-      status: "已缴纳",
-      tone: "green",
-    },
-  ]
+  const rows: PayRow[] = supplierBidList
+    .filter((b) => (kind === "service" ? b.result === "已中标" : b.signupStatus !== "未报名"))
+    .map((b) => {
+      const status = kind === "fee" ? b.feeStatus : kind === "deposit" ? b.depositStatus : b.result === "已中标" ? "待缴纳" : "—"
+      const tone: PayRow["tone"] = status === "已缴" ? "green" : status === "已退还" ? "gray" : "amber"
+      return {
+        no: b.id,
+        title: b.title,
+        buyer: b.buyer,
+        amount: kind === "fee" ? b.signupFee : kind === "deposit" ? b.deposit : "¥3,200",
+        status: status === "未缴" ? "待缴纳" : status,
+        tone,
+      }
+    })
   const totalDue = rows.filter((r) => r.status === "待缴纳").length
   const columns: Column<PayRow>[] = [
     { key: "no", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
     { key: "title", header: "公告标题", className: "whitespace-nowrap" },
+    { key: "buyer", header: "采购单位", className: "whitespace-nowrap" },
     { key: "amount", header: `${label}(元)`, className: "whitespace-nowrap tabular-nums" },
-    { key: "status", header: "缴纳状态", render: (r) => <StatusPill label={r.status} tone={r.tone} /> },
+    { key: "status", header: "缴纳状态", render: (r) => <StatusPill tone={r.tone}>{r.status}</StatusPill> },
     {
       key: "op",
       header: "操作",
       render: (r) =>
         r.status === "待缴纳" ? (
-          <button className="whitespace-nowrap rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90">
-            去缴纳
-          </button>
+          <Button size="sm">去缴纳</Button>
         ) : (
-          <button className="whitespace-nowrap rounded-md border border-border px-3 py-1 text-xs font-medium text-foreground hover:bg-accent">
+          <Button variant="outline" size="sm">
             查看凭证
-          </button>
+          </Button>
         ),
     },
   ]
@@ -151,30 +335,40 @@ function StatCard({
 
 export function StationWorkspace({ leaf }: { leaf: string }) {
   const meta = leafMeta[leaf] ?? leafMeta["station-recycler"]
+  const [detail, setDetail] = useState<SupplierBidItem | null>(null)
+
+  const showsDetail =
+    detail && (leaf === "station-supplier-bidding-signup" || leaf === "station-supplier-bidding-mine")
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      <PageHeader title={meta.title} desc={meta.desc} />
-      <div className="mt-4">
-        {leaf === "station-supplier-bidding-signup" && <SignupContent />}
-        {leaf === "station-supplier-bidding-mine" && <MyBiddingContent />}
-        {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
-        {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
-        {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
-        {(leaf === "station-recycler" || leaf === "station-seller") && (
-          <div className="flex h-[50vh] items-center justify-center">
-            <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Recycle className="size-7" />
+      {showsDetail ? (
+        <SupplierBidDetail item={detail} onBack={() => setDetail(null)} />
+      ) : (
+        <>
+          <PageHeader title={meta.title} desc={meta.desc} />
+          <div className="mt-4">
+            {leaf === "station-supplier-bidding-signup" && <SignupContent onOpen={setDetail} />}
+            {leaf === "station-supplier-bidding-mine" && <MyBiddingContent onOpen={setDetail} />}
+            {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
+            {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
+            {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
+            {(leaf === "station-recycler" || leaf === "station-seller") && (
+              <div className="flex h-[50vh] items-center justify-center">
+                <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
+                  <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Recycle className="size-7" />
+                  </div>
+                  <h2 className="mt-4 text-lg font-semibold text-foreground">{meta.title}</h2>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    该角色工作台规划中，后续将参照供应商结构展开各业务模块。
+                  </p>
+                </div>
               </div>
-              <h2 className="mt-4 text-lg font-semibold text-foreground">{meta.title}</h2>
-              <p className="mt-1.5 text-sm text-muted-foreground">
-                该角色工作台规划中，后续将参照供应商结构展开各业务模块。
-              </p>
-            </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }

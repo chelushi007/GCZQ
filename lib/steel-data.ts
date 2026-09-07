@@ -173,6 +173,49 @@ export const payMethods = ["线上支付", "银行转账", "银行保函", "免�
 export const materialConditions = ["全新", "九成新", "八成新", "七成新及以下", "废旧"]
 export const materialCategories = ["重废", "统废", "生铁", "废铁", "废钢筋", "其他"]
 
+// ---------- 供应商视角：竞价管理 ----------
+// 供应商是竞价的参与方：报名 → 缴报名费/保证金 → 报价竞价 → 中标 → 缴服务费/结算
+export interface SupplierBidItem {
+  id: string
+  title: string
+  buyer: string // 采购单位（钢厂）
+  category: string
+  region: string
+  qty: string
+  basePrice: string // 起拍价
+  bidMode: string // 竞价方式
+  signupEnd: string // 报名截止
+  bidStart: string
+  bidEnd: string
+  signupFee: string // 报名费
+  deposit: string // 保证金
+  signupStatus: "未报名" | "报名待审" | "报名通过" | "报名驳回"
+  feeStatus: "未缴" | "已缴" | "免缴"
+  depositStatus: "未缴" | "已缴" | "已退还"
+  myQuote: string // 我的最新报价
+  myRank: string // 我的当前排名
+  quotes: number // 参与家数
+  result: "报名中" | "竞价中" | "已中标" | "未中标" | "待开标"
+}
+
+export const supplierBidList: SupplierBidItem[] = [
+  { id: "JJ20260907-003", title: "重型废钢竞价采购公告", buyer: "华东特钢集团", category: "重废", region: "江苏·苏州", qty: "500 吨", basePrice: "¥2,500/吨", bidMode: "减价竞价", signupEnd: "09-07 17:00", bidStart: "09-08 09:00", bidEnd: "09-08 18:00", signupFee: "¥500", deposit: "¥50,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,480/吨", myRank: "第 1 名", quotes: 6, result: "竞价中" },
+  { id: "JJ20260907-001", title: "冲花板料竞价采购公告", buyer: "宝武钢铁", category: "统废", region: "上海·宝山", qty: "300 吨", basePrice: "¥2,380/吨", bidMode: "减价竞价", signupEnd: "09-07 12:00", bidStart: "09-08 09:00", bidEnd: "09-08 12:00", signupFee: "¥500", deposit: "¥30,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,410/吨", myRank: "第 2 名", quotes: 4, result: "竞价中" },
+  { id: "JJ20260906-008", title: "生铁边角料竞价公告", buyer: "南钢股份", category: "生铁", region: "浙江·嘉兴", qty: "200 吨", basePrice: "¥2,900/吨", bidMode: "增价竞价", signupEnd: "09-06 17:00", bidStart: "09-07 14:00", bidEnd: "09-07 20:00", signupFee: "¥500", deposit: "¥20,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "—", myRank: "—", quotes: 3, result: "待开标" },
+  { id: "JJ20260905-004", title: "钢筋头竞价采购公告", buyer: "沙钢集团", category: "重废", region: "江苏·无锡", qty: "420 吨", basePrice: "¥2,450/吨", bidMode: "减价竞价", signupEnd: "09-05 12:00", bidStart: "09-06 09:00", bidEnd: "09-06 18:00", signupFee: "¥500", deposit: "¥42,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥2,510/吨", myRank: "第 1 名", quotes: 9, result: "已中标" },
+  { id: "JJ20260904-009", title: "汽车压块竞价回收公告", buyer: "中天钢铁", category: "统废", region: "江苏·常州", qty: "350 吨", basePrice: "¥3,050/吨", bidMode: "减价竞价", signupEnd: "09-04 12:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", signupFee: "¥500", deposit: "¥35,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥3,120/吨", myRank: "第 4 名", quotes: 7, result: "未中标" },
+  { id: "JJ20260908-006", title: "废旧钢结构竞价公告", buyer: "永钢集团", category: "重废", region: "江苏·张家港", qty: "600 吨", basePrice: "¥2,420/吨", bidMode: "减价竞价", signupEnd: "09-09 17:00", bidStart: "09-10 09:00", bidEnd: "09-10 18:00", signupFee: "¥500", deposit: "¥60,000", signupStatus: "未报名", feeStatus: "未缴", depositStatus: "未缴", myQuote: "—", myRank: "—", quotes: 2, result: "报名中" },
+  { id: "JJ20260908-002", title: "马达铁竞价采购公告", buyer: "马钢股份", category: "统废", region: "安徽·马鞍山", qty: "180 吨", basePrice: "¥2,300/吨", bidMode: "增价竞价", signupEnd: "09-09 12:00", bidStart: "09-10 14:00", bidEnd: "09-10 20:00", signupFee: "¥500", deposit: "¥18,000", signupStatus: "报名待审", feeStatus: "已缴", depositStatus: "未缴", myQuote: "—", myRank: "—", quotes: 1, result: "报名中" },
+]
+
+export const supplierBidResultTone: Record<SupplierBidItem["result"], "primary" | "green" | "gray" | "amber"> = {
+  报名中: "amber",
+  竞价中: "primary",
+  待开标: "gray",
+  已中标: "green",
+  未中标: "gray",
+}
+
 // ---------- 固定价回收 ----------
 export interface FixedItem {
   id: string
