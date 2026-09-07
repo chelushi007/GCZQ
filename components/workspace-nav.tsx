@@ -94,12 +94,27 @@ export function WorkspaceNav({
   return (
     <aside
       className={cn(
-        "flex h-full shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200",
+        "relative flex h-full shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200",
         collapsed ? "w-16" : "w-64",
       )}
     >
-      {/* 顶部品牌 + 折叠按钮 */}
-      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
+      {/* 右侧边缘悬浮折叠按钮：始终醒目，展开/收起均可见 */}
+      <button
+        onClick={() => setCollapsed((v) => !v)}
+        title={collapsed ? "展开菜单" : "收起菜单"}
+        aria-label={collapsed ? "展开菜单" : "收起菜单"}
+        className="absolute -right-3 top-16 z-20 flex size-6 items-center justify-center rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-md transition-colors hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+      >
+        {collapsed ? <PanelLeftOpen className="size-3.5" /> : <PanelLeftClose className="size-3.5" />}
+      </button>
+
+      {/* 顶部品牌 */}
+      <div
+        className={cn(
+          "flex h-14 items-center gap-2 border-b border-sidebar-border px-3",
+          collapsed && "justify-center px-0",
+        )}
+      >
         <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
           <Factory className="size-4.5" />
         </div>
@@ -109,16 +124,6 @@ export function WorkspaceNav({
             <p className="truncate text-[11px] text-sidebar-foreground/60">工作台</p>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed((v) => !v)}
-          title={collapsed ? "展开菜单" : "收起菜单"}
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            collapsed && "mx-auto",
-          )}
-        >
-          {collapsed ? <PanelLeftOpen className="size-4.5" /> : <PanelLeftClose className="size-4.5" />}
-        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-3">
