@@ -241,13 +241,15 @@ interface SignupRow {
   time: string
   status: string
   license: string
+  signupFee: "已缴" | "未缴"
+  deposit: "已缴" | "未缴"
 }
 const initialSignupRows: SignupRow[] = [
-  { id: "R1", name: "华东再生资源有限公司", contact: "王建国", phone: "138****6621", time: "2026-09-01 10:24", status: "审核通过", license: "苏A-资源-20210331" },
-  { id: "R2", name: "江苏鑫盛物资回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812" },
-  { id: "R3", name: "浙江环晟金属科技", contact: "张伟", phone: "137****9902", time: "2026-09-02 09:33", status: "待审核", license: "浙C-资源-20220605" },
-  { id: "R4", name: "上海宝钢再生资源", contact: "陈明", phone: "136****1157", time: "2026-09-02 16:41", status: "待审核", license: "沪A-资源-20200118" },
-  { id: "R5", name: "安徽绿源废旧金属", contact: "刘芳", phone: "135****8820", time: "2026-09-03 08:05", status: "已驳回", license: "皖D-资源-20230920" },
+  { id: "R1", name: "华东再生资源有限公司", contact: "王建国", phone: "138****6621", time: "2026-09-01 10:24", status: "审核通过", license: "苏A-资源-20210331", signupFee: "已缴", deposit: "已缴" },
+  { id: "R2", name: "江苏鑫盛物资回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812", signupFee: "已缴", deposit: "未缴" },
+  { id: "R3", name: "浙江环晟金属科技", contact: "张伟", phone: "137****9902", time: "2026-09-02 09:33", status: "待审核", license: "浙C-资源-20220605", signupFee: "已缴", deposit: "未缴" },
+  { id: "R4", name: "上海宝钢再生资源", contact: "陈明", phone: "136****1157", time: "2026-09-02 16:41", status: "待审核", license: "沪A-资源-20200118", signupFee: "未缴", deposit: "未缴" },
+  { id: "R5", name: "安徽绿源废旧金属", contact: "刘芳", phone: "135****8820", time: "2026-09-03 08:05", status: "已驳回", license: "皖D-资源-20230920", signupFee: "未缴", deposit: "未缴" },
 ]
 const signupTone: Record<string, StatusTone> = {
   审核通过: "green",
@@ -291,6 +293,8 @@ function SignupContent() {
                 <th className="whitespace-nowrap px-3 py-2.5 font-medium">联系人</th>
                 <th className="whitespace-nowrap px-3 py-2.5 font-medium">联系方式</th>
                 <th className="whitespace-nowrap px-3 py-2.5 font-medium">报名时间</th>
+                <th className="whitespace-nowrap px-3 py-2.5 font-medium">报名费</th>
+                <th className="whitespace-nowrap px-3 py-2.5 font-medium">保证金</th>
                 <th className="whitespace-nowrap px-3 py-2.5 font-medium">审核状态</th>
                 <th className="whitespace-nowrap px-3 py-2.5 font-medium">操作</th>
               </tr>
@@ -303,6 +307,12 @@ function SignupContent() {
                   <td className="whitespace-nowrap px-3 py-3 text-muted-foreground">{r.contact}</td>
                   <td className="whitespace-nowrap px-3 py-3 tabular-nums text-muted-foreground">{r.phone}</td>
                   <td className="whitespace-nowrap px-3 py-3 tabular-nums text-muted-foreground">{r.time}</td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <StatusPill tone={r.signupFee === "已缴" ? "green" : "gray"}>{r.signupFee}</StatusPill>
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    <StatusPill tone={r.deposit === "已缴" ? "green" : "gray"}>{r.deposit}</StatusPill>
+                  </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     <StatusPill tone={signupTone[r.status]}>{r.status}</StatusPill>
                   </td>
