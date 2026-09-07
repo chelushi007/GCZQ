@@ -158,10 +158,13 @@ export function WorkspaceNav({
               <ul className="space-y-0.5">
                 {group.children.map((leaf) => {
                   const Icon = leafIcon[leaf.key]
-                  const isActive = active === leaf.key
-                  const hasMillMenu = leaf.key === "mill" || leaf.key === "portal-steel"
+                  const hasMillMenu = leaf.key === "mill"
                   const subMenu = leafSubMenu[leaf.key]
-                  const expandable = (hasMillMenu || !!subMenu) && group.id === "user"
+                  // 用户工作台下的钢厂/回收站/供应商仅作为可展开父级，不承载页面内容
+                  const isParent = (hasMillMenu || !!subMenu) && group.id === "user"
+                  const expandable = isParent
+                  // 父级本身永不高亮；是否有子级被选中由子菜单自行控制
+                  const isActive = !isParent && active === leaf.key
                   const isOpen = openLeaves.has(leaf.key)
                   const showChildren = expandable && isOpen && !collapsed
                   return (
@@ -176,7 +179,18 @@ export function WorkspaceNav({
                         )}
                       >
                         <button
-                          onClick={() => onSelect(leaf.key)}
+                          onClick={() => {
+                            if (isParent) {
+                              if (collapsed) {
+                                setCollapsed(false)
+                                setOpenLeaves((prev) => new Set(prev).add(leaf.key))
+                              } else {
+                                toggleLeaf(leaf.key)
+                              }
+                            } else {
+                              onSelect(leaf.key)
+                            }
+                          }}
                           title={leaf.label}
                           className={cn(
                             "flex flex-1 items-center gap-2.5 py-2",
