@@ -7,7 +7,7 @@ import { WorkspaceNav } from "@/components/workspace-nav"
 import { HomeEntry } from "@/components/home-entry"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
 import { PlaceholderWorkspace } from "@/components/placeholder-workspace"
-import { workspaceNav, type WorkspaceKey } from "@/lib/steel-data"
+import { workspaceNav, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
 
 const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
   const m = {} as Record<WorkspaceKey, { group: string; leaf: string }>
@@ -20,6 +20,7 @@ const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
 export default function Page() {
   const [collapsed, setCollapsed] = useState(false)
   const [active, setActive] = useState<WorkspaceKey>("mill")
+  const [millSection, setMillSection] = useState<MillMenuKey>("overview")
 
   const crumb = titleMap[active]
 
@@ -33,8 +34,13 @@ export default function Page() {
         onSelect={setActive}
       />
 
-      {/* 2. 钢厂专区菜单栏 */}
-      <WorkspaceNav active={active} onSelect={setActive} />
+      {/* 2. 统一工作台菜单栏（角色 + 钢厂子菜单合并） */}
+      <WorkspaceNav
+        active={active}
+        onSelect={setActive}
+        millSection={millSection}
+        onMillSectionChange={setMillSection}
+      />
 
       {/* 3. 工作台内容 */}
       <main className="flex min-w-0 flex-1 flex-col">
@@ -60,7 +66,7 @@ export default function Page() {
               <HomeEntry />
             </div>
           )}
-          {active === "mill" && <SteelMillWorkspace />}
+          {active === "mill" && <SteelMillWorkspace section={millSection} />}
           {(active === "station" || active === "supplier" || active === "ops-tbd") && (
             <PlaceholderWorkspace workspace={active} />
           )}
