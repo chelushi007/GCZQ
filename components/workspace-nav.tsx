@@ -58,6 +58,20 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
   ],
 }
 
+// 用户工作台各子项的占位子菜单（回收站 / 供应商）
+const leafSubMenu: Partial<Record<WorkspaceKey, { label: string; icon: LucideIcon }[]>> = {
+  station: [
+    { label: "回收总览", icon: LayoutDashboard },
+    { label: "回收订单", icon: ClipboardList },
+    { label: "结算管理", icon: FileSignature },
+  ],
+  supplier: [
+    { label: "供货总览", icon: LayoutDashboard },
+    { label: "报价管理", icon: Tag },
+    { label: "合同管理", icon: FileSignature },
+  ],
+}
+
 export function WorkspaceNav({
   active,
   onSelect,
@@ -71,6 +85,16 @@ export function WorkspaceNav({
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [purchaseOpen, setPurchaseOpen] = useState(true)
+  const [openLeaves, setOpenLeaves] = useState<Set<WorkspaceKey>>(new Set(["mill"]))
+
+  function toggleLeaf(key: WorkspaceKey) {
+    setOpenLeaves((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   function MillBtn({ node }: { node: MillNode }) {
     const isActive = millSection === node.key
@@ -132,45 +156,71 @@ export function WorkspaceNav({
                 {group.children.map((leaf) => {
                   const Icon = leafIcon[leaf.key]
                   const isActive = active === leaf.key
-                  const showMillMenu = (leaf.key === "mill" || leaf.key === "portal-steel") && isActive && !collapsed
+                  const hasMillMenu = leaf.key === "mill" || leaf.key === "portal-steel"
+                  const subMenu = leafSubMenu[leaf.key]
+                  const expandable = (hasMillMenu || !!subMenu) && group.id === "user"
+                  const isOpen = openLeaves.has(leaf.key)
+                  const showChildren = expandable && isOpen && !collapsed
                   return (
                     <li key={leaf.key}>
-                      <button
-                        onClick={() => onSelect(leaf.key)}
-                        title={leaf.label}
+                      <div
                         className={cn(
-                          "flex w-full items-center gap-2.5 rounded-md py-2 text-sm transition-colors",
-                          collapsed ? "justify-center px-0" : "px-2.5",
+                          "flex w-full items-center rounded-md text-sm transition-colors",
+                          collapsed ? "justify-center" : "pr-1",
                           isActive
                             ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
                             : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
                         )}
                       >
-                        <Icon
+                        <button
+                          onClick={() => onSelect(leaf.key)}
+                          title={leaf.label}
                           className={cn(
-                            "size-4 shrink-0",
-                            isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/70",
+                            "flex flex-1 items-center gap-2.5 py-2",
+                            collapsed ? "justify-center px-0" : "px-2.5",
                           )}
-                        />
-                        {!collapsed && (
-                          <>
-                            <span className="flex-1 text-left">{leaf.label}</span>
-                            {leaf.desc && !showMillMenu && (
-                              <span
-                                className={cn(
-                                  "text-[10px]",
-                                  isActive ? "text-sidebar-primary-foreground/70" : "text-sidebar-foreground/50",
-                                )}
-                              >
-                                {leaf.desc}
-                              </span>
+                        >
+                          <Icon
+                            className={cn(
+                              "size-4 shrink-0",
+                              isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/70",
                             )}
-                          </>
+                          />
+                          {!collapsed && (
+                            <>
+                              <span className="flex-1 text-left">{leaf.label}</span>
+                              {leaf.desc && !expandable && (
+                                <span
+                                  className={cn(
+                                    "text-[10px]",
+                                    isActive ? "text-sidebar-primary-foreground/70" : "text-sidebar-foreground/50",
+                                  )}
+                                >
+                                  {leaf.desc}
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </button>
+                        {expandable && !collapsed && (
+                          <button
+                            onClick={() => toggleLeaf(leaf.key)}
+                            title={isOpen ? "收起" : "展开"}
+                            aria-label={isOpen ? "收起" : "展开"}
+                            className={cn(
+                              "flex size-6 shrink-0 items-center justify-center rounded transition-colors",
+                              isActive
+                                ? "text-sidebar-primary-foreground/80 hover:bg-sidebar-primary-foreground/15"
+                                : "text-sidebar-foreground/50 hover:bg-sidebar-accent",
+                            )}
+                          >
+                            <ChevronDown className={cn("size-4 transition-transform", isOpen && "rotate-180")} />
+                          </button>
                         )}
-                      </button>
+                      </div>
 
-                      {/* 选中「钢厂」时内联展开其工作台子菜单 */}
-                      {showMillMenu && (
+                      {/* 钢厂：内联展开其工作台子菜单 */}
+                      {showChildren && hasMillMenu && (
                         <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                           {millMenu.top.map((n) => (
                             <MillBtn key={n.key} node={n} />
@@ -199,6 +249,26 @@ export function WorkspaceNav({
                           {millMenu.bottom.map((n) => (
                             <MillBtn key={n.key} node={n} />
                           ))}
+                        </div>
+                      )}
+
+                      {/* 回收站 / 供应商：内联展开占位子菜单 */}
+                      {showChildren && subMenu && (
+                        <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
+                          {subMenu.map((n) => {
+                            const NIcon = n.icon
+                            return (
+                              <button
+                                key={n.label}
+                                onClick={() => onSelect(leaf.key)}
+                                title={n.label}
+                                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                              >
+                                <NIcon className="size-3.5 shrink-0" />
+                                <span className="flex-1 text-left">{n.label}</span>
+                              </button>
+                            )
+                          })}
                         </div>
                       )}
                     </li>
