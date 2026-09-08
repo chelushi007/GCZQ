@@ -49,7 +49,7 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
   top: [{ key: "overview", label: "总览", icon: LayoutDashboard }],
   purchase: [
     { key: "purchase-bidding", label: "竞价回收", icon: Gavel },
-    { key: "purchase-fixed", label: "固定价（一口价）回收", icon: Tag },
+    { key: "purchase-fixed", label: "固定价回收", icon: Tag },
     { key: "purchase-agreement", label: "协议回收", icon: FileSignature },
   ],
   bottom: [

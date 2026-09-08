@@ -77,7 +77,7 @@ export interface StationTreeNode {
 export const stationTree: StationTreeNode[] = [
   {
     key: "station-supplier",
-    label: "供应商",
+    label: "供应",
     children: [
       {
         key: "station-supplier-bidding",
@@ -94,15 +94,14 @@ export const stationTree: StationTreeNode[] = [
   },
   {
     key: "station-recycler",
-    label: "回收商",
+    label: "回收",
     children: [
       {
         key: "station-recycler-purchase",
         label: "采购管理",
         children: [
           { key: "station-recycler-purchase-bidding", label: "竞价回收" },
-          { key: "station-recycler-purchase-fixed", label: "固定价一口价回收" },
-          { key: "station-recycler-purchase-agreement", label: "协议回收" },
+          { key: "station-recycler-purchase-fixed", label: "固定价回收" },
         ],
       },
       { key: "station-recycler-orders", label: "订单管理" },
@@ -110,7 +109,7 @@ export const stationTree: StationTreeNode[] = [
   },
   {
     key: "station-seller",
-    label: "销售方",
+    label: "销售",
   },
 ]
 
@@ -122,10 +121,9 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-supplier-bidding-deposit": ["供应商", "竞价管理", "缴纳保证金"],
   "station-supplier-bidding-service": ["供应商", "竞价管理", "缴纳服务费"],
   "station-recycler": ["回收商"],
-  "station-recycler-purchase-bidding": ["回收商", "采购管理", "竞价回收"],
-  "station-recycler-purchase-fixed": ["回收商", "采购管理", "固定价一口价回收"],
-  "station-recycler-purchase-agreement": ["回收商", "采购管理", "协议回收"],
-  "station-recycler-orders": ["回收商", "订单管理"],
+  "station-recycler-purchase-bidding": ["回收", "采购管理", "竞价回收"],
+  "station-recycler-purchase-fixed": ["回收", "采购管理", "固定价回收"],
+  "station-recycler-orders": ["回收", "订单管理"],
   "station-seller": ["销售方"],
 }
 

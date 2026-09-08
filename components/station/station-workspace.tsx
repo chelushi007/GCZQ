@@ -402,14 +402,6 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
       </div>
     )
   }
-  if (leaf === "station-recycler-purchase-agreement") {
-    return (
-      <div className="h-full overflow-y-auto p-6">
-        <PurchaseAgreement />
-      </div>
-    )
-  }
-
   return (
     <div className="h-full overflow-y-auto p-6">
       {showsSignupDetail ? (

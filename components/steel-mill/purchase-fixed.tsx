@@ -38,7 +38,7 @@ export function PurchaseFixed() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="固定价（一口价）回收"
+        title="固定价回收"
         desc="以固定单价挂出采购需求，供应商直接接单供货，成交高效"
         action={
           <Button>
