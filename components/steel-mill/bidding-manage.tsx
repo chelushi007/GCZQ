@@ -913,8 +913,32 @@ function SelectContent() {
 }
 
 /* 8. 中标结果公告 */
+const noticeTemplates = [
+  {
+    id: "standard",
+    name: "标准中标公告",
+    desc: "适用于常规竞价采购，含中标单位、成交价、成交金额等完整信息",
+  },
+  {
+    id: "brief",
+    name: "简版中标公告",
+    desc: "仅公示中标单位与成交结果，适用于快速公示场景",
+  },
+  {
+    id: "detailed",
+    name: "详版中标公告",
+    desc: "含标的明细、评审说明与全部候选人排序，适用于监管留档",
+  },
+]
+
 function ResultContent({ item }: { item: BiddingItem }) {
   const settled = item.status === "已成交"
+  // decision: 待定 | published(已发布) | skipped(不发布)
+  const [decision, setDecision] = React.useState<"pending" | "published" | "skipped">("pending")
+  const [templateId, setTemplateId] = React.useState("standard")
+  const [pubOpen, setPubOpen] = React.useState(false)
+  const [skipOpen, setSkipOpen] = React.useState(false)
+
   if (!settled) {
     return (
       <SectionCard title="中标结果公告">
@@ -927,8 +951,12 @@ function ResultContent({ item }: { item: BiddingItem }) {
       </SectionCard>
     )
   }
+
+  const chosen = noticeTemplates.find((t) => t.id === templateId)
+
   return (
     <div className="space-y-4">
+      {/* 定标结果摘要 */}
       <div className="overflow-hidden rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-6">
         <div className="flex items-center gap-3">
           <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -945,6 +973,84 @@ function ResultContent({ item }: { item: BiddingItem }) {
           <Field label="定标时间" value="2026-09-05 10:00" />
         </div>
       </div>
+
+      {/* 公告发布决策 */}
+      <SectionCard title="公告发布">
+        {decision === "pending" && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
+              <FileText className="mt-0.5 size-4 shrink-0" />
+              <span>定标已完成。您可选择发布中标结果公告对外公示，或经内部审批后不对外发布公告。</span>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* 发布公告 */}
+              <div className="flex flex-col rounded-lg border border-border p-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Award className="size-4 text-primary" />
+                  发布中标结果公告
+                </div>
+                <p className="mt-2 flex-1 text-xs leading-relaxed text-muted-foreground">
+                  向平台内所有供应商公示中标单位与成交结果，可选择不同公告模版。
+                </p>
+                <div className="mt-3">
+                  <label className="mb-1 block text-xs text-muted-foreground">公告模版</label>
+                  <select
+                    value={templateId}
+                    onChange={(e) => setTemplateId(e.target.value)}
+                    className="h-9 w-full rounded border border-border bg-background px-2 text-sm outline-none focus:border-primary"
+                  >
+                    {noticeTemplates.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{chosen?.desc}</p>
+                </div>
+                <Button className="mt-3" onClick={() => setPubOpen(true)}>
+                  发布公告
+                </Button>
+              </div>
+              {/* 不发布公告 */}
+              <div className="flex flex-col rounded-lg border border-border p-4">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <FileText className="size-4 text-muted-foreground" />
+                  不发布中标结果公告
+                </div>
+                <p className="mt-2 flex-1 text-xs leading-relaxed text-muted-foreground">
+                  本次采购不对外公示中标结果，仅在平台内部留档。适用于涉密或定向采购场景，需说明原因。
+                </p>
+                <Button variant="outline" className="mt-3 bg-transparent" onClick={() => setSkipOpen(true)}>
+                  选择不发布
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {decision === "published" && (
+          <div className="flex items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            <Award className="mt-0.5 size-4 shrink-0" />
+            <span>
+              中标结果公告已发布（模版：{chosen?.name}），已对全平台供应商公示。中标单位信息见下方。
+            </span>
+          </div>
+        )}
+
+        {decision === "skipped" && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <FileText className="size-4" />
+              本次采购已选择不发布中标结果公告，仅平台内部留档。
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setDecision("pending")}>
+              重新选择
+            </Button>
+          </div>
+        )}
+      </SectionCard>
+
+      {/* 中标单位信息 */}
       <SectionCard title="中标单位信息">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex items-center gap-2 text-sm text-foreground">
@@ -969,6 +1075,70 @@ function ResultContent({ item }: { item: BiddingItem }) {
           </div>
         </div>
       </SectionCard>
+
+      {/* 发布确认弹窗 */}
+      <Modal
+        open={pubOpen}
+        onClose={() => setPubOpen(false)}
+        title="确认发布中标结果公告"
+        footer={
+          <>
+            <Button variant="outline" className="bg-transparent" onClick={() => setPubOpen(false)}>
+              取消
+            </Button>
+            <Button
+              onClick={() => {
+                setDecision("published")
+                setPubOpen(false)
+              }}
+            >
+              确认发布
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm text-foreground">
+          <div className="rounded-md border border-border bg-muted/40 p-3">
+            <div className="text-xs text-muted-foreground">选用公告模版</div>
+            <div className="mt-0.5 font-medium">{chosen?.name}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{chosen?.desc}</div>
+          </div>
+          <p className="text-muted-foreground">
+            发布后，中标单位「江苏鑫盛物资回收公司」及成交结果将对平台内全部供应商公示，公示信息不可撤回。
+          </p>
+        </div>
+      </Modal>
+
+      {/* 不发布确认弹窗 */}
+      <Modal
+        open={skipOpen}
+        onClose={() => setSkipOpen(false)}
+        title="确认不发布中标结果公告"
+        footer={
+          <>
+            <Button variant="outline" className="bg-transparent" onClick={() => setSkipOpen(false)}>
+              取消
+            </Button>
+            <Button
+              onClick={() => {
+                setDecision("skipped")
+                setSkipOpen(false)
+              }}
+            >
+              确认不发布
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm">
+          <p className="text-muted-foreground">本次采购将不对外公示中标结果，仅在平台内部留档。请填写不发布原因：</p>
+          <textarea
+            rows={3}
+            placeholder="请输入不发布中标结果公告的原因（如涉密采购、定向采购等）"
+            className="w-full rounded border border-border bg-background p-2 text-sm outline-none focus:border-primary"
+          />
+        </div>
+      </Modal>
     </div>
   )
 }
