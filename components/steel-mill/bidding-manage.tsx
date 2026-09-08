@@ -80,7 +80,7 @@ function buildNodes(item: BiddingItem): ProcessNode[] {
       actions: [
         { key: "notice", label: "采购公告", icon: FileText, desc: "查看本次竞价的完整采购公告与标的说明" },
         { key: "signup", label: "报名查看", icon: Users, desc: "查看供应商报名情况并进行资格审核" },
-        { key: "modifyNotice", label: "修改公告", icon: FilePenLine, desc: "报名开始前可修改采购公告，修改同步至回收站" },
+        { key: "modifyNotice", label: "修改公告", icon: FilePenLine, desc: "报名开始前可修改采购公告" },
       ],
     },
     {
@@ -461,7 +461,7 @@ function ModifyNoticeContent({ item }: { item: BiddingItem }) {
       {editable && (
         <div className="mb-4 flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
           <Info className="mt-0.5 size-4 shrink-0" />
-          <span>报名开始前可修改采购公告。修改保存后将实时同步至回收站（供应商端）竞价信息。</span>
+          <span>报名开始前可修改采购公告。修改保存后将实时更新供应商端竞价信息。</span>
         </div>
       )}
 
@@ -580,7 +580,7 @@ function ModifyNoticeContent({ item }: { item: BiddingItem }) {
           {saved && (
             <span className="mr-auto inline-flex items-center gap-1 text-sm text-emerald-600">
               <CheckCircle2 className="size-4" />
-              修改已保存并同步至回收站
+                修改已保存
             </span>
           )}
           <Button size="sm" className="h-9" disabled={!editable} onClick={() => setConfirmOpen(true)}>
@@ -593,7 +593,7 @@ function ModifyNoticeContent({ item }: { item: BiddingItem }) {
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         title="确认修改采购公告"
-        description="修改保存后将实时同步至回收站（供应商端）竞价信息，请确认修改内容无误。"
+        description="修改保存后将实时更新供应商端竞价信息，请确认修改内容无误。"
         footer={
           <>
             <Button variant="outline" size="sm" className="h-9" onClick={() => setConfirmOpen(false)}>

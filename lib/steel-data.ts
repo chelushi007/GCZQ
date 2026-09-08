@@ -35,7 +35,7 @@ export const workspaceNav: NavGroup[] = [
     label: "用户工作台",
     children: [
       { key: "mill", label: "钢厂", desc: "采购方" },
-      { key: "station", label: "回收站", desc: "供货 / 采购" },
+      { key: "station", label: "回收基地", desc: "供货 / 采购" },
       { key: "supplier", label: "供应商", desc: "企业 / 自然人" },
     ],
   },
@@ -51,7 +51,7 @@ export const designNav: { key: WorkspaceKey; label: string }[] = [
   { key: "portal-home", label: "门户 · 首页" },
   { key: "portal-steel", label: "门户 · 钢厂专区" },
   { key: "mill", label: "工作台 · 钢厂" },
-  { key: "station", label: "工作台 · 回收站" },
+  { key: "station", label: "工作台 · 回收基地" },
   { key: "supplier", label: "工作台 · 供应商" },
   { key: "ops-tbd", label: "运营工作台" },
 ]
@@ -268,7 +268,7 @@ export interface FixedItem {
 }
 
 export const fixedList: FixedItem[] = [
-  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "09-15", status: "部分成交" },
+  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "09-15", status: "部��成交" },
   { id: "GD20260907-005", title: "一口价收统废", category: "统废", qty: "600 吨", price: "¥2,410/吨", taken: "0 吨", validUntil: "09-12", status: "挂单中" },
   { id: "GD20260906-009", title: "一口价收生铁", category: "生铁", qty: "400 吨", price: "¥2,950/吨", taken: "400 吨", validUntil: "09-10", status: "已完成" },
   { id: "GD20260905-002", title: "一口价收钢筋头", category: "重废", qty: "500 吨", price: "¥2,480/吨", taken: "500 吨", validUntil: "09-08", status: "已完成" },
@@ -317,7 +317,7 @@ export const orderList: OrderItem[] = [
 export interface SupplierItem {
   id: string
   name: string
-  type: "回收站" | "企业供应商" | "自然人"
+  type: "回收基地" | "企业供应商" | "自然人"
   contact: string
   region: string
   supplyCategory: string
@@ -327,9 +327,9 @@ export interface SupplierItem {
 }
 
 export const supplierList: SupplierItem[] = [
-  { id: "S001", name: "城南再生资源回收站", type: "回收站", contact: "李经理 138****2043", region: "江苏·苏州", supplyCategory: "重废/统废", totalQty: "9,860 吨", status: "合作中", cooperation: "协议供应商" },
+  { id: "S001", name: "城南再生资源回收站", type: "回收基地", contact: "李经理 138****2043", region: "江苏·苏州", supplyCategory: "重废/统废", totalQty: "9,860 吨", status: "合作中", cooperation: "协议供应商" },
   { id: "S002", name: "盛通金属有限公司", type: "企业供应商", contact: "王总 139****7781", region: "上海·宝山", supplyCategory: "生铁", totalQty: "5,240 吨", status: "合作中", cooperation: "协议供应商" },
-  { id: "S003", name: "环宇物资回收站", type: "回收站", contact: "赵主管 137****5502", region: "浙江·嘉兴", supplyCategory: "统废", totalQty: "3,120 吨", status: "待审核", cooperation: "普通供应商" },
+  { id: "S003", name: "环宇物资回收站", type: "回收基地", contact: "赵主管 137****5502", region: "浙江·嘉兴", supplyCategory: "统废", totalQty: "3,120 吨", status: "待审核", cooperation: "普通供应商" },
   { id: "S004", name: "张建国", type: "自然人", contact: "张建国 135****9920", region: "江苏·无锡", supplyCategory: "统废", totalQty: "620 吨", status: "合作中", cooperation: "普通供应商" },
   { id: "S005", name: "利民废旧金属", type: "企业供应商", contact: "陈经理 136****1188", region: "安徽·马鞍山", supplyCategory: "重废", totalQty: "2,050 吨", status: "已停用", cooperation: "普通供应商" },
 ]
