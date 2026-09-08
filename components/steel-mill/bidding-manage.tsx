@@ -14,22 +14,32 @@ import {
   CheckCircle2,
   Circle,
   Clock,
-  Plus,
   Download,
   Medal,
   Building2,
   Phone,
-  Calendar,
   CalendarClock,
   ClipboardCheck,
   MapPin,
   ShieldCheck,
+  FilePenLine,
+  AlertTriangle,
+  Info,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusPill, statusTone, type StatusTone } from "@/components/shared/status-pill"
 import { Modal } from "@/components/shared/modal"
-import type { BiddingItem } from "@/lib/steel-data"
+import { type BiddingItem, materialCategories } from "@/lib/steel-data"
+import { updateNotice, type NoticeEditable } from "@/lib/bidding-store"
 import { cn } from "@/lib/utils"
+
+// 是否已进入报名阶段（报名开始时间是否已到，用于判断采购公告能否修改）。
+// 原型数据用 "MM-DD HH:mm" 文本，这里按当前竞价状态近似判断：
+// 只有当项目处于"报名前"（本原型用 status 反推，进行中/待开标/成交/流标均视为已开始报名）时可改。
+function hasSignupStarted(item: BiddingItem): boolean {
+  // 已进入竞价或已结束的项目，报名一定已开始
+  return item.status === "进行中" || item.status === "待开标" || item.status === "已成交" || item.status === "已流标"
+}
 
 type NodeState = "done" | "active" | "todo"
 
@@ -70,7 +80,7 @@ function buildNodes(item: BiddingItem): ProcessNode[] {
       actions: [
         { key: "notice", label: "采购公告", icon: FileText, desc: "查看本次竞价的完整采购公告与标的说明" },
         { key: "signup", label: "报名查看", icon: Users, desc: "查看供应商报名情况并进行资格审核" },
-        { key: "change", label: "变更公告", icon: Megaphone, desc: "发布采购条款、时间等变更信息" },
+        { key: "modifyNotice", label: "修改公告", icon: FilePenLine, desc: "报名开始前可修改采购公告，修改同步至回收站" },
       ],
     },
     {
@@ -406,131 +416,199 @@ function SignupContent() {
   )
 }
 
-/* 3. 变更公告（含发布表单） */
-interface ChangeRow {
-  id: string
-  title: string
-  type: string
-  time: string
-  status: string
-}
-const initialChangeRows: ChangeRow[] = [
-  { id: "C1", title: "关于报名截止时间延期的变更公告", type: "时间变更", time: "2026-09-02 09:00", status: "已发布" },
-  { id: "C2", title: "关于竞价阶梯调整的变更公告", type: "规则变更", time: "2026-09-01 15:30", status: "已发布" },
-]
-const changeTypes = ["时间变更", "规则变更", "标的变更", "其他变更"]
+/* 3. 修改公告（报名开始前可修改采购公告，修改同步至回收站） */
+function ModifyNoticeContent({ item }: { item: BiddingItem }) {
+  // 是否已进入报名阶段：报名开始后不可修改
+  const signupStarted = item.status !== "待发布" && hasSignupStarted(item)
+  const editable = !signupStarted
 
-function ChangeContent() {
-  const [rows, setRows] = useState<ChangeRow[]>(initialChangeRows)
-  const [open, setOpen] = useState(false)
-  const [form, setForm] = useState({ title: "", type: changeTypes[0], content: "" })
+  const [form, setForm] = useState<NoticeEditable>({
+    title: item.title,
+    category: item.category,
+    region: item.region,
+    qty: item.qty,
+    basePrice: item.basePrice,
+    budget: item.budget,
+    contact: item.contact,
+    allowPerson: item.allowPerson,
+    signupStart: item.signupStart,
+    signupEnd: item.signupEnd,
+    bidStart: item.bidStart,
+    bidEnd: item.bidEnd,
+  })
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  function set<K extends keyof NoticeEditable>(k: K, v: NoticeEditable[K]) {
+    setForm((f) => ({ ...f, [k]: v }))
+    setSaved(false)
+  }
 
   function submit() {
-    if (!form.title.trim()) return
-    setRows((prev) => [
-      {
-        id: `C${Date.now()}`,
-        title: form.title,
-        type: form.type,
-        time: new Date().toLocaleString("zh-CN", { hour12: false }).replace(/\//g, "-"),
-        status: "已发布",
-      },
-      ...prev,
-    ])
-    setForm({ title: "", type: changeTypes[0], content: "" })
-    setOpen(false)
+    updateNotice(item.id, form)
+    setConfirmOpen(false)
+    setSaved(true)
   }
 
   return (
     <>
-      <SectionCard
-        title="变更公告"
-        extra={
-          <Button size="sm" className="h-8 gap-1 text-xs" onClick={() => setOpen(true)}>
-            <Plus className="size-3.5" />
-            发布变更公告
+      {!editable && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <span>本竞价已进入报名/竞价阶段，采购公告不可再修改。如需变更请通过运营审核流程处理。</span>
+        </div>
+      )}
+      {editable && (
+        <div className="mb-4 flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          <Info className="mt-0.5 size-4 shrink-0" />
+          <span>报名开始前可修改采购公告。修改保存后将实时同步至回收站（供应商端）竞价信息。</span>
+        </div>
+      )}
+
+      <SectionCard title="修改采购公告">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormRow label="公告标题" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.title}
+              onChange={(e) => set("title", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="废钢类别" required>
+            <select
+              className={inputCls}
+              disabled={!editable}
+              value={form.category}
+              onChange={(e) => set("category", e.target.value)}
+            >
+              {materialCategories.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </FormRow>
+          <FormRow label="区域范围" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.region}
+              onChange={(e) => set("region", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="采购数量" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.qty}
+              onChange={(e) => set("qty", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="起拍价" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.basePrice}
+              onChange={(e) => set("basePrice", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="采购预算" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.budget}
+              onChange={(e) => set("budget", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="采购联系人" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.contact}
+              onChange={(e) => set("contact", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="是否允许自然人参与">
+            <div className="flex h-9 items-center gap-6">
+              {[true, false].map((v) => (
+                <label key={String(v)} className="inline-flex items-center gap-1.5 text-sm">
+                  <input
+                    type="radio"
+                    disabled={!editable}
+                    checked={form.allowPerson === v}
+                    onChange={() => set("allowPerson", v)}
+                  />
+                  {v ? "是" : "否"}
+                </label>
+              ))}
+            </div>
+          </FormRow>
+          <FormRow label="报名开始时间" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.signupStart}
+              onChange={(e) => set("signupStart", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="报名截止时间" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.signupEnd}
+              onChange={(e) => set("signupEnd", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="竞价开始时间" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.bidStart}
+              onChange={(e) => set("bidStart", e.target.value)}
+            />
+          </FormRow>
+          <FormRow label="竞价结束时间" required>
+            <input
+              className={inputCls}
+              disabled={!editable}
+              value={form.bidEnd}
+              onChange={(e) => set("bidEnd", e.target.value)}
+            />
+          </FormRow>
+        </div>
+
+        <div className="mt-5 flex items-center justify-end gap-3 border-t border-border pt-4">
+          {saved && (
+            <span className="mr-auto inline-flex items-center gap-1 text-sm text-emerald-600">
+              <CheckCircle2 className="size-4" />
+              修改已保存并同步至回收站
+            </span>
+          )}
+          <Button size="sm" className="h-9" disabled={!editable} onClick={() => setConfirmOpen(true)}>
+            保存修改
           </Button>
-        }
-      >
-        {rows.length === 0 ? (
-          <div className="py-10 text-center text-sm text-muted-foreground">暂无变更公告</div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {rows.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                    <Megaphone className="size-4" />
-                  </span>
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{c.title}</div>
-                    <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="rounded bg-muted px-1.5 py-0.5">{c.type}</span>
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="size-3" />
-                        {c.time}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <StatusPill tone="green">{c.status}</StatusPill>
-                  <button className="inline-flex items-center gap-0.5 text-xs font-medium text-primary hover:underline">
-                    查看
-                    <ChevronRight className="size-3" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+        </div>
       </SectionCard>
 
       <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="发布变更公告"
-        description="变更公告发布后将同步通知全部已报名供应商"
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="确认修改采购公告"
+        description="修改保存后将实时同步至回收站（供应商端）竞价信息，请确认修改内容无误。"
         footer={
           <>
-            <Button variant="outline" size="sm" className="h-9" onClick={() => setOpen(false)}>
+            <Button variant="outline" size="sm" className="h-9" onClick={() => setConfirmOpen(false)}>
               取消
             </Button>
             <Button size="sm" className="h-9" onClick={submit}>
-              确认发布
+              确认保存
             </Button>
           </>
         }
       >
-        <div className="space-y-4">
-          <FormRow label="公告标题" required>
-            <input
-              className={inputCls}
-              placeholder="请输入变更公告标题"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            />
-          </FormRow>
-          <FormRow label="变更类型" required>
-            <select
-              className={inputCls}
-              value={form.type}
-              onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-            >
-              {changeTypes.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-          </FormRow>
-          <FormRow label="变更内容" required>
-            <textarea
-              rows={5}
-              placeholder="请详细描述变更事项及原因"
-              value={form.content}
-              onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-              className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </FormRow>
+        <div className="space-y-1.5 text-sm text-foreground">
+          <div>公告标题：{form.title}</div>
+          <div>采购数量：{form.qty} · 起拍价：{form.basePrice}</div>
+          <div>报名截止：{form.signupEnd} · 竞价时间：{form.bidStart} ~ {form.bidEnd}</div>
         </div>
       </Modal>
     </>
@@ -1146,7 +1224,7 @@ function ResultContent({ item }: { item: BiddingItem }) {
 const actionContent: Record<string, (item: BiddingItem) => React.ReactNode> = {
   notice: (item) => <NoticeContent item={item} />,
   signup: () => <SignupContent />,
-  change: () => <ChangeContent />,
+  modifyNotice: (item) => <ModifyNoticeContent item={item} />,
   quotes: (item) => <QuotesContent item={item} />,
   modifyTime: (item) => <ModifyTimeContent item={item} />,
   shortlist: () => <ShortlistContent />,

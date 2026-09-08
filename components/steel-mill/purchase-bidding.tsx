@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
-import { biddingList, type BiddingItem } from "@/lib/steel-data"
+import { type BiddingItem } from "@/lib/steel-data"
+import { useMillBids } from "@/lib/bidding-store"
 import { BiddingManage } from "./bidding-manage"
 import { BiddingPublish } from "./bidding-publish"
 
@@ -22,8 +23,9 @@ export function PurchaseBidding() {
   const [manageItem, setManageItem] = useState<BiddingItem | null>(null)
   const [publishing, setPublishing] = useState(false)
 
+  const millBids = useMillBids()
   const rows = useMemo(() => {
-    return biddingList.filter((b) => {
+    return millBids.filter((b) => {
       if (tab !== "全部" && b.status !== tab) return false
       if (category !== "全部类别" && b.category !== category) return false
       if (region !== "全部区域" && b.region !== region) return false

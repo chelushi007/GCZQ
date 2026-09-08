@@ -17,7 +17,8 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { StatusPill } from "@/components/shared/status-pill"
-import { supplierBidList, supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
+import { supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
+import { useSupplierBids } from "@/lib/bidding-store"
 import { SupplierBidDetail } from "./supplier-bid-detail"
 import { SignupDetail } from "./signup-detail"
 import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
@@ -47,6 +48,7 @@ function SignupContent({ onOpen }: { onOpen: (i: SupplierBidItem) => void }) {
   const [category, setCategory] = useState("全部类别")
   const [region, setRegion] = useState("全部区域")
   const [keyword, setKeyword] = useState("")
+  const supplierBidList = useSupplierBids()
   // 网上报名：仅展示还可报名 / 报名中的项目
   const source = supplierBidList.filter((b) => b.result === "报名中" || b.signupStatus === "未报名" || b.signupStatus === "报名待审")
 
@@ -124,6 +126,7 @@ const myTabs = ["全部", "报名中", "竞价中", "待开标", "已中标", "�
 function MyBiddingContent({ onOpen }: { onOpen: (i: SupplierBidItem) => void }) {
   const [tab, setTab] = useState("全部")
   const [keyword, setKeyword] = useState("")
+  const supplierBidList = useSupplierBids()
   // 我的竞价：已报名的项目
   const source = supplierBidList.filter((b) => b.signupStatus !== "未报名")
 
@@ -282,6 +285,7 @@ const payMethods = ["线上支付", "银行转账", "平台代扣"]
 function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
   const [tab, setTab] = useState("全部")
   const label = kind === "fee" ? "报名费" : kind === "deposit" ? "保证金" : "服务费"
+  const supplierBidList = useSupplierBids()
   const allRows: PayRow[] = supplierBidList
     .filter((b) => (kind === "service" ? b.result === "已中标" : b.signupStatus !== "未报名"))
     .map((b, i) => {
