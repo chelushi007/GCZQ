@@ -12,7 +12,7 @@ import {
 import { MaterialPicker, type PickedCategory } from "./material-picker"
 import { scrapCategoryTree } from "@/lib/steel-data"
 
-const secondLevelCategories = scrapCategoryTree.flatMap((l1) => l1.children.map((l2) => l2.name))
+const leafCategories = scrapCategoryTree.flatMap((l1) => l1.children.flatMap((l2) => l2.children))
 
 interface MaterialRow {
   id: number
@@ -100,7 +100,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       ...m,
       {
         id: seq++,
-        category: picked.path,
+        category: picked.l3,
         name: "",
         spec: "",
         unit: "吨",
@@ -136,7 +136,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       ...m,
       {
         id: seq++,
-        category: secondLevelCategories[0],
+        category: leafCategories[0],
         name: "",
         spec: "",
         unit: "吨",
@@ -383,7 +383,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
                           onChange={(e) => updateMaterial(row.id, { category: e.target.value })}
                           className="h-8 w-full min-w-28 rounded border border-border bg-background px-2 text-sm outline-none focus:border-primary"
                         >
-                          {secondLevelCategories.map((c) => (
+                          {leafCategories.map((c) => (
                             <option key={c}>{c}</option>
                           ))}
                         </select>
