@@ -199,11 +199,11 @@ function NoticeContent({ item }: { item: BiddingItem }) {
           <Field label="投标保证金 (元)" value="20,000" />
           <Field label="支付方式" value="线上支付" />
           <Field label="保证金缴纳截止" value={item.signupEnd} />
-          <Field label="竞价方式" value="多轮次报价(增价竞价)" />
+          <Field label="竞价方式" value="多轮次报价(减价竞价)" />
           <Field label="竞价开始时间" value={item.bidStart} />
           <Field label="竞价结束时间" value={item.bidEnd} />
           <Field label="延时竞价周期 (秒)" value="300" />
-          <Field label="竞价阶梯 (元)" value="500" />
+          <Field label="竞价阶��� (元)" value="500" />
           <Field label="起始价 (元/吨)" value="3,000" />
           <Field label="中标保证金退还" value="签约后 5 个工作日内退还" />
         </div>
@@ -416,7 +416,7 @@ function SignupContent() {
   )
 }
 
-/* 3. 修改公告（报名开始前可修改采购公告，修改同步至回收站） */
+/* 3. 修改公告（报名开始前可修改采购公告） */
 function ModifyNoticeContent({ item }: { item: BiddingItem }) {
   // 是否已进入报名阶段：报名开始后不可修改
   const signupStarted = item.status !== "待发布" && hasSignupStarted(item)
@@ -727,7 +727,7 @@ function ModifyTimeContent({ item }: { item: BiddingItem }) {
               onChange={(e) => setForm((f) => ({ ...f, newEnd: e.target.value }))}
             />
           </FormRow>
-          <FormRow label="申请原因" required>
+          <FormRow label="申���原因" required>
             <input
               className={inputCls}
               placeholder="请输入延长竞价时间的原因"

@@ -8,9 +8,9 @@ import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { supplierList, type SupplierItem } from "@/lib/steel-data"
 
-const tabs = ["全部", "回收站", "企业供应商", "自然人"]
+const tabs = ["全部", "回收基地", "企业供应商", "自然人"]
 const typeTone: Record<string, "blue" | "green" | "amber"> = {
-  回收站: "blue",
+  回收基地: "blue",
   企业供应商: "green",
   自然人: "amber",
 }
