@@ -98,7 +98,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       {
         id: seq++,
         category: picked.path,
-        name: picked.l3,
+        name: "",
         spec: "",
         unit: "吨",
         brand: "",
