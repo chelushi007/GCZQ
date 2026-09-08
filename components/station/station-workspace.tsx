@@ -20,6 +20,9 @@ import { StatusPill } from "@/components/shared/status-pill"
 import { supplierBidList, supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
 import { SupplierBidDetail } from "./supplier-bid-detail"
 import { SignupDetail } from "./signup-detail"
+import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
+import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
+import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -32,6 +35,7 @@ const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }
   "station-supplier-bidding-deposit": { icon: ShieldCheck, title: "缴纳保证金", desc: "缴纳投标保证金，未中标后按规则退还" },
   "station-supplier-bidding-service": { icon: HandCoins, title: "缴纳服务费", desc: "中标后缴纳平台交易服务费" },
   "station-recycler": { icon: Recycle, title: "回收商", desc: "回收商角色工作台设计中" },
+  "station-recycler-orders": { icon: ClipboardList, title: "订单管理", desc: "回收商采购订单的查询、结算与合同管理" },
   "station-seller": { icon: Recycle, title: "销售方", desc: "销售方角色工作台设计中" },
 }
 
@@ -383,6 +387,29 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
   const showsSignupDetail = detail && leaf === "station-supplier-bidding-signup"
   const showsBidDetail = detail && leaf === "station-supplier-bidding-mine"
 
+  // 回收商 · 采购管理：复用钢厂采购组件（采购模式一致）
+  if (leaf === "station-recycler-purchase-bidding") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <PurchaseBidding />
+      </div>
+    )
+  }
+  if (leaf === "station-recycler-purchase-fixed") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <PurchaseFixed />
+      </div>
+    )
+  }
+  if (leaf === "station-recycler-purchase-agreement") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <PurchaseAgreement />
+      </div>
+    )
+  }
+
   return (
     <div className="h-full overflow-y-auto p-6">
       {showsSignupDetail ? (
@@ -398,6 +425,19 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
             {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
             {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
             {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
+            {leaf === "station-recycler-orders" && (
+              <div className="flex h-[50vh] items-center justify-center">
+                <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
+                  <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <ClipboardList className="size-7" />
+                  </div>
+                  <h2 className="mt-4 text-lg font-semibold text-foreground">订单管理</h2>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    回收商采购订单的查询、结算与合同管理，页面内容规划中。
+                  </p>
+                </div>
+              </div>
+            )}
             {(leaf === "station-recycler" || leaf === "station-seller") && (
               <div className="flex h-[50vh] items-center justify-center">
                 <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
