@@ -775,7 +775,7 @@ function SelectContent() {
       {confirmed ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           已完成择标，中标单位为 <span className="font-semibold">{picked}</span>
-          ，系统已生成中标结果，可前往「中标结果公告」发布。
+          ，���统已生成中标结果，可前往「中标结果公告」发布。
         </div>
       ) : (
         <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
@@ -934,10 +934,10 @@ const noticeTemplates = [
 function ResultContent({ item }: { item: BiddingItem }) {
   const settled = item.status === "已成交"
   // decision: 待定 | published(已发布) | skipped(不发布)
-  const [decision, setDecision] = React.useState<"pending" | "published" | "skipped">("pending")
-  const [templateId, setTemplateId] = React.useState("standard")
-  const [pubOpen, setPubOpen] = React.useState(false)
-  const [skipOpen, setSkipOpen] = React.useState(false)
+  const [decision, setDecision] = useState<"pending" | "published" | "skipped">("pending")
+  const [templateId, setTemplateId] = useState("standard")
+  const [pubOpen, setPubOpen] = useState(false)
+  const [skipOpen, setSkipOpen] = useState(false)
 
   if (!settled) {
     return (
