@@ -52,34 +52,7 @@ export default function Page() {
           <div className="flex items-center gap-1.5 text-sm">
             <span className="font-semibold text-foreground">盘古循环资源</span>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span className="text-muted-foreground">{crumb.group}</span>
-            <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span
-              className={
-                active === "mill" || active === "station" ? "text-muted-foreground" : "font-medium text-foreground"
-              }
-            >
-              {crumb.leaf}
-            </span>
-            {active === "mill" && (
-              <>
-                <ChevronRight className="size-3.5 text-muted-foreground" />
-                <span className="font-medium text-foreground">{millSectionLabel[millSection]}</span>
-              </>
-            )}
-            {active === "station" &&
-              stationPath?.map((seg, i) => (
-                <span key={seg} className="flex items-center gap-1.5">
-                  <ChevronRight className="size-3.5 text-muted-foreground" />
-                  <span
-                    className={
-                      i === stationPath.length - 1 ? "font-medium text-foreground" : "text-muted-foreground"
-                    }
-                  >
-                    {seg}
-                  </span>
-                </span>
-              ))}
+            <span className="font-medium text-foreground">{crumb.group}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">演示集团</span>
