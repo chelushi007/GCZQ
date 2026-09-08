@@ -19,6 +19,7 @@ import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shar
 import { StatusPill } from "@/components/shared/status-pill"
 import { supplierBidList, supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
 import { SupplierBidDetail } from "./supplier-bid-detail"
+import { SignupDetail } from "./signup-detail"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -259,34 +260,68 @@ function FilterCard({
 }
 
 /* ---------------- 缴费类页面 ---------------- */
-type PayRow = { no: string; title: string; buyer: string; amount: string; status: string; tone: "amber" | "green" | "gray" }
+type PayRow = {
+  no: string
+  title: string
+  buyer: string
+  category: string
+  amount: string
+  dueTime: string
+  payMethod: string
+  paidTime: string
+  status: string
+  tone: "amber" | "green" | "gray"
+}
+
+const payMethods = ["线上支付", "银行转账", "平台代扣"]
 
 function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
+  const [tab, setTab] = useState("全部")
   const label = kind === "fee" ? "报名费" : kind === "deposit" ? "保证金" : "服务费"
-  const rows: PayRow[] = supplierBidList
+  const allRows: PayRow[] = supplierBidList
     .filter((b) => (kind === "service" ? b.result === "已中标" : b.signupStatus !== "未报名"))
-    .map((b) => {
-      const status = kind === "fee" ? b.feeStatus : kind === "deposit" ? b.depositStatus : b.result === "已中标" ? "待缴纳" : "—"
+    .map((b, i) => {
+      const raw = kind === "fee" ? b.feeStatus : kind === "deposit" ? b.depositStatus : b.result === "已中标" ? "未缴" : "—"
+      const status = raw === "未缴" ? "待缴纳" : raw
       const tone: PayRow["tone"] = status === "已缴" ? "green" : status === "已退还" ? "gray" : "amber"
+      const paid = status === "已缴" || status === "已退还"
       return {
         no: b.id,
         title: b.title,
         buyer: b.buyer,
+        category: b.category,
         amount: kind === "fee" ? b.signupFee : kind === "deposit" ? b.deposit : "¥3,200",
-        status: status === "未缴" ? "待缴纳" : status,
+        dueTime: b.signupEnd,
+        payMethod: paid ? payMethods[i % payMethods.length] : "—",
+        paidTime: paid ? b.bidStart : "—",
+        status,
         tone,
       }
     })
-  const totalDue = rows.filter((r) => r.status === "待缴纳").length
+
+  const rows = allRows.filter((r) => tab === "全部" || r.status === tab)
+  const totalDue = allRows.filter((r) => r.status === "待缴纳").length
+  const totalPaid = allRows.filter((r) => r.status === "已缴").length
+
   const columns: Column<PayRow>[] = [
     { key: "no", header: "竞价单号", className: "whitespace-nowrap font-medium text-foreground" },
     { key: "title", header: "公告标题", className: "whitespace-nowrap" },
     { key: "buyer", header: "采购单位", className: "whitespace-nowrap" },
-    { key: "amount", header: `${label}(元)`, className: "whitespace-nowrap tabular-nums" },
-    { key: "status", header: "缴纳状态", render: (r) => <StatusPill tone={r.tone}>{r.status}</StatusPill> },
+    { key: "category", header: "类别", className: "whitespace-nowrap", render: (r) => <StatusPill tone="gray">{r.category}</StatusPill> },
+    { key: "amount", header: `${label}(元)`, className: "whitespace-nowrap tabular-nums font-medium text-foreground" },
+    { key: "dueTime", header: "应缴截止", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
+    { key: "payMethod", header: "支付方式", className: "whitespace-nowrap text-muted-foreground" },
+    { key: "paidTime", header: "缴费时间", className: "whitespace-nowrap tabular-nums text-muted-foreground" },
+    {
+      key: "status",
+      header: "缴纳状态",
+      className: "whitespace-nowrap",
+      render: (r) => <StatusPill tone={r.tone}>{r.status}</StatusPill>,
+    },
     {
       key: "op",
       header: "操作",
+      className: "whitespace-nowrap",
       render: (r) =>
         r.status === "待缴纳" ? (
           <Button size="sm">去缴纳</Button>
@@ -301,8 +336,17 @@ function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label={`待缴纳${label}`} value={String(totalDue)} unit="笔" tone="amber" />
-        <StatCard label={`已缴纳${label}`} value={String(rows.length - totalDue)} unit="笔" tone="green" />
+        <StatCard label={`已缴纳${label}`} value={String(totalPaid)} unit="笔" tone="green" />
         <StatCard label="累计缴纳金额" value="¥84,800" unit="" tone="primary" />
+      </div>
+      <div className="rounded-lg border border-border bg-card p-3">
+        <FilterBar>
+          {["全部", "待缴纳", "已缴", ...(kind === "deposit" ? ["已退还"] : [])].map((t) => (
+            <FilterChip key={t} active={tab === t} onClick={() => setTab(t)}>
+              {t}
+            </FilterChip>
+          ))}
+        </FilterBar>
       </div>
       <DataTable columns={columns} rows={rows} rowKey={(r) => r.no} stickyLastColumn />
     </div>
@@ -336,12 +380,14 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
   const meta = leafMeta[leaf] ?? leafMeta["station-recycler"]
   const [detail, setDetail] = useState<SupplierBidItem | null>(null)
 
-  const showsDetail =
-    detail && (leaf === "station-supplier-bidding-signup" || leaf === "station-supplier-bidding-mine")
+  const showsSignupDetail = detail && leaf === "station-supplier-bidding-signup"
+  const showsBidDetail = detail && leaf === "station-supplier-bidding-mine"
 
   return (
     <div className="h-full overflow-y-auto p-6">
-      {showsDetail ? (
+      {showsSignupDetail ? (
+        <SignupDetail item={detail} onBack={() => setDetail(null)} />
+      ) : showsBidDetail ? (
         <SupplierBidDetail item={detail} onBack={() => setDetail(null)} />
       ) : (
         <>
