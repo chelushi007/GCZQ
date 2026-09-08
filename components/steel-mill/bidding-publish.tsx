@@ -8,9 +8,11 @@ import {
   bidModes,
   payMethods,
   materialConditions,
-  materialCategories,
 } from "@/lib/steel-data"
 import { MaterialPicker, type PickedCategory } from "./material-picker"
+import { scrapCategoryTree } from "@/lib/steel-data"
+
+const secondLevelCategories = scrapCategoryTree.flatMap((l1) => l1.children.map((l2) => l2.name))
 
 interface MaterialRow {
   id: number
@@ -22,6 +24,7 @@ interface MaterialRow {
   qty: string
   condition: string
   detail: string
+  manual?: boolean
 }
 
 interface AttachmentRow {
@@ -105,6 +108,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
         qty: "",
         condition: materialConditions[0],
         detail: "",
+        manual: false,
       },
     ])
     setPickerOpen(false)
@@ -132,7 +136,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       ...m,
       {
         id: seq++,
-        category: materialCategories[0],
+        category: secondLevelCategories[0],
         name: "",
         spec: "",
         unit: "吨",
@@ -140,6 +144,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
         qty: "",
         condition: materialConditions[0],
         detail: "",
+        manual: true,
       },
     ])
   }
@@ -372,15 +377,19 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
                       />
                     </td>
                     <td className="px-3 py-2">
-                      <select
-                        value={row.category}
-                        onChange={(e) => updateMaterial(row.id, { category: e.target.value })}
-                        className="h-8 w-full min-w-24 rounded border border-border bg-background px-2 text-sm outline-none focus:border-primary"
-                      >
-                        {materialCategories.map((c) => (
-                          <option key={c}>{c}</option>
-                        ))}
-                      </select>
+                      {row.manual ? (
+                        <select
+                          value={row.category}
+                          onChange={(e) => updateMaterial(row.id, { category: e.target.value })}
+                          className="h-8 w-full min-w-28 rounded border border-border bg-background px-2 text-sm outline-none focus:border-primary"
+                        >
+                          {secondLevelCategories.map((c) => (
+                            <option key={c}>{c}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="inline-block min-w-28 whitespace-nowrap text-sm text-foreground">{row.category}</span>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <input
