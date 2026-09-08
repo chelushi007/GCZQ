@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { ArrowLeft, Plus, Trash2, Layers, Upload, FileText, Paperclip } from "lucide-react"
+import { ArrowLeft, Plus, Trash2, Layers, Upload, FileText, Paperclip, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   purchaseMethods,
@@ -10,9 +10,6 @@ import {
   materialConditions,
 } from "@/lib/steel-data"
 import { MaterialPicker, type PickedCategory } from "./material-picker"
-import { scrapCategoryTree } from "@/lib/steel-data"
-
-const leafCategories = scrapCategoryTree.flatMap((l1) => l1.children.flatMap((l2) => l2.children))
 
 interface MaterialRow {
   id: number
@@ -93,25 +90,36 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [attachments, setAttachments] = useState<AttachmentRow[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerRowId, setPickerRowId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const addMaterialFromPicker = (picked: PickedCategory) => {
-    setMaterials((m) => [
-      ...m,
-      {
-        id: seq++,
-        category: picked.l3,
-        name: "",
-        spec: "",
-        unit: "吨",
-        brand: "",
-        qty: "",
-        condition: materialConditions[0],
-        detail: "",
-        manual: false,
-      },
-    ])
+    if (pickerRowId !== null) {
+      updateMaterial(pickerRowId, { category: picked.l3 })
+    } else {
+      setMaterials((m) => [
+        ...m,
+        {
+          id: seq++,
+          category: picked.l3,
+          name: "",
+          spec: "",
+          unit: "吨",
+          brand: "",
+          qty: "",
+          condition: materialConditions[0],
+          detail: "",
+          manual: false,
+        },
+      ])
+    }
     setPickerOpen(false)
+    setPickerRowId(null)
+  }
+
+  const openPickerForRow = (id: number) => {
+    setPickerRowId(id)
+    setPickerOpen(true)
   }
 
   const onPickFiles = (files: FileList | null) => {
@@ -136,7 +144,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       ...m,
       {
         id: seq++,
-        category: leafCategories[0],
+        category: "",
         name: "",
         spec: "",
         unit: "吨",
@@ -378,15 +386,14 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
                     </td>
                     <td className="px-3 py-2">
                       {row.manual ? (
-                        <select
-                          value={row.category}
-                          onChange={(e) => updateMaterial(row.id, { category: e.target.value })}
-                          className="h-8 w-full min-w-28 rounded border border-border bg-background px-2 text-sm outline-none focus:border-primary"
+                        <button
+                          type="button"
+                          onClick={() => openPickerForRow(row.id)}
+                          className={`flex h-8 w-full min-w-28 items-center justify-between gap-1 rounded border border-border bg-background px-2 text-left text-sm outline-none transition-colors hover:border-primary focus:border-primary ${row.category ? "text-foreground" : "text-muted-foreground"}`}
                         >
-                          {leafCategories.map((c) => (
-                            <option key={c}>{c}</option>
-                          ))}
-                        </select>
+                          <span className="truncate">{row.category || "请选择"}</span>
+                          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+                        </button>
                       ) : (
                         <span className="inline-block min-w-28 whitespace-nowrap text-sm text-foreground">{row.category}</span>
                       )}
