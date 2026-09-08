@@ -173,6 +173,30 @@ export const payMethods = ["线上支付", "银行转账", "银行保函", "免�
 export const materialConditions = ["全新", "九成新", "八成新", "七成新及以下", "废旧"]
 export const materialCategories = ["重废", "统废", "生铁", "废铁", "废钢筋", "其他"]
 
+// 废钢三级分类树（新增物料弹窗使用）
+export interface ScrapCategoryL1 {
+  name: string
+  children: { name: string; children: string[] }[]
+}
+
+export const scrapCategoryTree: ScrapCategoryL1[] = [
+  {
+    name: "废钢类",
+    children: [
+      { name: "重废类", children: ["优质重废", "重废"] },
+      { name: "中轻废类", children: ["中重废", "中废", "剪切料", "轻废"] },
+      { name: "颗粒/特殊成型料", children: ["钢筋切粒", "马蹄铁", "破碎废钢"] },
+      { name: "打包料类", children: ["优质碳钢打包料", "三级打包料", "四级打包料"] },
+      { name: "铁屑类", children: ["钢屑", "铁屑"] },
+      { name: "大件毛料", children: ["优质重废毛料", "重废毛料", "中废毛料"] },
+      { name: "型材/建筑毛料", children: ["架子管毛料"] },
+      { name: "混杂毛料", children: ["剪切毛料", "统料毛料", "彩涂毛料"] },
+      { name: "不锈钢系列", children: ["不锈钢304", "不锈钢316"] },
+      { name: "其他合金钢", children: ["合金钢废钢"] },
+    ],
+  },
+]
+
 // ---------- 供应商视角：竞价管理 ----------
 // 供应商是竞价的参与方：报名 → 缴报名费/保证金 → 报价竞价 → 中标 → 缴服务费/结算
 export interface SupplierBidItem {

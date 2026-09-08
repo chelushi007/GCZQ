@@ -10,6 +10,7 @@ import {
   materialConditions,
   materialCategories,
 } from "@/lib/steel-data"
+import { MaterialPicker, type PickedCategory } from "./material-picker"
 
 interface MaterialRow {
   id: number
@@ -88,7 +89,26 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
   const [materials, setMaterials] = useState<MaterialRow[]>([])
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [attachments, setAttachments] = useState<AttachmentRow[]>([])
+  const [pickerOpen, setPickerOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const addMaterialFromPicker = (picked: PickedCategory) => {
+    setMaterials((m) => [
+      ...m,
+      {
+        id: seq++,
+        category: picked.path,
+        name: picked.l3,
+        spec: "",
+        unit: "吨",
+        brand: "",
+        qty: "",
+        condition: materialConditions[0],
+        detail: "",
+      },
+    ])
+    setPickerOpen(false)
+  }
 
   const onPickFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return
@@ -287,7 +307,7 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
       {/* 物料信息 */}
       <SectionCard title="物料信息">
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Button size="sm" onClick={addMaterial}>
+          <Button size="sm" onClick={() => setPickerOpen(true)}>
             <Layers />
             新增物料
           </Button>
@@ -508,6 +528,8 @@ export function BiddingPublish({ onBack }: { onBack: () => void }) {
           <Button onClick={onBack}>提交发布</Button>
         </div>
       </div>
+
+      <MaterialPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onConfirm={addMaterialFromPicker} />
     </div>
   )
 }
