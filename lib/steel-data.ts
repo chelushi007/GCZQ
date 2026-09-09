@@ -343,30 +343,43 @@ export interface AgreementOrder {
   status: "待供应商确认" | "供应商已确认" | "供应商已拒绝" | "已完成"
 }
 
+// 协议单指定的供应商及其确认情况
+export interface AgreementSupplier {
+  name: string
+  contact: string
+  confirm: "待确认" | "已确认" | "已拒绝"
+  confirmedAt?: string
+}
+
 export interface AgreementItem {
   id: string
-  supplier: string
+  title: string
+  suppliers: AgreementSupplier[]
   category: string
   monthlyQty: string
   price: string
   period: string
   signedAt: string
-  contact: string
-  status: "履约中" | "待签署" | "已到期"
+  deliverBy: string
+  status: "已发单" | "待确认" | "已确认" | "已下架"
   orders: AgreementOrder[]
 }
 
 export const agreementList: AgreementItem[] = [
   {
     id: "XY20260906-002",
-    supplier: "城南再生资源回收站",
+    title: "重废统废长协采购单（9月）",
+    suppliers: [
+      { name: "城南再生资源回收站", contact: "王志强 138-0000-1122", confirm: "待确认" },
+      { name: "环宇物资回收站", contact: "赵敏 137-0000-5566", confirm: "已确认", confirmedAt: "2026-09-06 15:20" },
+    ],
     category: "重废 / 统废",
     monthlyQty: "≥ 800 吨/月",
     price: "随行就市 -2%",
     period: "2026-01 ~ 2026-12",
     signedAt: "2025-12-20",
-    contact: "王志强 138-0000-1122",
-    status: "履约中",
+    deliverBy: "2026-09-15",
+    status: "待确认",
     orders: [
       { orderId: "XYD20260908-021", category: "重废", qty: "300 吨", price: "¥2,620/吨", amount: "¥786,000", deliverBy: "2026-09-15", sentAt: "2026-09-08 09:20", status: "待供应商确认" },
       { orderId: "XYD20260901-018", category: "统废", qty: "260 吨", price: "¥2,410/吨", amount: "¥626,600", deliverBy: "2026-09-06", sentAt: "2026-09-01 10:05", status: "供应商已确认" },
@@ -375,14 +388,15 @@ export const agreementList: AgreementItem[] = [
   },
   {
     id: "XY20260901-004",
-    supplier: "盛通金属有限公司",
+    title: "生铁固定价长协采购单",
+    suppliers: [{ name: "盛通金属有限公司", contact: "李国栋 139-0000-3344", confirm: "已确认", confirmedAt: "2026-09-07 11:40" }],
     category: "生铁",
     monthlyQty: "≥ 300 吨/月",
     price: "固定 ¥2,900/吨",
     period: "2026-03 ~ 2027-02",
     signedAt: "2026-02-25",
-    contact: "李国栋 139-0000-3344",
-    status: "履约中",
+    deliverBy: "2026-09-14",
+    status: "已确认",
     orders: [
       { orderId: "XYD20260907-020", category: "生铁", qty: "300 吨", price: "¥2,900/吨", amount: "¥870,000", deliverBy: "2026-09-14", sentAt: "2026-09-07 11:15", status: "供应商已确认" },
       { orderId: "XYD20260903-016", category: "生铁", qty: "200 吨", price: "¥2,900/吨", amount: "¥580,000", deliverBy: "2026-09-05", sentAt: "2026-09-03 08:40", status: "供应商已拒绝" },
@@ -390,30 +404,46 @@ export const agreementList: AgreementItem[] = [
   },
   {
     id: "XY20260830-001",
-    supplier: "环宇物资回收站",
+    title: "统废多商协议采购单",
+    suppliers: [
+      { name: "环宇物资回收站", contact: "赵敏 137-0000-5566", confirm: "待确认" },
+      { name: "城南再生资源回收站", contact: "王志强 138-0000-1122", confirm: "待确认" },
+      { name: "利民废旧金属", contact: "孙伟 136-0000-7788", confirm: "待确认" },
+    ],
     category: "统废",
     monthlyQty: "≥ 500 吨/月",
     price: "随行就市 -1.5%",
     period: "2026-09 ~ 2027-08",
     signedAt: "2026-08-28",
-    contact: "赵敏 137-0000-5566",
-    status: "待签署",
+    deliverBy: "2026-09-20",
+    status: "已发单",
     orders: [],
   },
   {
     id: "XY20251201-006",
-    supplier: "利民废旧金属",
+    title: "重废固定价协议采购单",
+    suppliers: [{ name: "利民废旧金属", contact: "孙伟 136-0000-7788", confirm: "已确认", confirmedAt: "2025-12-02 09:00" }],
     category: "重废",
     monthlyQty: "≥ 400 吨/月",
     price: "固定 ¥2,500/吨",
     period: "2025-01 ~ 2025-12",
     signedAt: "2024-12-18",
-    contact: "孙伟 136-0000-7788",
-    status: "已到期",
+    deliverBy: "2025-11-26",
+    status: "已下架",
     orders: [
       { orderId: "XYD20251120-009", category: "重废", qty: "400 吨", price: "¥2,500/吨", amount: "¥1,000,000", deliverBy: "2025-11-26", sentAt: "2025-11-20 16:00", status: "已完成" },
     ],
   },
+]
+
+// 协议回收可指定的候选供应商（新建协议单时选择一家或多家）
+export const agreementSupplierPool = [
+  { name: "城南再生资源回收站", contact: "王志强 138-0000-1122" },
+  { name: "环宇物资回收站", contact: "赵敏 137-0000-5566" },
+  { name: "盛通金属有限公司", contact: "李国栋 139-0000-3344" },
+  { name: "利民废旧金属", contact: "孙伟 136-0000-7788" },
+  { name: "鑫源钢铁物资", contact: "周涛 135-0000-9900" },
+  { name: "宏达再生资源", contact: "吴强 134-0000-2211" },
 ]
 
 // ---------- 订单管理（含结算与合同） ----------
