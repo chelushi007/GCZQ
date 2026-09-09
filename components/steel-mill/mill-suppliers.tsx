@@ -66,7 +66,7 @@ export function MillSuppliers() {
     <div className="space-y-5">
       <PageHeader
         title="供应商管理"
-        desc="管理回收站、企业与自然人供应商，审核合作申请，维护协议合作关系"
+        desc="管理回收基地、企业与自然人供应商，审核合作申请，维护协议合作关系"
         action={
           <Button>
             <UserPlus />

@@ -261,14 +261,19 @@ export interface FixedItem {
   price: string
   taken: string
   validUntil: string
+  region: string
+  unit: string
+  contact: string
+  publishTime: string
   status: "挂单中" | "部分成交" | "已完成" | "已下架"
 }
 
 export const fixedList: FixedItem[] = [
-  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "09-15", status: "部��成交" },
-  { id: "GD20260907-005", title: "一口价收统废", category: "统废", qty: "600 吨", price: "¥2,410/吨", taken: "0 吨", validUntil: "09-12", status: "挂单中" },
-  { id: "GD20260906-009", title: "一口价收生铁", category: "生铁", qty: "400 吨", price: "¥2,950/吨", taken: "400 吨", validUntil: "09-10", status: "已完成" },
-  { id: "GD20260905-002", title: "一口价收钢筋头", category: "重废", qty: "500 吨", price: "¥2,480/吨", taken: "500 吨", validUntil: "09-08", status: "已完成" },
+  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "2026-09-15", region: "江苏 南京", unit: "南京盘古钢铁有限公司", contact: "王工 138****6621", publishTime: "2026-09-07 09:20", status: "部分成交" },
+  { id: "GD20260907-005", title: "一口价收统废", category: "统废", qty: "600 吨", price: "¥2,410/吨", taken: "0 吨", validUntil: "2026-09-12", region: "江苏 苏州", unit: "南京盘古钢铁有限公司", contact: "李工 139****3308", publishTime: "2026-09-07 14:05", status: "挂单中" },
+  { id: "GD20260906-009", title: "一口价收生铁", category: "生铁", qty: "400 吨", price: "¥2,950/吨", taken: "400 吨", validUntil: "2026-09-10", region: "安徽 马鞍山", unit: "南京盘古钢铁有限公司", contact: "王工 138****6621", publishTime: "2026-09-06 10:40", status: "已完成" },
+  { id: "GD20260905-002", title: "一口价收钢筋头", category: "重废", qty: "500 吨", price: "¥2,480/吨", taken: "500 吨", validUntil: "2026-09-08", region: "江苏 无锡", unit: "南京盘古钢铁有限公司", contact: "赵工 137****9902", publishTime: "2026-09-05 16:15", status: "已完成" },
+  { id: "GD20260904-007", title: "一口价收剪切料", category: "统废", qty: "800 吨", price: "¥2,430/吨", taken: "150 吨", validUntil: "2026-09-06", region: "江苏 常州", unit: "南京盘古钢铁有限公司", contact: "李工 139****3308", publishTime: "2026-09-04 11:30", status: "已下架" },
 ]
 
 // ---------- 协议回收 ----------
