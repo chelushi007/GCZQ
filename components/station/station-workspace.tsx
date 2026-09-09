@@ -21,6 +21,7 @@ import { supplierBidResultTone, type SupplierBidItem } from "@/lib/steel-data"
 import { useSupplierBids } from "@/lib/bidding-store"
 import { SupplierBidDetail } from "./supplier-bid-detail"
 import { SignupDetail } from "./signup-detail"
+import { SupplierFixed } from "./supplier-fixed"
 import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
 import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
@@ -35,6 +36,8 @@ const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }
   "station-supplier-bidding-fee": { icon: Wallet, title: "缴纳报名费", desc: "缴纳竞价项目报名费，缴费后方可参与竞价" },
   "station-supplier-bidding-deposit": { icon: ShieldCheck, title: "缴纳保证金", desc: "缴纳投标保证金，未中标后按规则退还" },
   "station-supplier-bidding-service": { icon: HandCoins, title: "缴纳服务费", desc: "中标后缴纳平台交易服务费" },
+  "station-supplier-fixed-hall": { icon: HandCoins, title: "一口价大厅", desc: "浏览采购方发布的一口价挂单，按固定价接单报量（无需报名费/保证金）" },
+  "station-supplier-fixed-mine": { icon: ClipboardList, title: "我的接单", desc: "查看一口价接单记录与采购方确认、成交送货进度" },
   "station-recycler": { icon: Recycle, title: "回收商", desc: "回收商角色工作台设计中" },
   "station-recycler-orders": { icon: ClipboardList, title: "订单管理", desc: "回收商采购订单的查询、结算与合同管理" },
   "station-seller": { icon: Recycle, title: "销售方", desc: "销售方角色工作台设计中" },
@@ -428,6 +431,7 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
             {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
             {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
             {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
+            {(leaf === "station-supplier-fixed-hall" || leaf === "station-supplier-fixed-mine") && <SupplierFixed leaf={leaf} />}
             {leaf === "station-recycler-orders" && (
               <div className="flex h-[50vh] items-center justify-center">
                 <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
