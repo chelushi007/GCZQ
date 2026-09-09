@@ -25,6 +25,7 @@ import {
   FilePenLine,
   AlertTriangle,
   Info,
+  ArrowDownToLine,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { StatusPill, statusTone, type StatusTone } from "@/components/shared/status-pill"
@@ -80,7 +81,7 @@ function buildNodes(item: BiddingItem): ProcessNode[] {
       actions: [
         { key: "notice", label: "采购公告", icon: FileText, desc: "查看本次竞价的完整采购公告与标的说明" },
         { key: "signup", label: "报名查看", icon: Users, desc: "查看供应商报名情况并进行资格审核" },
-        { key: "modifyNotice", label: "修改公告", icon: FilePenLine, desc: "报名开始前可修改采购公告" },
+        { key: "manageNotice", label: "管理公告", icon: FilePenLine, desc: "报名开始前可修改采购公告，或将公告下架" },
       ],
     },
     {
@@ -256,7 +257,7 @@ interface SignupRow {
 }
 const initialSignupRows: SignupRow[] = [
   { id: "R1", name: "华东再生资源有限公司", contact: "王建国", phone: "138****6621", time: "2026-09-01 10:24", status: "审核通过", license: "苏A-资源-20210331", signupFee: "已缴", deposit: "已缴" },
-  { id: "R2", name: "江苏鑫盛物资回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812", signupFee: "已缴", deposit: "未缴" },
+  { id: "R2", name: "江苏鑫盛物��回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812", signupFee: "已缴", deposit: "未缴" },
   { id: "R3", name: "浙江环晟金属科技", contact: "张伟", phone: "137****9902", time: "2026-09-02 09:33", status: "待审核", license: "浙C-资源-20220605", signupFee: "已缴", deposit: "未缴" },
   { id: "R4", name: "上海宝钢再生资源", contact: "陈明", phone: "136****1157", time: "2026-09-02 16:41", status: "待审核", license: "沪A-资源-20200118", signupFee: "未缴", deposit: "未缴" },
   { id: "R5", name: "安徽绿源废旧金属", contact: "刘芳", phone: "135****8820", time: "2026-09-03 08:05", status: "已驳回", license: "皖D-资源-20230920", signupFee: "未缴", deposit: "未缴" },
@@ -612,6 +613,120 @@ function ModifyNoticeContent({ item }: { item: BiddingItem }) {
         </div>
       </Modal>
     </>
+  )
+}
+
+/* 3b. 下架公告 */
+function OffShelfContent({ item }: { item: BiddingItem }) {
+  const alreadyOff = item.status === "已下架" || item.status === "已成交" || item.status === "已流标"
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [done, setDone] = useState(false)
+  const [reason, setReason] = useState("")
+
+  if (alreadyOff) {
+    return (
+      <SectionCard title="下架公告">
+        <div className="flex items-start gap-2 rounded-md border border-muted-foreground/30 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+          <Info className="mt-0.5 size-4 shrink-0" />
+          <span>当前公告已为「{item.status}」状态，无需再次下架。</span>
+        </div>
+      </SectionCard>
+    )
+  }
+
+  return (
+    <SectionCard title="下架公告">
+      {done ? (
+        <div className="flex items-start gap-2 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+          <span>公告已下架，停止报名与竞价。已缴纳的报名费、保证金将按规则退还。</span>
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <span>下架后供应商将无法继续报名或竞价，操作不可撤销，请谨慎操作。</span>
+          </div>
+          <FormRow label="下架原因" required>
+            <textarea
+              rows={3}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className={inputCls.replace("h-9", "min-h-20") + " resize-y py-2"}
+              placeholder="请输入下架原因，如采购计划调整、公告信息有误等"
+            />
+          </FormRow>
+          <div className="mt-4">
+            <Button variant="destructive" disabled={!reason.trim()} onClick={() => setConfirmOpen(true)}>
+              <ArrowDownToLine className="size-4" />
+              下架公告
+            </Button>
+          </div>
+        </>
+      )}
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="确认下架公告"
+        description="下架后本次竞价将终止，供应商无法继续参与。"
+        footer={
+          <>
+            <Button variant="outline" size="sm" className="h-9" onClick={() => setConfirmOpen(false)}>
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-9"
+              onClick={() => {
+                setConfirmOpen(false)
+                setDone(true)
+              }}
+            >
+              确认下架
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-1.5 text-sm text-foreground">
+          <div>公告标题：{item.title}</div>
+          <div>下架原因：{reason}</div>
+        </div>
+      </Modal>
+    </SectionCard>
+  )
+}
+
+/* 3. 管理公告（修改公告 / 下架公告 合并） */
+function ManageNoticeContent({ item }: { item: BiddingItem }) {
+  const [tab, setTab] = useState<"modify" | "off">("modify")
+  const tabs = [
+    { key: "modify" as const, label: "修改公告", icon: FilePenLine },
+    { key: "off" as const, label: "下架公告", icon: ArrowDownToLine },
+  ]
+  return (
+    <div className="space-y-4">
+      <div className="inline-flex rounded-lg border border-border bg-muted/50 p-1">
+        {tabs.map((t) => {
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+                active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <t.icon className="size-4" />
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+      {tab === "modify" ? <ModifyNoticeContent item={item} /> : <OffShelfContent item={item} />}
+    </div>
   )
 }
 
@@ -1224,7 +1339,7 @@ function ResultContent({ item }: { item: BiddingItem }) {
 const actionContent: Record<string, (item: BiddingItem) => React.ReactNode> = {
   notice: (item) => <NoticeContent item={item} />,
   signup: () => <SignupContent />,
-  modifyNotice: (item) => <ModifyNoticeContent item={item} />,
+  manageNotice: (item) => <ManageNoticeContent item={item} />,
   quotes: (item) => <QuotesContent item={item} />,
   modifyTime: (item) => <ModifyTimeContent item={item} />,
   shortlist: () => <ShortlistContent />,

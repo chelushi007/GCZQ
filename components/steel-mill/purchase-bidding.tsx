@@ -11,7 +11,7 @@ import { useMillBids } from "@/lib/bidding-store"
 import { BiddingManage } from "./bidding-manage"
 import { BiddingPublish } from "./bidding-publish"
 
-const tabs = ["全部", "进行中", "待开标", "已成交", "已流标"]
+const tabs = ["全部", "待审核", "进行中", "待开标", "已成交", "已流标", "已下架"]
 const categories = ["全部类别", "重废", "统废", "生铁"]
 const regions = ["全部区域", "江苏·苏州", "上海·宝山", "浙江·嘉兴", "江苏·无锡", "安徽·马鞍山"]
 

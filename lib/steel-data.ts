@@ -169,7 +169,7 @@ export interface BiddingItem {
   bidStart: string
   bidEnd: string
   deadline: string
-  status: "进行中" | "待开标" | "已成交" | "已流标"
+  status: "待审核" | "进行中" | "待开标" | "已成交" | "已流标" | "已下架"
 }
 
 export const biddingList: BiddingItem[] = [
@@ -178,6 +178,8 @@ export const biddingList: BiddingItem[] = [
   { id: "JJ20260906-008", title: "生铁边角料竞价公告", category: "生铁", region: "浙江·嘉兴", qty: "200 吨", basePrice: "¥2,900/吨", budget: "¥580,000", purchaseMethod: "公开竞价", contact: "赵工 137****5502", allowPerson: true, quotes: 3, topQuote: "—", publishTime: "09-03 10:20", signupStart: "09-04 09:00", signupEnd: "09-06 17:00", bidStart: "09-07 14:00", bidEnd: "09-07 20:00", deadline: "09-07 20:00", status: "待开标" },
   { id: "JJ20260905-004", title: "钢筋头竞价采购公告", category: "重废", region: "江苏·无锡", qty: "420 吨", basePrice: "¥2,450/吨", budget: "¥1,029,000", purchaseMethod: "公开竞价", contact: "陈工 136****1188", allowPerson: false, quotes: 9, topQuote: "¥2,620/吨", publishTime: "09-02 11:40", signupStart: "09-03 09:00", signupEnd: "09-05 12:00", bidStart: "09-06 09:00", bidEnd: "09-06 18:00", deadline: "09-06 18:00", status: "已成交" },
   { id: "JJ20260904-002", title: "马达铁竞价采购公告", category: "统废", region: "安徽·马鞍山", qty: "150 吨", basePrice: "¥2,300/吨", budget: "¥345,000", purchaseMethod: "公开竞价", contact: "王工 135****9920", allowPerson: true, quotes: 1, topQuote: "—", publishTime: "09-01 15:00", signupStart: "09-02 09:00", signupEnd: "09-04 12:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", deadline: "09-05 18:00", status: "已流标" },
+  { id: "JJ20260908-006", title: "废旧模具钢竞价采购公告", category: "重废", region: "江苏·苏州", qty: "260 吨", basePrice: "¥2,700/吨", budget: "¥702,000", purchaseMethod: "公开竞价", contact: "周工 138****4417", allowPerson: false, quotes: 0, topQuote: "—", publishTime: "09-08 10:15", signupStart: "09-09 09:00", signupEnd: "09-11 17:00", bidStart: "09-12 09:00", bidEnd: "09-12 18:00", deadline: "09-12 18:00", status: "待审核" },
+  { id: "JJ20260903-005", title: "轻薄料竞价采购公告", category: "统废", region: "浙江·嘉兴", qty: "180 吨", basePrice: "¥2,260/吨", budget: "¥406,800", purchaseMethod: "公开竞价", contact: "孙工 139****2288", allowPerson: true, quotes: 2, topQuote: "—", publishTime: "09-02 09:40", signupStart: "09-03 09:00", signupEnd: "09-04 17:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", deadline: "09-05 18:00", status: "已下架" },
 ]
 
 // 竞价发布表单选项
@@ -265,7 +267,7 @@ export interface FixedItem {
   unit: string
   contact: string
   publishTime: string
-  status: "挂单中" | "部分成交" | "已完成" | "已下架"
+  status: "待审核" | "挂单中" | "部分成交" | "已完成" | "已下架"
 }
 
 export const fixedList: FixedItem[] = [
@@ -274,6 +276,7 @@ export const fixedList: FixedItem[] = [
   { id: "GD20260906-009", title: "一口价收生铁", category: "生铁", qty: "400 吨", price: "¥2,950/吨", taken: "400 吨", validUntil: "2026-09-10", region: "安徽 马鞍山", unit: "南京盘古钢铁有限公司", contact: "王工 138****6621", publishTime: "2026-09-06 10:40", status: "已完成" },
   { id: "GD20260905-002", title: "一口价收钢筋头", category: "重废", qty: "500 吨", price: "¥2,480/吨", taken: "500 吨", validUntil: "2026-09-08", region: "江苏 无锡", unit: "南京盘古钢铁有限公司", contact: "赵工 137****9902", publishTime: "2026-09-05 16:15", status: "已完成" },
   { id: "GD20260904-007", title: "一口价收剪切料", category: "统废", qty: "800 吨", price: "¥2,430/吨", taken: "150 吨", validUntil: "2026-09-06", region: "江苏 常州", unit: "南京盘古钢铁有限公司", contact: "李工 139****3308", publishTime: "2026-09-04 11:30", status: "已下架" },
+  { id: "GD20260908-013", title: "一口价收中重废", category: "重废", qty: "700 吨", price: "¥2,530/吨", taken: "0 吨", validUntil: "2026-09-18", region: "江苏 南京", unit: "南京盘古钢铁有限公司", contact: "周工 138****4417", publishTime: "2026-09-08 09:50", status: "待审核" },
 ]
 
 // ---------- 协议回收 ----------

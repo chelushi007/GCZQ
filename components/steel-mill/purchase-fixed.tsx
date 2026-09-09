@@ -10,7 +10,7 @@ import { fixedList, type FixedItem } from "@/lib/steel-data"
 import { FixedManage } from "./fixed-manage"
 import { FixedPublish } from "./fixed-publish"
 
-const tabs = ["全部", "挂单中", "部分成交", "已完成", "已下架"]
+const tabs = ["全部", "待审核", "挂单中", "部分成交", "已完成", "已下架"]
 
 export function PurchaseFixed() {
   const [tab, setTab] = useState("全部")

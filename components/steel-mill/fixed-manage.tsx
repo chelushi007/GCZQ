@@ -64,8 +64,7 @@ function buildNodes(item: FixedItem): ProcessNode[] {
       state: "done",
       actions: [
         { key: "notice", label: "查看公告", icon: FileText, desc: "查看本次固定价采购需求的完整公告" },
-        { key: "modifyNotice", label: "修改公告", icon: FilePenLine, desc: "有效期内可修改一口价、采购量等信息" },
-        { key: "offShelf", label: "下架公告", icon: ArrowDownToLine, desc: "停止接单并将需求下架" },
+        { key: "manageNotice", label: "管理公告", icon: FilePenLine, desc: "修改一口价、采购量等信息，或将需求下架" },
       ],
     },
     {
@@ -369,6 +368,38 @@ function OffShelfContent({ item }: { item: FixedItem }) {
   )
 }
 
+/* 2+3. 管理公告（修改公告 / 下架公告 合并） */
+function ManageNoticeContent({ item }: { item: FixedItem }) {
+  const [tab, setTab] = useState<"modify" | "off">("modify")
+  const tabs = [
+    { key: "modify" as const, label: "修改公告", icon: FilePenLine },
+    { key: "off" as const, label: "下架公告", icon: ArrowDownToLine },
+  ]
+  return (
+    <div className="space-y-4">
+      <div className="inline-flex rounded-lg border border-border bg-muted/50 p-1">
+        {tabs.map((t) => {
+          const active = tab === t.key
+          return (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+                active ? "bg-card text-primary shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <t.icon className="size-4" />
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+      {tab === "modify" ? <ModifyNoticeContent item={item} /> : <OffShelfContent item={item} />}
+    </div>
+  )
+}
+
 /* 4. 选择报价（接单确认） */
 interface TakeRow {
   id: string
@@ -522,8 +553,7 @@ function ModifyTimeContent({ item }: { item: FixedItem }) {
 
 const actionContent: Record<string, (item: FixedItem) => React.ReactNode> = {
   notice: (item) => <NoticeContent item={item} />,
-  modifyNotice: (item) => <ModifyNoticeContent item={item} />,
-  offShelf: (item) => <OffShelfContent item={item} />,
+  manageNotice: (item) => <ManageNoticeContent item={item} />,
   orders: (item) => <OrdersContent item={item} />,
   modifyTime: (item) => <ModifyTimeContent item={item} />,
 }
