@@ -42,8 +42,8 @@ export function PurchaseFixed() {
       key: "op",
       header: "操作",
       render: (r) => (
-        <Button variant="ghost" size="sm" onClick={() => setManaging(r)}>
-          <Settings2 />
+        <Button size="sm" className="h-8 gap-1 px-3" onClick={() => setManaging(r)}>
+          <Settings2 className="size-3.5" />
           管理
         </Button>
       ),

@@ -8,7 +8,6 @@ import {
   FileText,
   Megaphone,
   ClipboardList,
-  Award,
   CheckCircle2,
   Circle,
   Clock,
@@ -17,8 +16,6 @@ import {
   ArrowDownToLine,
   CalendarClock,
   ShoppingCart,
-  Building2,
-  Trophy,
   Info,
   AlertTriangle,
 } from "lucide-react"
@@ -75,18 +72,11 @@ function buildNodes(item: FixedItem): ProcessNode[] {
       id: "take",
       title: "接单",
       icon: ClipboardList,
-      state: isDone || isOff ? "done" : hasTaken ? "active" : "active",
+      state: isDone || isOff ? "done" : "active",
       actions: [
-        { key: "orders", label: "选择报价", icon: ShoppingCart, desc: "查看供应商接单情况并确认成交" },
+        { key: "orders", label: "确认报价", icon: ShoppingCart, desc: "查看供应商接单情况并确认成交" },
         { key: "modifyTime", label: "修改时间", icon: CalendarClock, desc: "延长或调整挂单有效期" },
       ],
-    },
-    {
-      id: "award",
-      title: "定标",
-      icon: Award,
-      state: isDone ? "active" : "todo",
-      actions: [{ key: "result", label: "择标结果", icon: Trophy, desc: "查看最终成交供应商与成交明细" }],
     },
   ]
 }
@@ -406,19 +396,31 @@ function OrdersContent({ item }: { item: FixedItem }) {
   const decide = (id: string, status: "已确认" | "已拒绝") =>
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)))
 
+  const planQty = item.qty
+  const takenQty = item.taken
+  const takenNum = Number.parseFloat(item.taken.replace(/[^\d.]/g, "")) || 0
+  const planNum = Number.parseFloat(item.qty.replace(/[^\d.]/g, "")) || 0
+  const progress = planNum > 0 ? Math.min(100, Math.round((takenNum / planNum) * 100)) : 0
+
   return (
     <SectionCard title="接单情况" extra={<span className="text-xs text-muted-foreground">一口价 {item.price} · 共 {rows.length} 家接单</span>}>
-      <div className="mb-4 grid grid-cols-3 gap-3">
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "接单总数", value: rows.length, tone: "text-foreground" },
-          { label: "已确认", value: rows.filter((r) => r.status === "已确认").length, tone: "text-emerald-600" },
-          { label: "待确认", value: rows.filter((r) => r.status === "待确认").length, tone: "text-amber-600" },
+          { label: "计划采购量", value: planQty, tone: "text-foreground" },
+          { label: `已成交量（${progress}%）`, value: takenQty, tone: "text-primary" },
+          { label: "已确认接单", value: rows.filter((r) => r.status === "已确认").length + " 家", tone: "text-emerald-600" },
+          { label: "待确认接单", value: rows.filter((r) => r.status === "待确认").length + " 家", tone: "text-amber-600" },
         ].map((s) => (
           <div key={s.label} className="rounded-lg border border-border bg-background px-4 py-3">
-            <div className={cn("text-2xl font-semibold tabular-nums", s.tone)}>{s.value}</div>
-            <div className="text-xs text-muted-foreground">{s.label}</div>
+            <div className={cn("text-xl font-semibold tabular-nums", s.tone)}>{s.value}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">{s.label}</div>
           </div>
         ))}
+      </div>
+      <div className="mb-4">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[820px] text-sm">
@@ -518,78 +520,12 @@ function ModifyTimeContent({ item }: { item: FixedItem }) {
   )
 }
 
-/* 6. 择标结果 */
-function ResultContent({ item }: { item: FixedItem }) {
-  const settled = item.status === "已完成"
-  if (!settled) {
-    return (
-      <SectionCard title="择标结果">
-        <div className="flex items-start gap-2 rounded-md border border-muted-foreground/30 bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0" />
-          <span>当前需求为「{item.status}」，尚未完成全部成交，暂无最终择标结果。</span>
-        </div>
-      </SectionCard>
-    )
-  }
-  const winners = [
-    { name: "华东再生资源有限公司", qty: "300 吨", amount: "¥768,000" },
-    { name: "江苏鑫盛物资回收公司", qty: "200 吨", amount: "¥512,000" },
-  ]
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 rounded-lg border border-emerald-300 bg-emerald-50 px-5 py-4">
-        <span className="grid size-10 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-          <Trophy className="size-5" />
-        </span>
-        <div>
-          <p className="text-sm font-semibold text-emerald-700">采购已完成</p>
-          <p className="text-xs text-emerald-600">
-            需求「{item.title}」计划采购 {item.qty}，已全部成交，一口价 {item.price}。
-          </p>
-        </div>
-      </div>
-      <SectionCard title="成交明细">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                {["序号", "成交供应商", "成交量", "成交金额", "单价"].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-3 py-2.5 font-medium">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {winners.map((w, i) => (
-                <tr key={w.name} className="border-b border-border/60 last:border-0">
-                  <td className="whitespace-nowrap px-3 py-3 tabular-nums text-muted-foreground">{i + 1}</td>
-                  <td className="whitespace-nowrap px-3 py-3 font-medium text-foreground">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Building2 className="size-4 text-muted-foreground" />
-                      {w.name}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3 tabular-nums text-foreground">{w.qty}</td>
-                  <td className="whitespace-nowrap px-3 py-3 tabular-nums text-primary">{w.amount}</td>
-                  <td className="whitespace-nowrap px-3 py-3 tabular-nums text-muted-foreground">{item.price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </SectionCard>
-    </div>
-  )
-}
-
 const actionContent: Record<string, (item: FixedItem) => React.ReactNode> = {
   notice: (item) => <NoticeContent item={item} />,
   modifyNotice: (item) => <ModifyNoticeContent item={item} />,
   offShelf: (item) => <OffShelfContent item={item} />,
   orders: (item) => <OrdersContent item={item} />,
   modifyTime: (item) => <ModifyTimeContent item={item} />,
-  result: (item) => <ResultContent item={item} />,
 }
 
 export function FixedManage({ item, onBack }: { item: FixedItem; onBack: () => void }) {
