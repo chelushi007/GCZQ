@@ -24,6 +24,7 @@ import { SignupDetail } from "./signup-detail"
 import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
 import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
+import { SupplierFixed } from "./supplier-fixed"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -390,6 +391,11 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
 
   const showsSignupDetail = detail && leaf === "station-supplier-bidding-signup"
   const showsBidDetail = detail && leaf === "station-supplier-bidding-mine"
+
+  // 供应商 · 固定价管理：网上报价 / 我的报价 / 缴纳服务费
+  if (leaf.startsWith("station-supplier-fixed")) {
+    return <SupplierFixed leaf={leaf} />
+  }
 
   // 回收商 · 采购管理：复用钢厂采购组件（采购模式一致）
   if (leaf === "station-recycler-purchase-bidding") {
