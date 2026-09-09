@@ -102,6 +102,7 @@ export const stationTree: StationTreeNode[] = [
         children: [
           { key: "station-recycler-purchase-bidding", label: "竞价回收" },
           { key: "station-recycler-purchase-fixed", label: "固定价回收" },
+          { key: "station-recycler-purchase-agreement", label: "协议回收" },
         ],
       },
       { key: "station-recycler-orders", label: "订单管理" },
@@ -123,6 +124,7 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-recycler": ["回收商"],
   "station-recycler-purchase-bidding": ["回收", "采购管理", "竞价回收"],
   "station-recycler-purchase-fixed": ["回收", "采购管理", "固定价回收"],
+  "station-recycler-purchase-agreement": ["回收", "采购管理", "协议回收"],
   "station-recycler-orders": ["回收", "订单管理"],
   "station-seller": ["销售方"],
 }
@@ -271,7 +273,7 @@ export interface FixedItem {
 }
 
 export const fixedList: FixedItem[] = [
-  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "2026-09-15", region: "江苏 南京", unit: "南京盘古钢铁有限公司", contact: "王工 138****6621", publishTime: "2026-09-07 09:20", status: "部分成交" },
+  { id: "GD20260907-011", title: "统一价收重废", category: "重废", qty: "1,000 吨", price: "¥2,560/吨", taken: "320 吨", validUntil: "2026-09-15", region: "江苏 南京", unit: "南京盘古钢铁有限公司", contact: "王�� 138****6621", publishTime: "2026-09-07 09:20", status: "部分成交" },
   { id: "GD20260907-005", title: "一口价收统废", category: "统废", qty: "600 吨", price: "¥2,410/吨", taken: "0 吨", validUntil: "2026-09-12", region: "江苏 苏州", unit: "南京盘古钢铁有限公司", contact: "李工 139****3308", publishTime: "2026-09-07 14:05", status: "挂单中" },
   { id: "GD20260906-009", title: "一口价收生铁", category: "生铁", qty: "400 吨", price: "¥2,950/吨", taken: "400 吨", validUntil: "2026-09-10", region: "安徽 马鞍山", unit: "南京盘古钢铁有限公司", contact: "王工 138****6621", publishTime: "2026-09-06 10:40", status: "已完成" },
   { id: "GD20260905-002", title: "一口价收钢筋头", category: "重废", qty: "500 吨", price: "¥2,480/吨", taken: "500 吨", validUntil: "2026-09-08", region: "江苏 无锡", unit: "南京盘古钢铁有限公司", contact: "赵工 137****9902", publishTime: "2026-09-05 16:15", status: "已完成" },

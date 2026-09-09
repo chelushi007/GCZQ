@@ -335,7 +335,7 @@ function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
           <Button size="sm">去缴纳</Button>
         ) : (
           <Button variant="outline" size="sm">
-            查看凭证
+            查看凭���
           </Button>
         ),
     },
@@ -403,6 +403,13 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
     return (
       <div className="h-full overflow-y-auto p-6">
         <PurchaseFixed />
+      </div>
+    )
+  }
+  if (leaf === "station-recycler-purchase-agreement") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <PurchaseAgreement />
       </div>
     )
   }
