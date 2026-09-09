@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Wallet, FileSignature } from "lucide-react"
+import { Search, Wallet, FileSignature, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatusPill, statusTone } from "@/components/shared/status-pill"
@@ -15,17 +15,59 @@ const channelTone: Record<string, "blue" | "amber" | "violet"> = {
   协议: "violet",
 }
 
+const channelOptions = ["全部", "竞价", "固定价", "协议"]
+const categoryOptions = ["全部", "重废", "统废", "生铁"]
+const contractOptions = ["全部", "待签署", "已签署", "已归档"]
+
 export function MillOrders() {
   const [tab, setTab] = useState("全部")
-  const rows = tab === "全部" ? orderList : orderList.filter((o) => o.settlement === tab)
+  const [channel, setChannel] = useState("全部")
+  const [category, setCategory] = useState("全部")
+  const [contract, setContract] = useState("全部")
+  const [keyword, setKeyword] = useState("")
+
+  const rows = orderList.filter((o) => {
+    if (tab !== "全部" && o.settlement !== tab) return false
+    if (channel !== "全部" && o.channel !== channel) return false
+    if (category !== "全部" && o.category !== category) return false
+    if (contract !== "全部" && o.contract !== contract) return false
+    if (keyword.trim()) {
+      const kw = keyword.trim()
+      if (!o.id.includes(kw) && !o.supplier.includes(kw)) return false
+    }
+    return true
+  })
+
+  const resetFilters = () => {
+    setChannel("全部")
+    setCategory("全部")
+    setContract("全部")
+    setKeyword("")
+  }
 
   const columns: Column<OrderItem>[] = [
     { key: "id", header: "订单编号", render: (r) => <span className="font-medium text-foreground">{r.id}</span> },
     { key: "supplier", header: "供应商" },
-    { key: "channel", header: "成交方式", render: (r) => <StatusPill tone={channelTone[r.channel]}>{r.channel}</StatusPill> },
+    {
+      key: "channel",
+      header: "成交方式",
+      render: (r) => <StatusPill tone={channelTone[r.channel]}>{r.channel}</StatusPill>,
+    },
     { key: "category", header: "类别" },
-    { key: "qty", header: "数量" },
-    { key: "amount", header: "订单金额", render: (r) => <span className="font-medium tabular-nums text-foreground">{r.amount}</span> },
+    { key: "region", header: "所在地区", className: "text-muted-foreground" },
+    { key: "qty", header: "数量", className: "tabular-nums" },
+    { key: "unitPrice", header: "成交单价", className: "tabular-nums text-muted-foreground" },
+    {
+      key: "amount",
+      header: "订单金额",
+      render: (r) =>
+        r.amount ? (
+          <span className="font-medium tabular-nums text-foreground">{r.amount}</span>
+        ) : (
+          <span className="text-xs text-muted-foreground">协议按周期结算</span>
+        ),
+    },
+    { key: "settleMode", header: "结算方式", className: "text-muted-foreground" },
     {
       key: "settlement",
       header: "结算状态",
@@ -46,7 +88,9 @@ export function MillOrders() {
         </span>
       ),
     },
-    { key: "createdAt", header: "下单日期", className: "text-muted-foreground" },
+    { key: "handler", header: "经办人", className: "text-muted-foreground" },
+    { key: "deliveryDate", header: "交货日期", className: "text-muted-foreground tabular-nums" },
+    { key: "createdAt", header: "下单日期", className: "text-muted-foreground tabular-nums" },
     {
       key: "op",
       header: "操作",
@@ -60,10 +104,63 @@ export function MillOrders() {
 
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="订单管理"
-        desc="订单查询贯通结算与合同：一条订单可追溯成交、结算单与电子合同"
-      />
+      <PageHeader title="订单管理" desc="订单查询贯通结算与合同：一条订单可追溯成交、结算单与电子合同" />
+
+      {/* 筛选条件区 */}
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <FilterField label="成交方式">
+            <select
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm outline-none focus:border-primary"
+            >
+              {channelOptions.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </FilterField>
+          <FilterField label="类别">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm outline-none focus:border-primary"
+            >
+              {categoryOptions.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </FilterField>
+          <FilterField label="合同状态">
+            <select
+              value={contract}
+              onChange={(e) => setContract(e.target.value)}
+              className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm outline-none focus:border-primary"
+            >
+              {contractOptions.map((o) => (
+                <option key={o}>{o}</option>
+              ))}
+            </select>
+          </FilterField>
+          <FilterField label="订单编号 / 供应商">
+            <div className="flex h-9 items-center gap-2 rounded-md border border-border bg-background px-2.5 text-sm text-muted-foreground focus-within:border-primary">
+              <Search className="size-4 shrink-0" />
+              <input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="输入关键词搜索"
+                className="w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          </FilterField>
+        </div>
+        <div className="mt-3 flex justify-end">
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1.5 text-muted-foreground">
+            <RotateCcw className="size-3.5" />
+            重置筛选
+          </Button>
+        </div>
+      </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar>
@@ -73,20 +170,25 @@ export function MillOrders() {
             </FilterChip>
           ))}
         </FilterBar>
-        <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 text-sm text-muted-foreground">
-          <Search className="size-4" />
-          <input
-            placeholder="搜索订单编号 / 供应商"
-            className="w-44 bg-transparent outline-none placeholder:text-muted-foreground"
-          />
-        </div>
+        <span className="text-sm text-muted-foreground">
+          共 <span className="font-medium text-foreground">{rows.length}</span> 条订单
+        </span>
       </div>
 
       <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />
 
       <p className="text-xs text-muted-foreground">
-        说明：订单查询中同时展示「结算状态」与「合同状态」，点击详情可查看对应的结算单据与电子合同。
+        说明：协议成交按合同周期结算，无固定订单金额，金额列显示为「协议按周期结算」；竞价与固定价成交按成交单价 × 数量核算订单金额。
       </p>
     </div>
+  )
+}
+
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      {children}
+    </label>
   )
 }
