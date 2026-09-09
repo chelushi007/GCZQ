@@ -269,7 +269,7 @@ export const supplierBidResultTone: Record<SupplierBidItem["result"], "primary" 
 }
 
 // ---------- 供应商视角：固定价管理 ----------
-// 固定价（一口价）由采购方设定，供应商按一口价在线报价（申报可供量）→ 采购方确认 → 成交送货 → 缴服务费结算
+// 固定价（一口价）由采购方设定，供应商按一口价在线报价（申报可供量��→ 采购方确认 → 成交送货 → 缴服务费结算
 // 固定价不收报名费、不收保证金，仅在成交后缴纳平台服务费
 export interface SupplierFixedItem {
   id: string // 固定价单号
@@ -330,6 +330,19 @@ export const fixedList: FixedItem[] = [
 ]
 
 // ---------- 协议回收 ----------
+// 协议回收：采购方与供应商提前签署长期协议，采购方按协议发起采购指令单，
+// 供应商在线确认接单即可，无需竞价或报价。
+export interface AgreementOrder {
+  orderId: string
+  category: string
+  qty: string
+  price: string
+  amount: string
+  deliverBy: string
+  sentAt: string
+  status: "待供应商确认" | "供应商已确认" | "供应商已拒绝" | "已完成"
+}
+
 export interface AgreementItem {
   id: string
   supplier: string
@@ -337,14 +350,70 @@ export interface AgreementItem {
   monthlyQty: string
   price: string
   period: string
+  signedAt: string
+  contact: string
   status: "履约中" | "待签署" | "已到期"
+  orders: AgreementOrder[]
 }
 
 export const agreementList: AgreementItem[] = [
-  { id: "XY20260906-002", supplier: "城南再生资源回收站", category: "重废 / 统废", monthlyQty: "≥ 800 ���/月", price: "随行就市 -2%", period: "2026-01 ~ 2026-12", status: "履约中" },
-  { id: "XY20260901-004", supplier: "盛通金属有限公司", category: "生铁", monthlyQty: "≥ 300 吨/月", price: "固定 ¥2,900/吨", period: "2026-03 ~ 2027-02", status: "履约中" },
-  { id: "XY20260830-001", supplier: "环宇物资回收站", category: "统废", monthlyQty: "≥ 500 吨/月", price: "随行就市 -1.5%", period: "2026-09 ~ 2027-08", status: "待签署" },
-  { id: "XY20251201-006", supplier: "利民废旧金属", category: "重废", monthlyQty: "≥ 400 吨/月", price: "固定 ¥2,500/吨", period: "2025-01 ~ 2025-12", status: "已到期" },
+  {
+    id: "XY20260906-002",
+    supplier: "城南再生资源回收站",
+    category: "重废 / 统废",
+    monthlyQty: "≥ 800 吨/月",
+    price: "随行就市 -2%",
+    period: "2026-01 ~ 2026-12",
+    signedAt: "2025-12-20",
+    contact: "王志强 138-0000-1122",
+    status: "履约中",
+    orders: [
+      { orderId: "XYD20260908-021", category: "重废", qty: "300 吨", price: "¥2,620/吨", amount: "¥786,000", deliverBy: "2026-09-15", sentAt: "2026-09-08 09:20", status: "待供应商确认" },
+      { orderId: "XYD20260901-018", category: "统废", qty: "260 吨", price: "¥2,410/吨", amount: "¥626,600", deliverBy: "2026-09-06", sentAt: "2026-09-01 10:05", status: "供应商已确认" },
+      { orderId: "XYD20260820-011", category: "重废", qty: "320 吨", price: "¥2,590/吨", amount: "¥828,800", deliverBy: "2026-08-26", sentAt: "2026-08-20 14:30", status: "已完成" },
+    ],
+  },
+  {
+    id: "XY20260901-004",
+    supplier: "盛通金属有限公司",
+    category: "生铁",
+    monthlyQty: "≥ 300 吨/月",
+    price: "固定 ¥2,900/吨",
+    period: "2026-03 ~ 2027-02",
+    signedAt: "2026-02-25",
+    contact: "李国栋 139-0000-3344",
+    status: "履约中",
+    orders: [
+      { orderId: "XYD20260907-020", category: "生铁", qty: "300 吨", price: "¥2,900/吨", amount: "¥870,000", deliverBy: "2026-09-14", sentAt: "2026-09-07 11:15", status: "供应商已确认" },
+      { orderId: "XYD20260903-016", category: "生铁", qty: "200 吨", price: "¥2,900/吨", amount: "¥580,000", deliverBy: "2026-09-05", sentAt: "2026-09-03 08:40", status: "供应商已拒绝" },
+    ],
+  },
+  {
+    id: "XY20260830-001",
+    supplier: "环宇物资回收站",
+    category: "统废",
+    monthlyQty: "≥ 500 吨/月",
+    price: "随行就市 -1.5%",
+    period: "2026-09 ~ 2027-08",
+    signedAt: "2026-08-28",
+    contact: "赵敏 137-0000-5566",
+    status: "待签署",
+    orders: [],
+  },
+  {
+    id: "XY20251201-006",
+    supplier: "利民废旧金属",
+    category: "重废",
+    monthlyQty: "≥ 400 吨/月",
+    price: "固定 ¥2,500/吨",
+    period: "2025-01 ~ 2025-12",
+    signedAt: "2024-12-18",
+    contact: "孙伟 136-0000-7788",
+    status: "已到期",
+    orders: [
+      { orderId: "XYD20251120-009", category: "重废", qty: "400 吨", price: "¥2,500/吨", amount: "¥1,000,000", deliverBy: "2025-11-26", sentAt: "2025-11-20 16:00", status: "已完成" },
+    ],
+  },
 ]
 
 // ---------- 订单管理（含结算与合同） ----------
