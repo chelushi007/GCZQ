@@ -529,10 +529,10 @@ function PaymentPanel({
   const paid = Math.round(amountNum * 0.4)
   const due = amountNum - paid
   const cycle = item.channel === "协议" ? "按月" : "一次性"
-  const term = cycle === "一次性" ? "一次性结清（货到 7 天）" : "按月账期（每月 28 日对账 · 月结 30 天）"
+  const payer = "华东特钢集团"
 
   const history = [
-    { no: item.id.replace("DD", "FK") + "-01", amount: paid, method: "线上支付", term: cycle, date: "2026-08-31", status: "已支付" },
+    { no: item.id.replace("DD", "FK") + "-01", amount: paid, method: "线上支付", payer, payee: item.supplier, date: "2026-08-31", status: "已支付" },
   ]
 
   return (
@@ -549,7 +549,7 @@ function PaymentPanel({
           <div className="text-xs font-medium text-primary">本期应付货款</div>
           <div className="mt-1 text-2xl font-bold tabular-nums text-primary">{money(due)}</div>
           <div className="mt-1 text-xs text-muted-foreground">
-            对账周期：{cycle} · 付款账期：{term}
+            对账周期：{cycle} · 付款方：{payer}
           </div>
         </div>
         <div className="rounded-md bg-card px-3 py-2 text-right text-xs text-muted-foreground">
@@ -559,7 +559,7 @@ function PaymentPanel({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
-        <Row k="付款账期" v={term} />
+        <Row k="付款方" v={payer} />
         <Row k="收款方" v={item.supplier} />
         <Row k="对账周期" v={cycle} />
         <Row k="付款单号" v={item.id.replace("DD", "FK")} />
@@ -618,12 +618,13 @@ function PaymentPanel({
       <div className="mt-5">
         <div className="mb-2 text-sm font-medium text-foreground">历史支付记录</div>
         <MiniTable
-          head={["付款单号", "支付金额", "支付方式", "账期", "支付时间", "状态"]}
+          head={["付款单号", "支付金额", "支付方式", "付款方", "收款方", "支付时间", "状态"]}
           rows={history.map((h) => [
             h.no,
             money(h.amount),
             h.method,
-            h.term,
+            h.payer,
+            h.payee,
             h.date,
             <StatusPill key="s" tone="green">
               {h.status}
@@ -645,8 +646,8 @@ function PaymentPanel({
         title="确认支付货款？"
         desc={
           method === "online"
-            ? `通过线上支付向「${item.supplier}」付款 ${money(due)}（账期 ${term}）。`
-            : `登记向「${item.supplier}」的线下转账 ${money(due)}（账期 ${term}）。`
+            ? `由「${payer}」通过线上支付向「${item.supplier}」付款 ${money(due)}。`
+            : `登记由「${payer}」向「${item.supplier}」的线下转账 ${money(due)}。`
         }
         onConfirm={() => {
           setOk(true)
