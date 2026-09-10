@@ -275,7 +275,7 @@ function ContractPanel({
   const [method, setMethod] = useState<"online" | "offline">("online")
   const [confirm, setConfirm] = useState(false)
   const [ok, setOk] = useState(done)
-  const [fileName, setFileName] = useState("")
+  const [preview, setPreview] = useState(false)
 
   return (
     <Panel title="合同签署" desc="选择线上电子签署或上传线下已签合同">
@@ -306,35 +306,32 @@ function ContractPanel({
           <MethodCard
             active={method === "offline"}
             onClick={() => setMethod("offline")}
-            icon={Upload}
-            title="上传线下合同"
-            desc="上传双方已线下签署盖章的合同扫描件归档"
+            icon={FileText}
+            title="确认线下合同"
+            desc="预览双方已线下签署盖章的合同并确认归档"
           />
         </div>
 
         {method === "offline" && (
-          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-background px-4 py-3 text-sm">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm">
             <span className="inline-flex items-center gap-2 text-muted-foreground">
-              <Upload className="size-4" />
-              {fileName || "点击上传线下合同扫描件（PDF / JPG）"}
+              <FileText className="size-4" />
+              线下合同 {contractNo}（双方已签署盖章）
             </span>
-            <span className="rounded-md bg-muted px-2 py-1 text-xs text-foreground">选择文件</span>
-            <input
-              type="file"
-              className="hidden"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "已选择文件")}
-            />
-          </label>
+            <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
+              预览合同
+            </Button>
+          </div>
         )}
       </div>
 
       <ActionFooter
         ok={ok}
         doneText={
-          method === "offline" ? "线下合同已上传归档" : isPurchaser ? "电子合同已发起并推送签署" : "电子合同已确认签署"
+          method === "offline" ? "线下合同已确认归档" : isPurchaser ? "电子合同已发起并推送签署" : "电子合同已确认签署"
         }
         buttonText={
-          method === "offline" ? "上传并归档合同" : isPurchaser ? "发起电子合同" : "确认并签署合同"
+          method === "offline" ? "确认线下合同" : isPurchaser ? "发起电子合同" : "确认并签署合同"
         }
         onClick={() => setConfirm(true)}
         extra={
@@ -350,7 +347,7 @@ function ContractPanel({
         title="确认合同签署？"
         desc={
           method === "offline"
-            ? `将上传的线下合同 ${contractNo} 归档，归档后进入后续履约环节。`
+            ? `确认线下合同 ${contractNo} 已由双方签署盖章并归档，归档后进入后续履约环节。`
             : isPurchaser
               ? `按成交结果生成电子合同 ${contractNo} 并推送「${item.supplier}」签署。`
               : `确认签署采购方发起的电子合同 ${contractNo}。`
@@ -361,6 +358,40 @@ function ContractPanel({
           setConfirm(false)
         }}
       />
+
+      <Modal
+        open={preview}
+        onClose={() => setPreview(false)}
+        title={`线下合同预览 · ${contractNo}`}
+        size="lg"
+        footer={
+          <Button variant="outline" size="sm" onClick={() => setPreview(false)}>
+            关闭
+          </Button>
+        }
+      >
+        <div className="space-y-4 text-sm">
+          <div className="rounded-lg border border-border bg-muted/40 p-4 text-center">
+            <div className="text-base font-semibold text-foreground">废钢采购合同</div>
+            <div className="mt-1 text-xs text-muted-foreground">合同编号：{contractNo}</div>
+          </div>
+          <StatGrid
+            rows={[
+              ["采购单位（甲方）", buyer],
+              ["供应商（乙方）", item.supplier],
+              ["标的类别", item.category],
+              ["合同数量", item.qty],
+              ["结算单价", item.unitPrice],
+              ["合同金额", item.amount ? item.amount : `${money(amountNum)}（协议周期结算）`],
+              ["交货日期", item.deliveryDate],
+              ["签署方式", "线下签署盖章"],
+            ]}
+          />
+          <p className="leading-relaxed text-muted-foreground">
+            甲乙双方经友好协商，就上述废钢采购事宜达成一致，双方已在纸质合同上签字盖章。本预览用于线上核对合同要素，确认无误后归档并进入后续履约环节。
+          </p>
+        </div>
+      </Modal>
     </Panel>
   )
 }
