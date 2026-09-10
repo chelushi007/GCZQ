@@ -398,13 +398,16 @@ function ReconcilePanel({
         : ["2026-Q1", "2026-Q2", "2026-Q3"]
     return periods.map((p, i) => {
       const qty = Math.round((total / (periods.length + 1)) * (i + 1) * 0.5)
+      const last = i === periods.length - 1
+      const createdAt = p.includes("Q") ? `${p.replace("Q1", "03").replace("Q2", "06").replace("Q3", "09").replace("2026-", "2026-")}-25` : `${p}-25`
       return {
         no: `${base}-${String(i + 1).padStart(2, "0")}`,
         period: p,
         qty,
         amount: qty * price,
-        status: i === periods.length - 1 ? "待确认" : "已确认",
-        date: p.includes("Q") ? `${p} 期末` : `${p}-28`,
+        status: last ? "待确认" : "已确认",
+        createdAt,
+        confirmedAt: last ? "" : p.includes("Q") ? `${p} 期末` : `${p}-28`,
       }
     })
   }, [cycle, total, price, item.id])
@@ -448,7 +451,7 @@ function ReconcilePanel({
       <StatGrid
         rows={[
           ["对账单号", item.id.replace("DD", "DZ") + "-C"],
-          ["对账周期", cycle],
+          ["对账���期", cycle],
           ["本期对账数量", `${curQty} / ${total} ${unit}`],
           ["结算单价", item.unitPrice],
           ["本期对账金额", money(curAmount)],
@@ -463,13 +466,14 @@ function ReconcilePanel({
         <div className="mt-5">
           <div className="mb-2 text-sm font-medium text-foreground">历史对账记录</div>
           <MiniTable
-            head={["对账单号", "对账期", "对账数量", "对账金额", "对账时间", "状态"]}
+            head={["对账单号", "对账期", "对账数量", "对账金额", "创建时间", "确认时间", "状态"]}
             rows={history.map((h) => [
               h.no,
               h.period,
               `${h.qty} ${unit}`,
               money(h.amount),
-              h.date,
+              h.createdAt,
+              h.confirmedAt || "—",
               <StatusPill key="s" tone={h.status === "已确认" ? "green" : "amber"}>
                 {h.status}
               </StatusPill>,
@@ -477,13 +481,6 @@ function ReconcilePanel({
           />
         </div>
       )}
-
-      <ActionFooter
-        ok={ok}
-        doneText={isPurchaser ? "对账单已发起，等待供应商确认" : "对账单已确认"}
-        buttonText={isPurchaser ? "发起对账" : "确认对账"}
-        onClick={() => setConfirm(true)}
-      />
 
       <ConfirmModal
         open={confirm}
@@ -501,40 +498,14 @@ function ReconcilePanel({
         }}
       />
 
-      <Modal
+      <NewReconcileModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        title="新增对账单"
-        footer={
-          <>
-            <Button variant="outline" size="sm" onClick={() => setAddOpen(false)}>
-              取消
-            </Button>
-            <Button size="sm" onClick={() => setAddOpen(false)}>
-              生成对账单
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-3">
-          <Field label="对账周期">
-            <select className={inputCls}>
-              <option>一次性</option>
-              <option>按月</option>
-              <option>按季度</option>
-            </select>
-          </Field>
-          <Field label="对账数量">
-            <input className={inputCls} placeholder={`如 ${curQty} ${unit}`} />
-          </Field>
-          <Field label="结算单价">
-            <input className={inputCls} defaultValue={item.unitPrice} />
-          </Field>
-          <Field label="备注">
-            <input className={inputCls} placeholder="选填" />
-          </Field>
-        </div>
-      </Modal>
+        item={item}
+        unit={unit}
+        curQty={curQty}
+        defaultCycle={cycle}
+      />
     </Panel>
   )
 }
@@ -557,24 +528,40 @@ function PaymentPanel({
   const [fileName, setFileName] = useState("")
   const paid = Math.round(amountNum * 0.4)
   const due = amountNum - paid
-  const term = item.channel === "协议" ? "货到 30 天" : "货到 7 天"
+  const cycle = item.channel === "协议" ? "按月" : "一次性"
+  const term = cycle === "一次性" ? "一次性结清（货到 7 天）" : "按月账期（每月 28 日对账 · 月结 30 天）"
 
   const history = [
-    { no: item.id.replace("DD", "FK") + "-01", amount: paid, method: "线上支付", term, date: "2026-08-31", status: "已支付" },
+    { no: item.id.replace("DD", "FK") + "-01", amount: paid, method: "线上支付", term: cycle, date: "2026-08-31", status: "已支付" },
   ]
 
   return (
-    <Panel title="货款支付" desc="支持线上支付与线下转账两种方式">
+    <Panel title="货款支付" desc="按对账周期支付货款，支持线上支付与线下转账">
       <div className="grid grid-cols-3 gap-3">
         <BigStat label="应付货款" value={money(amountNum)} tone="muted" />
         <BigStat label="已付货款" value={money(paid)} tone="green" />
         <BigStat label="待付货款" value={money(due)} tone="amber" />
       </div>
 
+      {/* 突出本期应付 */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <div>
+          <div className="text-xs font-medium text-primary">本期应付货款</div>
+          <div className="mt-1 text-2xl font-bold tabular-nums text-primary">{money(due)}</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            对账周期：{cycle} · 付款账期：{term}
+          </div>
+        </div>
+        <div className="rounded-md bg-card px-3 py-2 text-right text-xs text-muted-foreground">
+          <div>本期对账单号</div>
+          <div className="mt-0.5 font-medium text-foreground">{item.id.replace("DD", "DZ")}-C</div>
+        </div>
+      </div>
+
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
         <Row k="付款账期" v={term} />
         <Row k="收款方" v={item.supplier} />
-        <Row k="本期应付" v={money(due)} />
+        <Row k="对账周期" v={cycle} />
         <Row k="付款单号" v={item.id.replace("DD", "FK")} />
       </div>
 
@@ -775,6 +762,7 @@ function ReceiptPanel({
 }) {
   const [confirm, setConfirm] = useState(false)
   const [ok, setOk] = useState(done)
+  const [track, setTrack] = useState<{ no: string; waybill: string } | null>(null)
   const received = Math.round(total * 0.6)
 
   const history = [
@@ -783,7 +771,7 @@ function ReceiptPanel({
       qty: Math.round(total * 0.35),
       shipDate: "2026-09-03",
       arriveDate: "2026-09-05",
-      logistics: "苏物流 · 苏E·6621F",
+      waybill: "SU-20260903-01",
       status: "已收货",
     },
     {
@@ -791,7 +779,7 @@ function ReceiptPanel({
       qty: received - Math.round(total * 0.35),
       shipDate: "2026-09-06",
       arriveDate: "2026-09-08",
-      logistics: "顺丰重货 · SF-88213",
+      waybill: "SF-88213",
       status: "待收货",
     },
   ]
@@ -810,19 +798,28 @@ function ReceiptPanel({
       <div className="mt-5">
         <div className="mb-2 text-sm font-medium text-foreground">历史收货记录</div>
         <MiniTable
-          head={["收货单号", "收货数量", "发货时间", "到货时间", "物流信息", "状态"]}
+          head={["收货单号", "收货数量", "发货时间", "到货时间", "物流单号", "状态"]}
           rows={history.map((h) => [
             h.no,
             `${h.qty} ${unit}`,
             h.shipDate,
             h.arriveDate,
-            h.logistics,
+            <button
+              key="w"
+              onClick={() => setTrack({ no: h.no, waybill: h.waybill })}
+              className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline"
+            >
+              <Truck className="size-3.5" />
+              {h.waybill}
+            </button>,
             <StatusPill key="s" tone={h.status === "已收货" ? "green" : "amber"}>
               {h.status}
             </StatusPill>,
           ])}
         />
       </div>
+
+      <TrackModal track={track} onClose={() => setTrack(null)} />
 
       <ActionFooter
         ok={ok}
@@ -1018,6 +1015,146 @@ function ShipPanel({
         </div>
       </Modal>
     </Panel>
+  )
+}
+
+/* ---------------- 物流轨迹弹窗 ---------------- */
+function TrackModal({ track, onClose }: { track: { no: string; waybill: string } | null; onClose: () => void }) {
+  const steps = [
+    { time: "2026-09-06 09:12", node: "苏州仓", desc: "货物已装车，发往华东特钢集团", done: true },
+    { time: "2026-09-06 14:40", node: "苏州转运中心", desc: "货物已发出", done: true },
+    { time: "2026-09-07 08:05", node: "无锡分拨中心", desc: "运输途中，预计次日到达", done: true },
+    { time: "2026-09-08 10:30", node: "华东特钢集团收货区", desc: "已到达，等待卸货验收", done: false },
+  ]
+  return (
+    <Modal
+      open={!!track}
+      onClose={onClose}
+      title={`物流轨迹 · ${track?.waybill ?? ""}`}
+      footer={
+        <Button size="sm" onClick={onClose}>
+          关闭
+        </Button>
+      }
+    >
+      <div className="mb-4 flex items-center justify-between rounded-md bg-muted/50 px-3 py-2 text-xs">
+        <span className="text-muted-foreground">
+          收货单号 <span className="font-medium text-foreground">{track?.no}</span>
+        </span>
+        <span className="text-muted-foreground">
+          运单号 <span className="font-medium text-foreground">{track?.waybill}</span>
+        </span>
+      </div>
+      <ol className="space-y-0">
+        {steps.map((s, i) => (
+          <li key={i} className="flex gap-3">
+            <div className="flex flex-col items-center">
+              <span
+                className={cn(
+                  "mt-1 flex size-3 shrink-0 items-center justify-center rounded-full ring-2",
+                  s.done ? "bg-primary ring-primary/30" : "bg-muted ring-border",
+                )}
+              />
+              {i < steps.length - 1 && (
+                <span className={cn("w-0.5 flex-1", s.done ? "bg-primary/40" : "bg-border")} />
+              )}
+            </div>
+            <div className={cn("pb-5", i === steps.length - 1 && "pb-0")}>
+              <div className={cn("text-sm font-medium", s.done ? "text-foreground" : "text-muted-foreground")}>
+                {s.node}
+              </div>
+              <div className="text-xs text-muted-foreground">{s.desc}</div>
+              <div className="mt-0.5 text-xs tabular-nums text-muted-foreground">{s.time}</div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Modal>
+  )
+}
+
+/* ---------------- 新增对账单弹窗 ---------------- */
+function NewReconcileModal({
+  open,
+  onClose,
+  item,
+  unit,
+  curQty,
+  defaultCycle,
+}: {
+  open: boolean
+  onClose: () => void
+  item: OrderItem
+  unit: string
+  curQty: number
+  defaultCycle: Cycle
+}) {
+  const [cycle, setCycle] = useState<Cycle>(defaultCycle)
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="新增对账单"
+      footer={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            取消
+          </Button>
+          <Button size="sm" onClick={onClose}>
+            生成对账单
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <Field label="对账周期">
+          <select className={inputCls} value={cycle} onChange={(e) => setCycle(e.target.value as Cycle)}>
+            <option value="一次性">一次性</option>
+            <option value="按月">按月</option>
+            <option value="按季度">按季度</option>
+          </select>
+        </Field>
+
+        {cycle !== "一次性" && (
+          <Field label={cycle === "按月" ? "对账月份" : "对账季度"}>
+            {cycle === "按月" ? (
+              <input className={inputCls} type="month" defaultValue="2026-09" />
+            ) : (
+              <select className={inputCls} defaultValue="2026-Q3">
+                <option>2026-Q1</option>
+                <option>2026-Q2</option>
+                <option>2026-Q3</option>
+                <option>2026-Q4</option>
+              </select>
+            )}
+          </Field>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="对账起始日期">
+            <input className={inputCls} type="date" defaultValue="2026-09-01" />
+          </Field>
+          <Field label="对账截止日期">
+            <input className={inputCls} type="date" defaultValue="2026-09-30" />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="对账数量">
+            <input className={inputCls} placeholder={`如 ${curQty} ${unit}`} />
+          </Field>
+          <Field label="结算单价">
+            <input className={inputCls} defaultValue={item.unitPrice} />
+          </Field>
+        </div>
+        <Field label="对账人">
+          <input className={inputCls} defaultValue="刘采购" />
+        </Field>
+        <Field label="备注">
+          <input className={inputCls} placeholder="选填" />
+        </Field>
+      </div>
+    </Modal>
   )
 }
 
