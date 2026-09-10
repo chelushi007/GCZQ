@@ -894,11 +894,13 @@ function ShipPanel({
   const [ok, setOk] = useState(done)
   const [addOpen, setAddOpen] = useState(false)
   const [pickupOpen, setPickupOpen] = useState(false)
+  const [track, setTrack] = useState<{ no: string; waybill: string } | null>(null)
   const shipped = Math.round(total * 0.6)
 
   const history = [
     {
       no: item.id.replace("DD", "FH") + "-01",
+      goods: item.category,
       qty: Math.round(total * 0.35),
       date: "2026-09-03",
       logistics: "苏物流",
@@ -909,6 +911,7 @@ function ShipPanel({
     },
     {
       no: item.id.replace("DD", "FH") + "-02",
+      goods: item.category,
       qty: shipped - Math.round(total * 0.35),
       date: "2026-09-06",
       logistics: "顺丰重货",
@@ -948,14 +951,21 @@ function ShipPanel({
       <div className="mt-5">
         <div className="mb-2 text-sm font-medium text-foreground">发货历史记录</div>
         <MiniTable
-          head={["发货单号", "发货数量", "发货时间", "物流公司", "车牌号", "运单号", "提货单", "状态"]}
+          head={["发货单号", "货物名称", "发货数量", "发货时间", "物流公司", "车牌号", "运单号", "提货单", "状态"]}
           rows={history.map((h) => [
             h.no,
+            h.goods,
             `${h.qty} ${unit}`,
             h.date,
             h.logistics,
             h.plate,
-            h.waybill,
+            <button
+              key="w"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+              onClick={() => setTrack({ no: h.no, waybill: h.waybill })}
+            >
+              {h.waybill}
+            </button>,
             h.pickup,
             <StatusPill key="s" tone={h.status === "已签收" ? "green" : "blue"}>
               {h.status}
@@ -963,6 +973,8 @@ function ShipPanel({
           ])}
         />
       </div>
+
+      <TrackModal track={track} onClose={() => setTrack(null)} />
 
       <ConfirmModal
         open={confirm}
@@ -992,6 +1004,9 @@ function ShipPanel({
         }
       >
         <div className="space-y-3">
+          <Field label="货物名称">
+            <input className={inputCls} defaultValue={item.category} placeholder="如 重废" />
+          </Field>
           <Field label="发货数量">
             <input className={inputCls} placeholder={`如 100 ${unit}`} />
           </Field>
