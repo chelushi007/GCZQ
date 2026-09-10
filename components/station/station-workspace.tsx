@@ -404,11 +404,11 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
     return <SupplierAgreement />
   }
 
-  // 供应商 · 订单管理：复用钢厂订单管理页面与内容
+  // 供应商 · 订单管理：复用钢厂订单管理页面，履约走供应商视角
   if (leaf === "station-supplier-orders") {
     return (
       <div className="h-full overflow-y-auto p-6">
-        <MillOrders />
+        <MillOrders perspective="supplier" />
       </div>
     )
   }
