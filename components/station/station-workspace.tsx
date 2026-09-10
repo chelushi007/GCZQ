@@ -26,6 +26,7 @@ import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
 import { MillOrders } from "@/components/steel-mill/mill-orders"
 import { SupplierFixed } from "./supplier-fixed"
+import { SupplierAgreement } from "./supplier-agreement"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -396,6 +397,20 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
   // 供应商 · 固定价管理：网上报价 / 我的报价 / 缴纳服务费
   if (leaf.startsWith("station-supplier-fixed")) {
     return <SupplierFixed leaf={leaf} />
+  }
+
+  // 供应商 · 协议回收：协议单确认
+  if (leaf === "station-supplier-agreement-confirm") {
+    return <SupplierAgreement />
+  }
+
+  // 供应商 · 订单管理：复用钢厂订单管理页面与内容
+  if (leaf === "station-supplier-orders") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <MillOrders />
+      </div>
+    )
   }
 
   // 回收商 · 采购管理：复用钢厂采购组件（采购模式一致）

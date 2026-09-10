@@ -99,6 +99,12 @@ export const stationTree: StationTreeNode[] = [
           { key: "station-supplier-fixed-service", label: "缴纳服务费" },
         ],
       },
+      {
+        key: "station-supplier-agreement",
+        label: "协议回收",
+        children: [{ key: "station-supplier-agreement-confirm", label: "协议单确认" }],
+      },
+      { key: "station-supplier-orders", label: "订单管理" },
     ],
   },
   {
@@ -133,6 +139,8 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-supplier-fixed-quote": ["供应商", "固定价管理", "网上报价"],
   "station-supplier-fixed-mine": ["供应商", "固定价管理", "我的报价"],
   "station-supplier-fixed-service": ["供应商", "固定价管理", "缴纳服务费"],
+  "station-supplier-agreement-confirm": ["供应商", "协议回收", "协议单确认"],
+  "station-supplier-orders": ["供应商", "订单管理"],
   "station-recycler": ["回收商"],
   "station-recycler-purchase-bidding": ["回收", "采购管理", "竞价回收"],
   "station-recycler-purchase-fixed": ["回收", "采购管理", "固定价回收"],
@@ -269,7 +277,7 @@ export const supplierBidResultTone: Record<SupplierBidItem["result"], "primary" 
 }
 
 // ---------- 供应商视角：固定价管理 ----------
-// 固定价（一口价）由采购方设定，供应商按一口价在线报价（申报可供量���→ 采购方确认 → 成交送货 → 缴服务费结算
+// 固定价（一口价）由采购方设定，供应商按一口价在线报价（申报可��量���→ 采购方确认 → 成交送货 → 缴服务费结算
 // 固定价不收报名费、不收保证金，仅在成交后缴纳平台服务费
 export interface SupplierFixedItem {
   id: string // 固定价单号
