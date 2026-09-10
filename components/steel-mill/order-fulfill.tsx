@@ -15,6 +15,7 @@ import {
   Upload,
   CreditCard,
   Banknote,
+  FileText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -962,13 +963,6 @@ function ShipPanel({
           ])}
         />
       </div>
-
-      <ActionFooter
-        ok={ok}
-        doneText="本批次发货已登记"
-        buttonText="登记发货"
-        onClick={() => setConfirm(true)}
-      />
 
       <ConfirmModal
         open={confirm}
