@@ -801,17 +801,25 @@ function ReceiptPanel({
   const history = [
     {
       no: item.id.replace("DD", "SH") + "-01",
+      goods: item.category,
       qty: Math.round(total * 0.35),
       shipDate: "2026-09-03",
       arriveDate: "2026-09-05",
+      carrier: "顺丰物流",
+      plate: "苏A·8823F",
+      pickup: "TH-20260903-01",
       waybill: "SU-20260903-01",
       status: "已收货",
     },
     {
       no: item.id.replace("DD", "SH") + "-02",
+      goods: item.category,
       qty: received - Math.round(total * 0.35),
       shipDate: "2026-09-06",
       arriveDate: "2026-09-08",
+      carrier: "德邦物流",
+      plate: "浙B·5567K",
+      pickup: "TH-20260906-02",
       waybill: "SF-88213",
       status: "待收货",
     },
@@ -831,12 +839,16 @@ function ReceiptPanel({
       <div className="mt-5">
         <div className="mb-2 text-sm font-medium text-foreground">历史收货记录</div>
         <MiniTable
-          head={["收货单号", "收货数量", "发货时间", "到货时间", "物流单号", "状态"]}
+          head={["收货单号", "货物名称", "收货数量", "发货时间", "到货时间", "物流公司", "车牌号", "提货单", "物流单号", "状态"]}
           rows={history.map((h) => [
             h.no,
+            h.goods,
             `${h.qty} ${unit}`,
             h.shipDate,
             h.arriveDate,
+            h.carrier,
+            h.plate,
+            h.pickup,
             <button
               key="w"
               onClick={() => setTrack({ no: h.no, waybill: h.waybill })}
