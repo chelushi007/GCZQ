@@ -73,13 +73,16 @@ const nodeDefs: Record<FulfillPerspective, { id: string; title: string; icon: ty
       ],
     },
     {
+      id: "reconcile",
+      title: "发起对账",
+      icon: ScrollText,
+      actions: [{ key: "reconcile", label: "发起对账", desc: "按到货数量与结算单价向供应商发起对账确认", icon: ScrollText }],
+    },
+    {
       id: "payment",
       title: "货款支付",
       icon: Wallet,
-      actions: [
-        { key: "reconcile", label: "发起对账", desc: "按到货数量与结算单价发起对账确认", icon: ScrollText },
-        { key: "pay", label: "支付货款", desc: "对账通过后向供应商支付货款", icon: Banknote },
-      ],
+      actions: [{ key: "pay", label: "支付货款", desc: "对账通过后向供应商支付货款", icon: Banknote }],
     },
     {
       id: "receipt",
@@ -97,6 +100,12 @@ const nodeDefs: Record<FulfillPerspective, { id: string; title: string; icon: ty
         { key: "confirm", label: "确认合同", desc: "确认采购方发起的电子合同条款并完成签署", icon: CheckCircle2 },
         { key: "view", label: "查看合同", desc: "查看合同条款、签署状态与合同文本", icon: Eye },
       ],
+    },
+    {
+      id: "reconcile",
+      title: "确认对账",
+      icon: ScrollText,
+      actions: [{ key: "reconcile", label: "确认对账", desc: "核对采购方发起的对账单并确认结算数量与金额", icon: ScrollText }],
     },
     {
       id: "collection",
@@ -123,11 +132,8 @@ export function OrderFulfill({
   onBack: () => void
 }) {
   const defs = nodeDefs[perspective]
-  const finished = item.status === "履约结束"
-  // 已完成步骤集合：履约结束时全部完成；履约中默认合同已签署
-  const [done, setDone] = useState<Set<string>>(
-    () => new Set(finished ? defs.map((d) => d.id) : [defs[0].id]),
-  )
+  // 假设所有节点都未完成，需要在列表逐节点操作办理
+  const [done, setDone] = useState<Set<string>>(() => new Set())
   const nodes: FulfillNode[] = defs.map((d) => {
     let state: NodeState
     if (done.has(d.id)) state = "done"
@@ -357,31 +363,37 @@ function ActionPanel({
     )
   }
 
+  // ---- 对账（采购方发起 / 供应商确认） ----
+  if (nodeId === "reconcile") {
+    const isPurchaser = perspective === "purchaser"
+    return (
+      <ConfirmPanel
+        title={isPurchaser ? "发起对账" : "确认对账"}
+        infoNode={
+          <StatGrid
+            rows={[
+              ["到货数量", `${delivered} / ${total} ${unit}`],
+              ["结算单价", item.unitPrice],
+              ["本期对账金额", money(paidNum)],
+            ]}
+          />
+        }
+        done={done}
+        doneText={isPurchaser ? "对账单已发起，等待供应商确认" : "对账单已确认"}
+        buttonText={isPurchaser ? "发起对账" : "确认对账"}
+        confirmTitle={isPurchaser ? "确认发起对账？" : "确认对账单？"}
+        confirmDesc={
+          isPurchaser
+            ? `按已到货 ${delivered} ${unit} × ${item.unitPrice} 生成对账单，金额 ${money(paidNum)}，推送供应商确认。`
+            : `核对采购方发起的对账单：结算数量 ${delivered} ${unit}、金额 ${money(paidNum)}，确认后进入收款环节。`
+        }
+        onComplete={onComplete}
+      />
+    )
+  }
+
   // ---- 货款支付（采购方） ----
   if (nodeId === "payment") {
-    if (actionKey === "reconcile") {
-      return (
-        <ConfirmPanel
-          title="发起对账"
-          infoNode={
-            <StatGrid
-              rows={[
-                ["到货数量", `${delivered} / ${total} ${unit}`],
-                ["结算单价", item.unitPrice],
-                ["本期对账金额", money(paidNum)],
-              ]}
-            />
-          }
-          done={done}
-          doneText="对账单已发起，等待供应商确认"
-          buttonText="发起对账"
-          confirmTitle="确认发起对账？"
-          confirmDesc={`按已到货 ${delivered} ${unit} × ${item.unitPrice} 生成对账单，金额 ${money(paidNum)}。`}
-          onComplete={onComplete}
-        />
-      )
-    }
-    // pay
     return (
       <ConfirmPanel
         title="支付货款"
