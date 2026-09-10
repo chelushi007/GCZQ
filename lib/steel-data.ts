@@ -254,7 +254,7 @@ export interface SupplierBidItem {
 
 export const supplierBidList: SupplierBidItem[] = [
   { id: "JJ20260907-003", title: "重型废钢竞价采购公告", buyer: "华东特钢集团", category: "重废", region: "江苏·苏州", qty: "500 吨", basePrice: "¥2,500/吨", bidMode: "减价竞价", signupEnd: "09-07 17:00", bidStart: "09-08 09:00", bidEnd: "09-08 18:00", signupFee: "¥500", deposit: "¥50,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,480/吨", myRank: "第 1 名", quotes: 6, result: "竞价中" },
-  { id: "JJ20260907-001", title: "冲花板料竞价采购公告", buyer: "宝武钢铁", category: "统废", region: "上海·宝山", qty: "300 吨", basePrice: "¥2,380/吨", bidMode: "减价竞价", signupEnd: "09-07 12:00", bidStart: "09-08 09:00", bidEnd: "09-08 12:00", signupFee: "¥500", deposit: "¥30,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,410/吨", myRank: "第 2 名", quotes: 4, result: "竞价中" },
+  { id: "JJ20260907-001", title: "冲花板料竞价采购公告", buyer: "���武钢铁", category: "统废", region: "上海·宝山", qty: "300 吨", basePrice: "¥2,380/吨", bidMode: "减价竞价", signupEnd: "09-07 12:00", bidStart: "09-08 09:00", bidEnd: "09-08 12:00", signupFee: "¥500", deposit: "¥30,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,410/吨", myRank: "第 2 名", quotes: 4, result: "竞价中" },
   { id: "JJ20260905-004", title: "钢筋头竞价采购公告", buyer: "沙钢集团", category: "重废", region: "江苏·无锡", qty: "420 吨", basePrice: "¥2,450/吨", bidMode: "减价竞价", signupEnd: "09-05 12:00", bidStart: "09-06 09:00", bidEnd: "09-06 18:00", signupFee: "¥500", deposit: "¥42,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥2,510/吨", myRank: "第 1 名", quotes: 9, result: "已中标" },
   { id: "JJ20260904-009", title: "汽车压块竞价回收公告", buyer: "中天钢铁", category: "统废", region: "江苏·常州", qty: "350 吨", basePrice: "¥3,050/吨", bidMode: "减价竞价", signupEnd: "09-04 12:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", signupFee: "¥500", deposit: "¥35,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥3,120/吨", myRank: "第 4 名", quotes: 7, result: "未中标" },
   { id: "JJ20260908-006", title: "废旧钢结构竞价公告", buyer: "永钢集团", category: "重废", region: "江苏·张家港", qty: "600 吨", basePrice: "¥2,420/吨", bidMode: "减价竞价", signupEnd: "09-09 17:00", bidStart: "09-10 09:00", bidEnd: "09-10 18:00", signupFee: "¥500", deposit: "¥60,000", signupStatus: "未报名", feeStatus: "未缴", depositStatus: "未缴", myQuote: "—", myRank: "—", quotes: 2, result: "报名中" },
@@ -457,19 +457,19 @@ export interface OrderItem {
   // 协议成交按周期结算，无固定订单金额，amount 为 null
   amount: string | null
   region: string
-  status: "待结算" | "结算中" | "已结算" | "履约中" | "履约结束"
+  status: "履约中" | "履约结束"
   createdAt: string
   deliveryDate: string
   }
   
   export const orderList: OrderItem[] = [
-  { id: "DD20260907-013", supplier: "华东再生资源", channel: "竞价", category: "重废", qty: "500 吨", unitPrice: "¥2,650/吨", amount: "¥1,325,000", region: "江苏·苏州", status: "待结算", createdAt: "2026-09-07", deliveryDate: "2026-09-15" },
+  { id: "DD20260907-013", supplier: "华东再生资源", channel: "竞价", category: "重废", qty: "500 吨", unitPrice: "¥2,650/吨", amount: "¥1,325,000", region: "江苏·苏州", status: "履约中", createdAt: "2026-09-07", deliveryDate: "2026-09-15" },
   { id: "DD20260906-010", supplier: "城南再生资源回收站", channel: "协议", category: "统废", qty: "820 吨", unitPrice: "¥2,405/吨", amount: null, region: "江苏·苏州", status: "履约中", createdAt: "2026-09-06", deliveryDate: "2026-09-30" },
-  { id: "DD20260905-007", supplier: "盛通金属有限公司", channel: "固定价", category: "生铁", qty: "400 吨", unitPrice: "¥2,950/吨", amount: "¥1,180,000", region: "上海·宝山", status: "已结算", createdAt: "2026-09-05", deliveryDate: "2026-09-10" },
-  { id: "DD20260904-005", supplier: "张建国（自然人）", channel: "固定价", category: "统废", qty: "35 吨", unitPrice: "¥2,410/吨", amount: "¥84,350", region: "江苏·无锡", status: "已结算", createdAt: "2026-09-04", deliveryDate: "2026-09-08" },
-  { id: "DD20260903-002", supplier: "环宇物资回收站", channel: "竞价", category: "重废", qty: "420 吨", unitPrice: "¥2,620/吨", amount: "¥1,100,400", region: "浙江·嘉兴", status: "待结算", createdAt: "2026-09-03", deliveryDate: "2026-09-12" },
+  { id: "DD20260905-007", supplier: "盛通金属有限公司", channel: "固定价", category: "生铁", qty: "400 吨", unitPrice: "¥2,950/吨", amount: "¥1,180,000", region: "上海·宝山", status: "履约结束", createdAt: "2026-09-05", deliveryDate: "2026-09-10" },
+  { id: "DD20260904-005", supplier: "张建国（自然人）", channel: "固定价", category: "统废", qty: "35 吨", unitPrice: "¥2,410/吨", amount: "¥84,350", region: "江苏·无锡", status: "履约结束", createdAt: "2026-09-04", deliveryDate: "2026-09-08" },
+  { id: "DD20260903-002", supplier: "环宇物资回收站", channel: "竞价", category: "重废", qty: "420 吨", unitPrice: "¥2,620/吨", amount: "¥1,100,400", region: "浙江·嘉兴", status: "履约中", createdAt: "2026-09-03", deliveryDate: "2026-09-12" },
   { id: "DD20260902-018", supplier: "城南再生资源回收站", channel: "协议", category: "重废", qty: "1,200 吨", unitPrice: "¥2,660/吨", amount: null, region: "江苏·苏州", status: "履约结束", createdAt: "2026-09-02", deliveryDate: "2026-09-25" },
-  { id: "DD20260901-006", supplier: "盛通金属有限公司", channel: "竞价", category: "生铁", qty: "300 吨", unitPrice: "¥2,900/吨", amount: "¥870,000", region: "上海·宝山", status: "结算中", createdAt: "2026-09-01", deliveryDate: "2026-09-09" },
+  { id: "DD20260901-006", supplier: "盛通金属有限公司", channel: "竞价", category: "生铁", qty: "300 吨", unitPrice: "¥2,900/吨", amount: "¥870,000", region: "上海·宝山", status: "履约中", createdAt: "2026-09-01", deliveryDate: "2026-09-09" },
   ]
 
 // ---------- 供应商管理 ----------

@@ -24,6 +24,7 @@ import { SignupDetail } from "./signup-detail"
 import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
 import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
+import { MillOrders } from "@/components/steel-mill/mill-orders"
 import { SupplierFixed } from "./supplier-fixed"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
@@ -419,6 +420,14 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
       </div>
     )
   }
+  // 回收商 · 订单管理：复用钢厂订单管理页面与内容
+  if (leaf === "station-recycler-orders") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <MillOrders />
+      </div>
+    )
+  }
   return (
     <div className="h-full overflow-y-auto p-6">
       {showsSignupDetail ? (
@@ -434,19 +443,6 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
             {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
             {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
             {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
-            {leaf === "station-recycler-orders" && (
-              <div className="flex h-[50vh] items-center justify-center">
-                <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
-                  <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <ClipboardList className="size-7" />
-                  </div>
-                  <h2 className="mt-4 text-lg font-semibold text-foreground">订单管理</h2>
-                  <p className="mt-1.5 text-sm text-muted-foreground">
-                    回收商采购订单的查询、结算与合同管理，页面内容规划中。
-                  </p>
-                </div>
-              </div>
-            )}
             {(leaf === "station-recycler" || leaf === "station-seller") && (
               <div className="flex h-[50vh] items-center justify-center">
                 <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">

@@ -8,7 +8,7 @@ import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { orderList, type OrderItem } from "@/lib/steel-data"
 
-const tabs = ["全部", "待结算", "结算中", "已结算", "履约中", "履约结束"]
+const tabs = ["全部", "履约中", "履约结束"]
 const channelTone: Record<string, "blue" | "amber" | "violet"> = {
   竞价: "blue",
   固定价: "amber",
