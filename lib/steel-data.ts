@@ -457,22 +457,19 @@ export interface OrderItem {
   // 协议成交按周期结算，无固定订单金额，amount 为 null
   amount: string | null
   region: string
-  settlement: "待结算" | "结算中" | "已结算"
-  settleMode: "一次性结算" | "按批次结算" | "按月结算"
-  contract: "待签署" | "已签署" | "已归档"
-  handler: string
+  status: "待结算" | "结算中" | "已结算" | "履约中" | "履约结束"
   createdAt: string
   deliveryDate: string
   }
   
   export const orderList: OrderItem[] = [
-  { id: "DD20260907-013", supplier: "华东再生资源", channel: "竞价", category: "重废", qty: "500 吨", unitPrice: "¥2,650/吨", amount: "¥1,325,000", region: "江苏·苏州", settlement: "待结算", settleMode: "一次性结算", contract: "已签署", handler: "刘采购", createdAt: "2026-09-07", deliveryDate: "2026-09-15" },
-  { id: "DD20260906-010", supplier: "城南再生资源回收站", channel: "协议", category: "统废", qty: "820 吨", unitPrice: "¥2,405/吨", amount: null, region: "江苏·苏州", settlement: "结算中", settleMode: "按月结算", contract: "已签署", handler: "王采购", createdAt: "2026-09-06", deliveryDate: "2026-09-30" },
-  { id: "DD20260905-007", supplier: "盛通金属有限公司", channel: "固定价", category: "生铁", qty: "400 吨", unitPrice: "¥2,950/吨", amount: "¥1,180,000", region: "上海·宝山", settlement: "已结算", settleMode: "一次性结算", contract: "已归档", handler: "刘采购", createdAt: "2026-09-05", deliveryDate: "2026-09-10" },
-  { id: "DD20260904-005", supplier: "张建国（自然人）", channel: "固定价", category: "统废", qty: "35 吨", unitPrice: "¥2,410/吨", amount: "¥84,350", region: "江苏·无锡", settlement: "已结算", settleMode: "一次性结算", contract: "已归档", handler: "赵采购", createdAt: "2026-09-04", deliveryDate: "2026-09-08" },
-  { id: "DD20260903-002", supplier: "环宇物资回收站", channel: "竞价", category: "重废", qty: "420 吨", unitPrice: "¥2,620/吨", amount: "¥1,100,400", region: "浙江·嘉兴", settlement: "待结算", settleMode: "按批次结算", contract: "待签署", handler: "王采购", createdAt: "2026-09-03", deliveryDate: "2026-09-12" },
-  { id: "DD20260902-018", supplier: "城南再生资源回收站", channel: "协议", category: "重废", qty: "1,200 吨", unitPrice: "¥2,660/吨", amount: null, region: "江苏·苏州", settlement: "已结算", settleMode: "按月结算", contract: "已归档", handler: "王采购", createdAt: "2026-09-02", deliveryDate: "2026-09-25" },
-  { id: "DD20260901-006", supplier: "盛通金属有限公司", channel: "竞价", category: "生铁", qty: "300 吨", unitPrice: "¥2,900/吨", amount: "¥870,000", region: "上海·宝山", settlement: "结算中", settleMode: "一次性结算", contract: "已签署", handler: "赵采购", createdAt: "2026-09-01", deliveryDate: "2026-09-09" },
+  { id: "DD20260907-013", supplier: "华东再生资源", channel: "竞价", category: "重废", qty: "500 吨", unitPrice: "¥2,650/吨", amount: "¥1,325,000", region: "江苏·苏州", status: "待结算", createdAt: "2026-09-07", deliveryDate: "2026-09-15" },
+  { id: "DD20260906-010", supplier: "城南再生资源回收站", channel: "协议", category: "统废", qty: "820 吨", unitPrice: "¥2,405/吨", amount: null, region: "江苏·苏州", status: "履约中", createdAt: "2026-09-06", deliveryDate: "2026-09-30" },
+  { id: "DD20260905-007", supplier: "盛通金属有限公司", channel: "固定价", category: "生铁", qty: "400 吨", unitPrice: "¥2,950/吨", amount: "¥1,180,000", region: "上海·宝山", status: "已结算", createdAt: "2026-09-05", deliveryDate: "2026-09-10" },
+  { id: "DD20260904-005", supplier: "张建国（自然人）", channel: "固定价", category: "统废", qty: "35 吨", unitPrice: "¥2,410/吨", amount: "¥84,350", region: "江苏·无锡", status: "已结算", createdAt: "2026-09-04", deliveryDate: "2026-09-08" },
+  { id: "DD20260903-002", supplier: "环宇物资回收站", channel: "竞价", category: "重废", qty: "420 吨", unitPrice: "¥2,620/吨", amount: "¥1,100,400", region: "浙江·嘉兴", status: "待结算", createdAt: "2026-09-03", deliveryDate: "2026-09-12" },
+  { id: "DD20260902-018", supplier: "城南再生资源回收站", channel: "协议", category: "重废", qty: "1,200 吨", unitPrice: "¥2,660/吨", amount: null, region: "江苏·苏州", status: "履约结束", createdAt: "2026-09-02", deliveryDate: "2026-09-25" },
+  { id: "DD20260901-006", supplier: "盛通金属有限公司", channel: "竞价", category: "生铁", qty: "300 吨", unitPrice: "¥2,900/吨", amount: "¥870,000", region: "上海·宝山", status: "结算中", createdAt: "2026-09-01", deliveryDate: "2026-09-09" },
   ]
 
 // ---------- 供应商管理 ----------

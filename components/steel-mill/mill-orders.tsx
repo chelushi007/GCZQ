@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Wallet, FileSignature, RotateCcw } from "lucide-react"
+import { Search, Wallet, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/shared/page-header"
 import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { orderList, type OrderItem } from "@/lib/steel-data"
 
-const tabs = ["全部", "待结算", "结算中", "已结算"]
+const tabs = ["全部", "待结算", "结算中", "已结算", "履约中", "履约结束"]
 const channelTone: Record<string, "blue" | "amber" | "violet"> = {
   竞价: "blue",
   固定价: "amber",
@@ -17,20 +17,20 @@ const channelTone: Record<string, "blue" | "amber" | "violet"> = {
 
 const channelOptions = ["全部", "竞价", "固定价", "协议"]
 const categoryOptions = ["全部", "重废", "统废", "生铁"]
-const contractOptions = ["全部", "待签署", "已签署", "已归档"]
+const regionOptions = ["全部", "江苏·苏州", "江苏·无锡", "上海·宝山", "浙江·嘉兴"]
 
 export function MillOrders() {
   const [tab, setTab] = useState("全部")
   const [channel, setChannel] = useState("全部")
   const [category, setCategory] = useState("全部")
-  const [contract, setContract] = useState("全部")
+  const [region, setRegion] = useState("全部")
   const [keyword, setKeyword] = useState("")
 
   const rows = orderList.filter((o) => {
-    if (tab !== "全部" && o.settlement !== tab) return false
+    if (tab !== "全部" && o.status !== tab) return false
     if (channel !== "全部" && o.channel !== channel) return false
     if (category !== "全部" && o.category !== category) return false
-    if (contract !== "全部" && o.contract !== contract) return false
+    if (region !== "全部" && o.region !== region) return false
     if (keyword.trim()) {
       const kw = keyword.trim()
       if (!o.id.includes(kw) && !o.supplier.includes(kw)) return false
@@ -41,7 +41,7 @@ export function MillOrders() {
   const resetFilters = () => {
     setChannel("全部")
     setCategory("全部")
-    setContract("全部")
+    setRegion("全部")
     setKeyword("")
   }
 
@@ -67,44 +67,35 @@ export function MillOrders() {
           <span className="text-xs text-muted-foreground">协议按周期结算</span>
         ),
     },
-    { key: "settleMode", header: "结算方式", className: "text-muted-foreground" },
     {
-      key: "settlement",
-      header: "结算状态",
+      key: "status",
+      header: "订单状态",
       render: (r) => (
         <span className="inline-flex items-center gap-1">
           <Wallet className="size-3.5 text-muted-foreground" />
-          <StatusPill tone={statusTone(r.settlement)}>{r.settlement}</StatusPill>
+          <StatusPill tone={statusTone(r.status)}>{r.status}</StatusPill>
         </span>
       ),
     },
-    {
-      key: "contract",
-      header: "合同状态",
-      render: (r) => (
-        <span className="inline-flex items-center gap-1">
-          <FileSignature className="size-3.5 text-muted-foreground" />
-          <StatusPill tone={statusTone(r.contract)}>{r.contract}</StatusPill>
-        </span>
-      ),
-    },
-    { key: "handler", header: "经办人", className: "text-muted-foreground" },
     { key: "deliveryDate", header: "交货日期", className: "text-muted-foreground tabular-nums" },
     { key: "createdAt", header: "下单日期", className: "text-muted-foreground tabular-nums" },
     {
       key: "op",
       header: "操作",
-      render: () => (
-        <Button variant="ghost" size="sm">
-          详情
-        </Button>
-      ),
+      render: (r) =>
+        r.status === "履约中" ? (
+          <Button size="sm">履约</Button>
+        ) : (
+          <Button variant="ghost" size="sm">
+            详情
+          </Button>
+        ),
     },
   ]
 
   return (
     <div className="space-y-5">
-      <PageHeader title="订单管理" desc="订单查询贯通结算与合同：一条订单可追溯成交、结算单与电子合同" />
+      <PageHeader title="订单管理" desc="订单查询贯通成交与履约：一条订单可追溯成交方式、履约进度与结算状态" />
 
       {/* 筛选条件区 */}
       <div className="rounded-lg border border-border bg-card p-4">
@@ -131,13 +122,13 @@ export function MillOrders() {
               ))}
             </select>
           </FilterField>
-          <FilterField label="合同状态">
+          <FilterField label="所在地区">
             <select
-              value={contract}
-              onChange={(e) => setContract(e.target.value)}
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
               className="h-9 w-full rounded-md border border-border bg-background px-2.5 text-sm outline-none focus:border-primary"
             >
-              {contractOptions.map((o) => (
+              {regionOptions.map((o) => (
                 <option key={o}>{o}</option>
               ))}
             </select>
@@ -178,7 +169,7 @@ export function MillOrders() {
       <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />
 
       <p className="text-xs text-muted-foreground">
-        说明：协议成交按合同周期结算，无固定订单金额，金额列显示为「协议按周期结算」；竞价与固定价成交按成交单价 × 数量核算订单金额。
+        说明：协议成交按合同周期结算，无固定订单金额，金额列显示为「协议按周期结算」；竞价与固定价成交按成交单价 × 数量核算订单金额。履约中的订单可点击「履约」跟进交货与结算。
       </p>
     </div>
   )
