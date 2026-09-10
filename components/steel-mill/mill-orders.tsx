@@ -7,7 +7,6 @@ import { PageHeader } from "@/components/shared/page-header"
 import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { orderList, type OrderItem } from "@/lib/steel-data"
-import { OrderFulfill, type FulfillPerspective } from "@/components/steel-mill/order-fulfill"
 
 const tabs = ["全部", "履约中", "履约结束"]
 const channelTone: Record<string, "blue" | "amber" | "violet"> = {
@@ -20,13 +19,12 @@ const channelOptions = ["全部", "竞价", "固定价", "协议"]
 const categoryOptions = ["全部", "重废", "统废", "生铁"]
 const regionOptions = ["全部", "江苏·苏州", "江苏·无锡", "上海·宝山", "浙江·嘉兴"]
 
-export function MillOrders({ perspective = "purchaser" }: { perspective?: FulfillPerspective }) {
+export function MillOrders() {
   const [tab, setTab] = useState("全部")
   const [channel, setChannel] = useState("全部")
   const [category, setCategory] = useState("全部")
   const [region, setRegion] = useState("全部")
   const [keyword, setKeyword] = useState("")
-  const [fulfilling, setFulfilling] = useState<OrderItem | null>(null)
 
   const rows = orderList.filter((o) => {
     if (tab !== "全部" && o.status !== tab) return false
@@ -86,20 +84,14 @@ export function MillOrders({ perspective = "purchaser" }: { perspective?: Fulfil
       header: "操作",
       render: (r) =>
         r.status === "履约中" ? (
-          <Button size="sm" onClick={() => setFulfilling(r)}>
-            履约
-          </Button>
+          <Button size="sm">履约</Button>
         ) : (
-          <Button variant="ghost" size="sm" onClick={() => setFulfilling(r)}>
+          <Button variant="ghost" size="sm">
             详情
           </Button>
         ),
     },
   ]
-
-  if (fulfilling) {
-    return <OrderFulfill item={fulfilling} perspective={perspective} onBack={() => setFulfilling(null)} />
-  }
 
   return (
     <div className="space-y-5">
