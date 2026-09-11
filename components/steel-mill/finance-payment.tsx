@@ -129,7 +129,7 @@ export function FinancePayment() {
       </div>
 
       <div className="mt-3">
-        <DataTable data={rows} columns={cols} rowKey={(r) => r.id} />
+        <DataTable rows={rows} columns={cols} rowKey={(r) => r.id} />
       </div>
 
       <Modal

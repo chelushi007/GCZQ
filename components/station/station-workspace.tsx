@@ -25,6 +25,7 @@ import { PurchaseBidding } from "@/components/steel-mill/purchase-bidding"
 import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
 import { MillOrders } from "@/components/steel-mill/mill-orders"
+import { FinancePayment } from "@/components/steel-mill/finance-payment"
 import { SupplierFixed } from "./supplier-fixed"
 import { SupplierAgreement } from "./supplier-agreement"
 
@@ -440,6 +441,14 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
     return (
       <div className="h-full overflow-y-auto p-6">
         <MillOrders />
+      </div>
+    )
+  }
+  // 回收商 · 财务管理 · 费用支付：复刻钢厂财务管理页面
+  if (leaf === "station-recycler-finance-payment") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <FinancePayment />
       </div>
     )
   }

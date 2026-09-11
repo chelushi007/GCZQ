@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   ShoppingCart,
   ClipboardList,
+  Wallet,
   Gavel,
   Tag,
   FileSignature,
@@ -54,6 +55,7 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
   ],
   bottom: [
     { key: "orders", label: "订单管理", icon: ClipboardList },
+    { key: "finance", label: "财务管理", icon: Wallet },
     { key: "suppliers", label: "供应商管理", icon: Users },
   ],
 }

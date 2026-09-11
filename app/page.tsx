@@ -23,6 +23,7 @@ const millSectionLabel: Record<MillMenuKey, string> = {
   "purchase-fixed": "固定价（一口价）回收",
   "purchase-agreement": "协议回收",
   orders: "订单管理",
+  finance: "财务管理",
   suppliers: "供应商管理",
 }
 

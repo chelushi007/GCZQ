@@ -7,6 +7,7 @@ import { PurchaseFixed } from "./purchase-fixed"
 import { PurchaseAgreement } from "./purchase-agreement"
 import { MillOrders } from "./mill-orders"
 import { MillSuppliers } from "./mill-suppliers"
+import { FinancePayment } from "./finance-payment"
 
 export function SteelMillWorkspace({ section }: { section: MillMenuKey }) {
   return (
@@ -16,6 +17,7 @@ export function SteelMillWorkspace({ section }: { section: MillMenuKey }) {
       {section === "purchase-fixed" && <PurchaseFixed />}
       {section === "purchase-agreement" && <PurchaseAgreement />}
       {section === "orders" && <MillOrders />}
+      {section === "finance" && <FinancePayment />}
       {section === "suppliers" && <MillSuppliers />}
     </div>
   )
