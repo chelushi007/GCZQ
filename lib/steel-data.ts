@@ -63,6 +63,7 @@ export type MillMenuKey =
   | "purchase-fixed"
   | "purchase-agreement"
   | "orders"
+  | "finance"
   | "suppliers"
 
 // ---------- 回收站工作台树形菜单（可多层嵌套） ----------
@@ -121,6 +122,11 @@ export const stationTree: StationTreeNode[] = [
         ],
       },
       { key: "station-recycler-orders", label: "订单管理" },
+      {
+        key: "station-recycler-finance",
+        label: "财务管理",
+        children: [{ key: "station-recycler-finance-payment", label: "费用支付" }],
+      },
     ],
   },
   {
@@ -146,6 +152,7 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-recycler-purchase-fixed": ["回收", "采购管理", "固定价回收"],
   "station-recycler-purchase-agreement": ["回收", "采购管理", "协议回收"],
   "station-recycler-orders": ["回收", "订单管理"],
+  "station-recycler-finance-payment": ["回收", "财务管理", "费用支付"],
   "station-seller": ["销售方"],
 }
 
@@ -265,7 +272,7 @@ export const supplierBidList: SupplierBidItem[] = [
   { id: "JJ20260907-001", title: "冲花板料竞价采购公告", buyer: "���武钢铁", category: "统废", region: "上海·宝山", qty: "300 吨", basePrice: "¥2,380/吨", bidMode: "减价竞价", signupEnd: "09-07 12:00", bidStart: "09-08 09:00", bidEnd: "09-08 12:00", signupFee: "¥500", deposit: "¥30,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已缴", myQuote: "¥2,410/吨", myRank: "第 2 名", quotes: 4, result: "竞价中" },
   { id: "JJ20260905-004", title: "钢筋头竞价采购公告", buyer: "沙钢集团", category: "重废", region: "江苏·无锡", qty: "420 吨", basePrice: "¥2,450/吨", bidMode: "减价竞价", signupEnd: "09-05 12:00", bidStart: "09-06 09:00", bidEnd: "09-06 18:00", signupFee: "¥500", deposit: "¥42,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥2,510/吨", myRank: "第 1 名", quotes: 9, result: "已中标" },
   { id: "JJ20260904-009", title: "汽车压块竞价回收公告", buyer: "中天钢铁", category: "统废", region: "江苏·常州", qty: "350 吨", basePrice: "¥3,050/吨", bidMode: "减价竞价", signupEnd: "09-04 12:00", bidStart: "09-05 09:00", bidEnd: "09-05 18:00", signupFee: "¥500", deposit: "¥35,000", signupStatus: "报名通过", feeStatus: "已缴", depositStatus: "已退还", myQuote: "¥3,120/吨", myRank: "第 4 名", quotes: 7, result: "未中标" },
-  { id: "JJ20260908-006", title: "废旧钢结构竞价公告", buyer: "永钢集团", category: "重废", region: "江苏·张家港", qty: "600 吨", basePrice: "¥2,420/吨", bidMode: "减价竞价", signupEnd: "09-09 17:00", bidStart: "09-10 09:00", bidEnd: "09-10 18:00", signupFee: "¥500", deposit: "¥60,000", signupStatus: "未报名", feeStatus: "未缴", depositStatus: "未缴", myQuote: "—", myRank: "—", quotes: 2, result: "报名中" },
+  { id: "JJ20260908-006", title: "废旧钢结构竞价公告", buyer: "永钢集团", category: "重废", region: "江苏·张家��", qty: "600 吨", basePrice: "¥2,420/吨", bidMode: "减价竞价", signupEnd: "09-09 17:00", bidStart: "09-10 09:00", bidEnd: "09-10 18:00", signupFee: "¥500", deposit: "¥60,000", signupStatus: "未报名", feeStatus: "未缴", depositStatus: "未缴", myQuote: "—", myRank: "—", quotes: 2, result: "报名中" },
 ]
 
 export const supplierBidResultTone: Record<SupplierBidItem["result"], "primary" | "green" | "gray" | "amber"> = {
@@ -479,6 +486,52 @@ export interface OrderItem {
   { id: "DD20260902-018", supplier: "城南再生资源回收站", channel: "协议", category: "重废", qty: "1,200 吨", unitPrice: "¥2,660/吨", amount: null, region: "江苏·苏州", status: "履约结束", createdAt: "2026-09-02", deliveryDate: "2026-09-25" },
   { id: "DD20260901-006", supplier: "盛通金属有限公司", channel: "竞价", category: "生铁", qty: "300 吨", unitPrice: "¥2,900/吨", amount: "¥870,000", region: "上海·宝山", status: "履约中", createdAt: "2026-09-01", deliveryDate: "2026-09-09" },
   ]
+
+// ---------- 财务管理 · 费用支付（费用类型：货款） ----------
+export interface PaymentBill {
+  id: string
+  feeType: "货款"
+  orderId: string
+  payee: string
+  category: string
+  qty: string
+  amount: string
+  period: string
+  method: "线上支付" | "线下转账"
+  status: "待支付" | "支付中" | "已支付"
+  applyDate: string
+  payDate: string | null
+  invoiceStatus: "未开票" | "已开票" | "已收票"
+}
+
+export const paymentBills: PaymentBill[] = [
+  { id: "FK20260907-013", feeType: "货款", orderId: "DD20260907-013", payee: "华东再生资源", category: "重废", qty: "500 吨", amount: "¥1,325,000", period: "一次性结清", method: "线上支付", status: "待支付", applyDate: "2026-09-08", payDate: null, invoiceStatus: "已开票" },
+  { id: "FK20260906-010", feeType: "货款", orderId: "DD20260906-010", payee: "城南再生资源回收站", category: "统废", qty: "820 吨", amount: "¥1,972,100", period: "2026-09（按月）", method: "线下转账", status: "支付中", applyDate: "2026-09-07", payDate: null, invoiceStatus: "已开票" },
+  { id: "FK20260905-007", feeType: "货款", orderId: "DD20260905-007", payee: "盛通金属有限公司", category: "生铁", qty: "400 吨", amount: "¥1,180,000", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-05", payDate: "2026-09-06", invoiceStatus: "已收票" },
+  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "统废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "已收票" },
+  { id: "FK20260903-002", feeType: "货款", orderId: "DD20260903-002", payee: "环宇物资回收站", category: "重废", qty: "420 吨", amount: "¥1,100,400", period: "一次性结清", method: "线下转账", status: "待支付", applyDate: "2026-09-03", payDate: null, invoiceStatus: "未开票" },
+  { id: "FK20260902-018", feeType: "货款", orderId: "DD20260902-018", payee: "城南再生资源回收站", category: "重废", qty: "1,200 吨", amount: "¥3,192,000", period: "2026-09（按月）", method: "线下转账", status: "已支付", applyDate: "2026-09-02", payDate: "2026-09-03", invoiceStatus: "已收票" },
+]
+
+export interface InvoiceRecord {
+  id: string
+  billId: string
+  title: string
+  taxNo: string
+  type: "增值税专用发票" | "增值税普通发票"
+  amount: string
+  taxRate: string
+  issueDate: string
+  status: "待开具" | "已开具" | "已认证"
+}
+
+export const invoiceRecords: InvoiceRecord[] = [
+  { id: "FP20260907-013", billId: "FK20260907-013", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥1,325,000", taxRate: "13%", issueDate: "2026-09-08", status: "已开具" },
+  { id: "FP20260906-010", billId: "FK20260906-010", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥1,972,100", taxRate: "13%", issueDate: "2026-09-07", status: "已开具" },
+  { id: "FP20260905-007", billId: "FK20260905-007", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥1,180,000", taxRate: "13%", issueDate: "2026-09-06", status: "已认证" },
+  { id: "FP20260904-005", billId: "FK20260904-005", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税普通发票", amount: "¥84,350", taxRate: "3%", issueDate: "2026-09-05", status: "已认证" },
+  { id: "FP20260902-018", billId: "FK20260902-018", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥3,192,000", taxRate: "13%", issueDate: "2026-09-03", status: "已认证" },
+]
 
 // ---------- 供应商管理 ----------
 export interface SupplierItem {
