@@ -26,23 +26,16 @@ const H = 640
 
 export function ChinaMap({
   values,
-  colorFor,
   hovered,
   onHover,
-  legendTitle,
-  legend,
   tooltip,
 }: {
   values: Record<string, number>
-  colorFor: (v: number) => string
   hovered: string | null
   onHover: (name: string | null) => void
-  legendTitle: string
-  legend: MapLegendItem[]
   tooltip?: (name: string) => ReactNode
 }) {
   const { features, pathFor, centroids } = useMemo(() => {
-    // fitSize 自动完成中国范围的居中与缩放
     const projection = geoMercator().fitSize([W, H], geo as never)
     const path = geoPath(projection)
     const features = geo.features.map((f) => ({ feature: f, name: shortName(f.properties.name) }))
@@ -61,13 +54,14 @@ export function ChinaMap({
         <g>
           {features.map(({ feature, name }) => {
             const isHover = hovered === name
+            const hasData = (values[name] || 0) > 0
             return (
               <path
                 key={name}
                 d={pathFor(feature) ?? undefined}
-                fill={isHover ? "#93c5fd" : "#cfe4fb"}
+                fill={isHover ? "#7fb8f2" : hasData ? "#bcdcfb" : "#d6e9fc"}
                 stroke="#ffffff"
-                strokeWidth={0.6}
+                strokeWidth={0.7}
                 className="cursor-pointer transition-colors duration-150"
                 onMouseEnter={() => onHover(name)}
                 onMouseLeave={() => onHover(null)}
@@ -75,42 +69,24 @@ export function ChinaMap({
             )
           })}
         </g>
-        <g>
+        {/* 省份名称标注 */}
+        <g className="pointer-events-none">
           {features.map(({ name }) => {
-            const v = values[name] || 0
-            if (!v) return null
             const c = centroids[name]
             if (!c) return null
             const [x, y] = c
-            const r = 11 + Math.min(15, v / 22)
-            const isHover = hovered === name
             return (
-              <g
-                key={`${name}-bubble`}
-                className="cursor-pointer"
-                onMouseEnter={() => onHover(name)}
-                onMouseLeave={() => onHover(null)}
+              <text
+                key={`${name}-label`}
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={hovered === name ? "#0f3d70" : "#5b7591"}
+                style={{ fontSize: 10, fontWeight: hovered === name ? 700 : 500 }}
               >
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={r}
-                  fill={colorFor(v)}
-                  fillOpacity={0.92}
-                  stroke="#ffffff"
-                  strokeWidth={isHover ? 2.5 : 1}
-                />
-                <text
-                  x={x}
-                  y={y}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fill="#ffffff"
-                  style={{ fontSize: 11, fontWeight: 600 }}
-                >
-                  {v}
-                </text>
-              </g>
+                {name}
+              </text>
             )
           })}
         </g>
@@ -130,19 +106,6 @@ export function ChinaMap({
           </div>
         </div>
       )}
-
-      {/* 图例 */}
-      <div className="absolute bottom-3 left-3 rounded-lg border border-border bg-card/95 px-3 py-2 shadow-sm backdrop-blur">
-        <p className="mb-1.5 text-xs font-medium text-foreground">{legendTitle}</p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          {legend.map((l) => (
-            <span key={l.label} className="flex items-center gap-1 text-[11px] text-muted-foreground">
-              <span className="size-2.5 rounded-sm" style={{ backgroundColor: l.color }} />
-              {l.label}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* 南海诸岛 装饰角标 */}
       <div className="absolute bottom-3 right-3 flex h-20 w-14 flex-col items-center justify-end rounded-md border border-sky-200 bg-sky-50/70 pb-1">

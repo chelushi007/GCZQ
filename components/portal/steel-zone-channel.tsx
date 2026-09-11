@@ -7,8 +7,6 @@ import {
   ChevronDown,
   Megaphone,
   Gavel,
-  Tag,
-  Clock,
   Flame,
   ArrowRight,
   Receipt,
@@ -17,6 +15,7 @@ import {
   Wallet,
   ShieldCheck,
   Leaf,
+  Clock,
   X,
   type LucideIcon,
 } from "lucide-react"
@@ -28,12 +27,14 @@ import {
   featuredServices,
   partnerCompanies,
   scrapCategories,
+  scrapImage,
+  latestBid,
+  BID_STEP,
   type Channel,
   type Listing,
 } from "@/lib/steel-zone-data"
 import { ZoneBanner } from "./steel-zone/zone-banner"
-import { DemandDistribution, SectionTitle } from "./steel-zone/demand-distribution"
-import { NetworkDistribution } from "./steel-zone/network-distribution"
+import { DistributionTabs, SectionTitle } from "./steel-zone/demand-distribution"
 
 const topNav = ["首页", "废钢需求", "竞价大厅", "废钢采购", "废钢销售", "成交公告", "资讯服务", "特色服务"]
 
@@ -107,11 +108,8 @@ export function SteelZoneChannel() {
         </div>
       </div>
 
-      {/* 3. 废钢需求分布（三级联动地图） */}
-      <DemandDistribution onPublish={() => setPublishOpen(true)} />
-
-      {/* 3. 回收网点分布（地图联动） */}
-      <NetworkDistribution />
+      {/* 3. 全国分布（废钢需求 / 回收网点 两个 Tab） */}
+      <DistributionTabs />
 
       {/* 4. 竞价大厅 */}
       <BiddingHall />
@@ -122,11 +120,11 @@ export function SteelZoneChannel() {
       {/* 6. 废钢销售 */}
       <ScrapSales />
 
-      {/* 7 & 8. 成交公告 + 资讯服务 */}
-      <section className="mx-auto grid max-w-6xl gap-5 px-6 lg:grid-cols-[1fr_1.3fr]">
-        <DealAnnouncements />
-        <NewsService />
-      </section>
+      {/* 7. 成交公告（单独一行） */}
+      <DealAnnouncements />
+
+      {/* 8. 资讯服务（单独一行） */}
+      <NewsService />
 
       {/* 9. 特色服务 */}
       <FeaturedServices />
@@ -139,95 +137,164 @@ export function SteelZoneChannel() {
   )
 }
 
-/* ------------------------- 竞价大厅 ------------------------- */
+/* ------------------------- 竞价大厅（表格 + 详情卡，参考图2） ------------------------- */
 function BiddingHall() {
-  const tabs: { key: Channel; label: string }[] = [
-    { key: "竞价回收", label: "竞价回收" },
-    { key: "竞价销售", label: "竞价销售" },
+  const tabs: { key: Channel; label: string; icon: LucideIcon }[] = [
+    { key: "竞价回收", label: "竞价回收", icon: Gavel },
+    { key: "竞价销售", label: "竞价销售", icon: Flame },
   ]
   const [tab, setTab] = useState<Channel>("竞价回收")
   const items = listingsByChannel(tab)
+  const [selectedId, setSelectedId] = useState(items[0]?.id)
+
+  const selected = items.find((i) => i.id === selectedId) ?? items[0]
+
+  function switchTab(k: Channel) {
+    setTab(k)
+    const first = listingsByChannel(k)[0]
+    setSelectedId(first?.id)
+  }
 
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="竞价大厅" sub="阳光竞价 · 实时报价 · 公开透明" />
+      <SectionTitle title="竞价大厅" />
       <div className="mb-4 inline-flex rounded-lg border border-border bg-card p-1">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
-              tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.key === "竞价回收" ? <Gavel className="size-4" /> : <Flame className="size-4" />}
-            {t.label}
-          </button>
-        ))}
+        {tabs.map((t) => {
+          const Icon = t.icon
+          return (
+            <button
+              key={t.key}
+              onClick={() => switchTab(t.key)}
+              className={cn(
+                "flex items-center gap-1.5 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+                tab === t.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Icon className="size-4" />
+              {t.label}
+            </button>
+          )
+        })}
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {items.map((it) => (
-          <AuctionCard key={it.id} item={it} />
-        ))}
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+        {/* 左：竞价标的表格 */}
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground">
+                <th className="px-4 py-2.5 font-medium">项目名称</th>
+                <th className="px-4 py-2.5 font-medium">剩余时间</th>
+                <th className="px-4 py-2.5 text-right font-medium">起始价</th>
+                <th className="px-4 py-2.5 text-right font-medium">最新报价</th>
+                <th className="px-4 py-2.5 text-center font-medium">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((it) => {
+                const live = it.status === "竞价中"
+                const latest = latestBid(it)
+                const isSel = selected?.id === it.id
+                return (
+                  <tr
+                    key={it.id}
+                    onClick={() => setSelectedId(it.id)}
+                    className={cn(
+                      "cursor-pointer border-b border-border last:border-0 transition-colors",
+                      isSel ? "bg-primary/5" : "hover:bg-muted/40",
+                    )}
+                  >
+                    <td className="max-w-64 truncate px-4 py-3 font-medium text-foreground">{it.title}</td>
+                    <td className="px-4 py-3">
+                      <span className={cn("flex items-center gap-1 text-xs", live ? "text-destructive" : "text-muted-foreground")}>
+                        <Clock className="size-3" />
+                        {it.endsIn}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{it.price.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right tabular-nums font-semibold text-primary">
+                      {latest ? latest.toLocaleString() : "--"}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span
+                        className={cn(
+                          "rounded border px-2 py-0.5 text-[11px] font-medium",
+                          live
+                            ? "border-destructive/40 bg-destructive/5 text-destructive"
+                            : "border-primary/40 bg-primary/5 text-primary",
+                        )}
+                      >
+                        {live ? "报价中" : "未开始"}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* 右：竞价详情卡 */}
+        {selected && <BidDetailCard item={selected} />}
       </div>
     </section>
   )
 }
 
-function AuctionCard({ item }: { item: Listing }) {
+function BidDetailCard({ item }: { item: Listing }) {
   const live = item.status === "竞价中"
+  const latest = latestBid(item)
   return (
-    <div className="group flex flex-col rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <span
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-card">
+      <img
+        src={scrapImage(item.category) || "/placeholder.svg"}
+        alt={item.title}
+        className="h-40 w-full object-cover"
+        crossOrigin="anonymous"
+      />
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="line-clamp-2 text-sm font-semibold text-foreground">{item.title}</h3>
+        <dl className="mt-3 space-y-2 text-xs">
+          <Row k="最新报价" v={latest ? `${latest.toLocaleString()} ${item.unit}` : "--"} strong />
+          <Row k="起始价" v={`${item.price.toLocaleString()} ${item.unit}`} />
+          <Row k="竞价阶梯" v={`${BID_STEP} 元`} />
+          <Row k="数量" v={item.quantity} />
+          <Row k="剩余时间" v={item.endsIn ?? "--"} />
+        </dl>
+        <button
           className={cn(
-            "rounded px-1.5 py-0.5 text-[10px] font-medium",
-            live ? "bg-primary/10 text-primary" : "bg-amber-50 text-amber-600",
+            "mt-4 w-full rounded-md py-2 text-sm font-medium transition-colors",
+            live
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "cursor-not-allowed bg-muted text-muted-foreground",
           )}
+          disabled={!live}
         >
-          {item.status}
-        </span>
-        <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{item.category}</span>
+          {live ? "立即报价" : "未开始"}
+        </button>
       </div>
-      <h3 className="mt-2 line-clamp-2 min-h-10 text-sm font-medium text-foreground">{item.title}</h3>
-      <div className="mt-2 flex items-end justify-between">
-        <div>
-          <span className="text-lg font-bold text-primary">{item.price.toLocaleString()}</span>
-          <span className="ml-0.5 text-[11px] text-muted-foreground">{item.unit}</span>
-        </div>
-        <span className="text-[11px] text-muted-foreground">{item.quantity}</span>
-      </div>
-      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <MapPin className="size-3" />
-          {item.region}
-        </span>
-        {live ? (
-          <span className="flex items-center gap-1 font-medium text-destructive">
-            <Clock className="size-3" />
-            {item.endsIn}
-          </span>
-        ) : (
-          <span>{item.endsIn}</span>
-        )}
-      </div>
-      <button className="mt-3 w-full rounded-md bg-primary/10 py-1.5 text-xs font-medium text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-        {live ? `立即参与（${item.bids} 次出价）` : "查看详情"}
-      </button>
     </div>
   )
 }
 
-/* ------------------------- 废钢采购 ------------------------- */
+function Row({ k, v, strong }: { k: string; v: string; strong?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-muted-foreground">{k}</dt>
+      <dd className={cn("tabular-nums", strong ? "text-base font-bold text-primary" : "text-foreground")}>{v}</dd>
+    </div>
+  )
+}
+
+/* ------------------------- 废钢采购（卡片式，参考图3；去掉固定价销售） ------------------------- */
 function ScrapPurchase() {
-  const channels: Channel[] = ["竞价回收", "固定价回收", "竞价销售", "固定价销售"]
+  const channels: Channel[] = ["竞价回收", "固定价回收", "竞价销售"]
   const [tab, setTab] = useState<Channel>("竞价回收")
   const items = listingsByChannel(tab)
 
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="废钢采购" sub="竞价回收 · 固定价回收 · 竞价销售 · 固定价销售" />
+      <SectionTitle title="废钢采购" />
       <div className="mb-4 flex flex-wrap gap-2">
         {channels.map((c) => (
           <button
@@ -244,37 +311,120 @@ function ScrapPurchase() {
           </button>
         ))}
       </div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        {items.map((it) => (
+          <ScrapCard key={it.id} item={it} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- 废钢销售（卡片式） ------------------------- */
+function ScrapSales() {
+  const items = [...listingsByChannel("竞价销售"), ...listingsByChannel("固定价销售")]
+  return (
+    <section className="mx-auto max-w-6xl px-6">
+      <SectionTitle title="废钢销售" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+        {items.map((it) => (
+          <ScrapCard key={it.id} item={it} sale />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const statusStyle: Record<string, string> = {
+  竞价中: "bg-primary text-primary-foreground",
+  报名中: "bg-amber-500 text-white",
+  即将开始: "bg-amber-500 text-white",
+  固定价: "bg-emerald-600 text-white",
+}
+
+function ScrapCard({ item, sale }: { item: Listing; sale?: boolean }) {
+  const priceColor = sale ? "text-emerald-600" : "text-destructive"
+  const isBid = item.channel.startsWith("竞价")
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-md">
+      <div className="relative">
+        <img
+          src={scrapImage(item.category) || "/placeholder.svg"}
+          alt={item.title}
+          className="h-32 w-full object-cover"
+          crossOrigin="anonymous"
+        />
+        <span
+          className={cn(
+            "absolute left-2 top-2 rounded px-1.5 py-0.5 text-[10px] font-medium",
+            statusStyle[item.status] ?? "bg-muted text-muted-foreground",
+          )}
+        >
+          {item.status}
+        </span>
+        {item.endsIn && (
+          <span className="absolute bottom-0 left-0 right-0 bg-black/45 px-2 py-1 text-[11px] text-white">
+            {isBid ? `${item.endsIn}` : item.spec}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <h3 className="line-clamp-2 min-h-10 text-[13px] font-medium leading-snug text-foreground">{item.title}</h3>
+        <div className="mt-2 space-y-1 text-xs">
+          <div className="flex items-baseline gap-2">
+            <span className="shrink-0 text-muted-foreground">{isBid ? "起拍价" : "价格"}</span>
+            <span className={cn("font-bold", priceColor)}>
+              {item.price.toLocaleString()}
+              <span className="text-[11px] font-normal text-muted-foreground"> {item.unit}</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 text-muted-foreground">数　量</span>
+            <span className="font-medium text-emerald-600">{item.quantity}</span>
+          </div>
+          <div className="flex items-center gap-1 truncate text-muted-foreground">
+            <MapPin className="size-3 shrink-0" />
+            <span className="truncate">
+              {item.region} · {item.company}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------- 成交公告（单独一行） ------------------------- */
+function DealAnnouncements() {
+  return (
+    <section className="mx-auto max-w-6xl px-6">
+      <SectionTitle title="成交公告" />
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left text-xs text-muted-foreground">
-              <th className="px-4 py-2.5 font-medium">标的名称</th>
+              <th className="px-4 py-2.5 font-medium">成交标的</th>
               <th className="px-4 py-2.5 font-medium">品类</th>
-              <th className="px-4 py-2.5 font-medium">规格</th>
               <th className="px-4 py-2.5 font-medium">数量</th>
-              <th className="px-4 py-2.5 text-right font-medium">价格</th>
+              <th className="px-4 py-2.5 text-right font-medium">成交价</th>
               <th className="px-4 py-2.5 font-medium">地区</th>
-              <th className="px-4 py-2.5 font-medium">发布方</th>
-              <th className="px-4 py-2.5 text-center font-medium">操作</th>
+              <th className="px-4 py-2.5 text-right font-medium">成交日期</th>
+              <th className="px-4 py-2.5 text-center font-medium">状态</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((it) => (
-              <tr key={it.id} className="border-b border-border last:border-0 hover:bg-muted/40">
-                <td className="max-w-56 truncate px-4 py-3 font-medium text-foreground">{it.title}</td>
-                <td className="px-4 py-3 text-muted-foreground">{it.category}</td>
-                <td className="px-4 py-3 text-muted-foreground">{it.spec}</td>
-                <td className="px-4 py-3 text-muted-foreground">{it.quantity}</td>
-                <td className="px-4 py-3 text-right font-semibold text-primary">
-                  {it.price.toLocaleString()}
-                  <span className="text-[11px] font-normal text-muted-foreground"> {it.unit}</span>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">{it.region}</td>
-                <td className="px-4 py-3 text-muted-foreground">{it.company}</td>
+            {zoneDeals.map((d) => (
+              <tr key={d.id} className="border-b border-border last:border-0 hover:bg-muted/40">
+                <td className="max-w-72 truncate px-4 py-3 font-medium text-foreground">{d.title}</td>
+                <td className="px-4 py-3 text-muted-foreground">{d.category}</td>
+                <td className="px-4 py-3 text-muted-foreground">{d.weight}</td>
+                <td className="px-4 py-3 text-right font-semibold text-primary">{d.price}</td>
+                <td className="px-4 py-3 text-muted-foreground">{d.region}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{d.date}</td>
                 <td className="px-4 py-3 text-center">
-                  <button className="rounded-md bg-primary/10 px-3 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
-                    {it.channel.startsWith("竞价") ? "参与竞价" : "立即交易"}
-                  </button>
+                  <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">
+                    已成交
+                  </span>
                 </td>
               </tr>
             ))}
@@ -285,84 +435,13 @@ function ScrapPurchase() {
   )
 }
 
-/* ------------------------- 废钢销售 ------------------------- */
-function ScrapSales() {
-  const items = [...listingsByChannel("竞价销售"), ...listingsByChannel("固定价销售")]
-  return (
-    <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="废钢销售" sub="钢厂副产品与废旧金属对外销售" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((it) => (
-          <div
-            key={it.id}
-            className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
-          >
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-              <Tag className="size-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    "rounded px-1.5 py-0.5 text-[10px] font-medium",
-                    it.channel === "竞价销售" ? "bg-primary/10 text-primary" : "bg-emerald-50 text-emerald-600",
-                  )}
-                >
-                  {it.channel}
-                </span>
-                <span className="truncate text-[11px] text-muted-foreground">{it.category}</span>
-              </div>
-              <p className="mt-1 line-clamp-1 text-sm font-medium text-foreground">{it.title}</p>
-              <div className="mt-1 flex items-center justify-between">
-                <span className="text-base font-bold text-emerald-600">
-                  {it.price.toLocaleString()}
-                  <span className="text-[11px] font-normal text-muted-foreground"> {it.unit}</span>
-                </span>
-                <span className="text-[11px] text-muted-foreground">{it.quantity}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-/* ------------------------- 成交公告 ------------------------- */
-function DealAnnouncements() {
-  return (
-    <div>
-      <SectionTitle title="成交公告" />
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        <ul className="divide-y divide-border">
-          {zoneDeals.map((d) => (
-            <li key={d.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40">
-              <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600">已成交</span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{d.title}</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {d.category} · {d.weight} · {d.region}
-                </p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-sm font-semibold text-primary">{d.price}</p>
-                <p className="text-[11px] text-muted-foreground">{d.date}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  )
-}
-
-/* ------------------------- 资讯服务 ------------------------- */
+/* ------------------------- 资讯服务（单独一行） ------------------------- */
 function NewsService() {
   const [featured, ...rest] = zoneNews
   return (
-    <div>
-      <SectionTitle title="资讯服务" sub="废钢行情 · 钢铁行业动态 · 政策法规" />
-      <div className="grid gap-4 sm:grid-cols-[1.1fr_1fr]">
+    <section className="mx-auto max-w-6xl px-6">
+      <SectionTitle title="资讯服务" />
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
         <div className="rounded-xl border border-border bg-card p-4">
           <span className="rounded bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">{featured.tag}</span>
           <h3 className="mt-2 text-pretty text-base font-semibold leading-snug text-foreground">{featured.title}</h3>
@@ -388,7 +467,7 @@ function NewsService() {
           ))}
         </ul>
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -405,7 +484,7 @@ const serviceIcon: Record<string, LucideIcon> = {
 function FeaturedServices() {
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="特色服务" sub="全链路增值服务 · 让废钢交易更省心" />
+      <SectionTitle title="特色服务" />
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {featuredServices.map((s) => {
           const Icon = serviceIcon[s.icon] ?? ShieldCheck
@@ -431,7 +510,7 @@ function FeaturedServices() {
 function PartnerCompanies() {
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="合作企业" sub="携手行业龙头 共建循环生态" />
+      <SectionTitle title="合作企业" />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {partnerCompanies.map((p) => (
           <div
@@ -498,7 +577,7 @@ function PublishDemandModal({ onClose }: { onClose: () => void }) {
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
                 />
               </Field>
-              <Field label="意向价格（元/吨）">
+              <Field label="意向单价（元/吨）">
                 <input
                   type="number"
                   placeholder="如 2600"
@@ -506,33 +585,26 @@ function PublishDemandModal({ onClose }: { onClose: () => void }) {
                 />
               </Field>
             </div>
-            <Field label="交货地区">
-              <input
-                placeholder="如 河北·唐山"
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-              />
-            </Field>
-            <Field label="规格 / 备注">
-              <textarea
-                rows={3}
-                placeholder="请填写规格要求、质量标准、验质方式等"
-                className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
-              />
-            </Field>
-            <div className="flex justify-end gap-2 pt-1">
-              <button
-                onClick={onClose}
-                className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted"
-              >
-                取消
-              </button>
-              <button
-                onClick={() => setSubmitted(true)}
-                className="rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                发布需求
-              </button>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="所在地区">
+                <input
+                  placeholder="如 河北·唐山"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </Field>
+              <Field label="规格要求">
+                <input
+                  placeholder="如 ≥6mm 优质料"
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </Field>
             </div>
+            <button
+              onClick={() => setSubmitted(true)}
+              className="mt-2 w-full rounded-md bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              发布需求
+            </button>
           </div>
         )}
       </div>

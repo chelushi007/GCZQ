@@ -203,6 +203,23 @@ export function listingsByChannel(channel: Channel): Listing[] {
   return listings.filter((l) => l.channel === channel)
 }
 
+/* 按品类映射到废钢实拍图 */
+export function scrapImage(category: string): string {
+  if (category.includes("不锈钢")) return "/images/scrap-stainless.png"
+  if (category.includes("剪切")) return "/images/scrap-shear.png"
+  if (category.includes("钢渣") || category.includes("氧化")) return "/images/scrap-slag.png"
+  if (category.includes("屑") || category.includes("轻薄")) return "/images/scrap-wire.png"
+  if (category.includes("重型") || category.includes("生铁")) return "/images/scrap-heavy.png"
+  return "/images/scrap-heavy.png"
+}
+
+/* 竞价大厅：起始价 / 竞价阶梯 / 最新报价 */
+export const BID_STEP = 50
+export function latestBid(l: Listing): number | null {
+  if (l.status !== "竞价中" || !l.bids) return null
+  return l.price + l.bids * BID_STEP
+}
+
 /* ------------------------------------------------------------------ */
 /* 成交公告                                                            */
 /* ------------------------------------------------------------------ */
