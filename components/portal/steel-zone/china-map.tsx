@@ -54,14 +54,13 @@ export function ChinaMap({
         <g>
           {features.map(({ feature, name }) => {
             const isHover = hovered === name
-            const hasData = (values[name] || 0) > 0
             return (
               <path
                 key={name}
                 d={pathFor(feature) ?? undefined}
-                fill={isHover ? "#7fb8f2" : hasData ? "#bcdcfb" : "#d6e9fc"}
+                fill={isHover ? "#7fb8f2" : "#cfe6fb"}
                 stroke="#ffffff"
-                strokeWidth={0.7}
+                strokeWidth={0.8}
                 className="cursor-pointer transition-colors duration-150"
                 onMouseEnter={() => onHover(name)}
                 onMouseLeave={() => onHover(null)}
