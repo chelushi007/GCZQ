@@ -37,10 +37,12 @@ import {
 import { ZoneBanner } from "./steel-zone/zone-banner"
 import { DistributionTabs, SectionTitle } from "./steel-zone/demand-distribution"
 
-const topNav = ["首页", "废钢需求", "竞价大厅", "废钢采购", "废钢出售", "成交公告", "资讯服务", "特色服务"]
+const topNav = ["首页", "竞价大厅", "废钢采购", "废钢出售"]
 
 export function SteelZoneChannel() {
   const [publishOpen, setPublishOpen] = useState(false)
+  const [searchCat, setSearchCat] = useState("all")
+  const [catOpen, setCatOpen] = useState(false)
 
   return (
     <div className="min-h-full bg-background pb-16">
@@ -87,9 +89,38 @@ export function SteelZoneChannel() {
             <ChevronDown className="size-3.5 text-muted-foreground" />
           </button>
           <span className="h-6 w-px bg-border" />
-          <button className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-            废钢分类 <ChevronDown className="size-3.5" />
-          </button>
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setCatOpen((v) => !v)}
+              className="flex items-center gap-1.5 rounded-md bg-muted px-3 py-2 text-sm text-foreground"
+            >
+              {searchCat === "all" ? "废钢分类" : scrapCategories.find((c) => c.key === searchCat)?.name}
+              <ChevronDown className={cn("size-3.5 transition-transform", catOpen && "rotate-180")} />
+            </button>
+            {catOpen && (
+              <>
+                <div className="fixed inset-0 z-20" onClick={() => setCatOpen(false)} aria-hidden />
+                <ul className="absolute left-0 top-full z-30 mt-1 max-h-72 w-40 overflow-auto rounded-lg border border-border bg-popover py-1 shadow-lg">
+                  {scrapCategories.map((c) => (
+                    <li key={c.key}>
+                      <button
+                        onClick={() => {
+                          setSearchCat(c.key)
+                          setCatOpen(false)
+                        }}
+                        className={cn(
+                          "flex w-full items-center px-3 py-1.5 text-left text-sm transition-colors hover:bg-muted",
+                          searchCat === c.key ? "font-medium text-primary" : "text-foreground",
+                        )}
+                      >
+                        {c.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
           <input
             placeholder="搜索废钢品类、回收 / 销售需求、回收商…"
             className="min-w-0 flex-1 bg-transparent px-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
@@ -102,7 +133,11 @@ export function SteelZoneChannel() {
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 text-xs text-muted-foreground">
           <span>热门：</span>
           {scrapCategories.slice(1, 7).map((c) => (
-            <button key={c.key} className="hover:text-primary">
+            <button
+              key={c.key}
+              onClick={() => setSearchCat(c.key)}
+              className={cn("hover:text-primary", searchCat === c.key && "font-medium text-primary")}
+            >
               {c.name}
             </button>
           ))}
