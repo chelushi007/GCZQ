@@ -171,6 +171,7 @@ export type Listing = {
   id: string
   title: string
   category: string
+  catKey: string
   channel: Channel
   price: number
   unit: string
@@ -184,19 +185,41 @@ export type Listing = {
 }
 
 export const listings: Listing[] = [
-  { id: "B2601", title: "唐山地区重型废钢竞价回收", category: "重型废钢", channel: "竞价回收", price: 2650, unit: "元/吨", quantity: "1500 吨", spec: "≥6mm 一级料", region: "河北·唐山", status: "竞价中", bids: 18, endsIn: "02:14:30", company: "华东钢铁厂" },
-  { id: "B2602", title: "沙钢集团剪切料月度竞价", category: "剪切料", channel: "竞价回收", price: 2720, unit: "元/吨", quantity: "3000 吨", spec: "1.2m 剪切", region: "江苏·张家港", status: "竞价中", bids: 25, endsIn: "01:02:48", company: "沙钢集团" },
-  { id: "B2603", title: "山钢中型废钢竞价回收", category: "中型废钢", channel: "竞价回收", price: 2580, unit: "元/吨", quantity: "2000 吨", spec: "中废统料", region: "山东·莱芜", status: "报名中", bids: 0, endsIn: "1 天后开始", company: "山东钢铁" },
-  { id: "B2604", title: "本钢重废季度竞价回收", category: "重型废钢", channel: "竞价回收", price: 2610, unit: "元/吨", quantity: "5000 吨", spec: "重型统料", region: "辽宁·本溪", status: "竞价中", bids: 12, endsIn: "05:30:10", company: "本钢集团" },
-  { id: "F2611", title: "韶钢轻薄料固定价回收", category: "轻薄料", channel: "固定价回收", price: 2380, unit: "元/吨", quantity: "800 吨", spec: "轻薄打包", region: "广东·韶关", status: "固定价", company: "宝武韶钢" },
-  { id: "F2612", title: "太钢生铁铸铁固定价回收", category: "生铁铸铁", channel: "固定价回收", price: 2900, unit: "元/吨", quantity: "1200 吨", spec: "机件生铁", region: "山西·太原", status: "固定价", company: "太钢集团" },
-  { id: "F2613", title: "安钢中废统料固定价回收", category: "中型废钢", channel: "固定价回收", price: 2560, unit: "元/吨", quantity: "1000 吨", spec: "中废混合", region: "河南·安阳", status: "固定价", company: "安阳钢铁" },
-  { id: "S2621", title: "华东钢铁厂钢渣副产品竞价销售", category: "钢渣", channel: "竞价销售", price: 320, unit: "元/吨", quantity: "8000 吨", spec: "转炉钢渣", region: "江苏·南京", status: "竞价中", bids: 9, endsIn: "03:45:00", company: "华东钢铁厂" },
-  { id: "S2622", title: "含铁氧化皮竞价销售", category: "氧化铁皮", channel: "竞价销售", price: 780, unit: "元/吨", quantity: "1500 吨", spec: "轧钢氧化皮", region: "河北·唐山", status: "竞价中", bids: 14, endsIn: "00:52:20", company: "华东钢铁厂" },
-  { id: "S2623", title: "废旧钢结构件竞价销售", category: "重型废钢", channel: "竞价销售", price: 2480, unit: "元/吨", quantity: "600 吨", spec: "拆解结构件", region: "山东·青岛", status: "报名中", bids: 0, endsIn: "2 天后开始", company: "青岛特钢" },
-  { id: "G2631", title: "报废设备金属固定价销售", category: "中型废钢", channel: "固定价销售", price: 2450, unit: "元/吨", quantity: "400 吨", spec: "报废设备", region: "湖北·武汉", status: "固定价", company: "武钢集团" },
-  { id: "G2632", title: "不锈钢边角料固定价销售", category: "不锈钢", channel: "固定价销售", price: 8600, unit: "元/吨", quantity: "120 吨", spec: "304 边角", region: "广东·佛山", status: "固定价", company: "广东联钢" },
-  { id: "G2633", title: "钢屑压块固定价销售", category: "钢屑刨花", channel: "固定价销售", price: 1980, unit: "元/吨", quantity: "300 吨", spec: "压块屑", region: "浙江·宁波", status: "固定价", company: "宁波钢铁" },
+  // —— 竞价回收（8）——
+  { id: "B2601", title: "唐山地区重型废钢竞价回收", category: "重型废钢", catKey: "heavy", channel: "竞价回收", price: 2650, unit: "元/吨", quantity: "1500 吨", spec: "≥6mm 一级料", region: "河北·唐山", status: "竞价中", bids: 18, endsIn: "02:14:30", company: "华东钢铁厂" },
+  { id: "B2602", title: "沙钢集团剪切料月度竞价", category: "剪切料", catKey: "shear", channel: "竞价回收", price: 2720, unit: "元/吨", quantity: "3000 吨", spec: "1.2m 剪切", region: "江苏·张家港", status: "竞价中", bids: 25, endsIn: "01:02:48", company: "沙钢集团" },
+  { id: "B2603", title: "山钢中型废钢竞价回收", category: "中型废钢", catKey: "medium", channel: "竞价回收", price: 2580, unit: "元/吨", quantity: "2000 吨", spec: "中废统料", region: "山东·莱芜", status: "报名中", bids: 0, endsIn: "1 天后开始", company: "山东钢铁" },
+  { id: "B2604", title: "本钢重废季度竞价回收", category: "重型废钢", catKey: "heavy", channel: "竞价回收", price: 2610, unit: "元/吨", quantity: "5000 吨", spec: "重型统料", region: "辽宁·本溪", status: "竞价中", bids: 12, endsIn: "05:30:10", company: "本钢集团" },
+  { id: "B2605", title: "韶钢轻薄料竞价回收", category: "轻薄料", catKey: "light", channel: "竞价回收", price: 2380, unit: "元/吨", quantity: "800 吨", spec: "轻薄打包", region: "广东·韶关", status: "竞价中", bids: 7, endsIn: "04:18:00", company: "宝武韶钢" },
+  { id: "B2606", title: "太钢生铁铸铁竞价回收", category: "生铁铸铁", catKey: "pig", channel: "竞价回收", price: 2900, unit: "元/吨", quantity: "1200 吨", spec: "机件生铁", region: "山西·太原", status: "竞价中", bids: 11, endsIn: "06:02:40", company: "太钢集团" },
+  { id: "B2607", title: "鄂钢合金钢边角竞价回收", category: "合金钢", catKey: "alloy", channel: "竞价回收", price: 3450, unit: "元/吨", quantity: "500 吨", spec: "低合金", region: "湖北·黄石", status: "报名中", bids: 0, endsIn: "2 天后开始", company: "鄂城钢铁" },
+  { id: "B2608", title: "莱芜不锈钢废料竞价回收", category: "不锈钢", catKey: "stainless", channel: "竞价回收", price: 8300, unit: "元/吨", quantity: "200 吨", spec: "304 统料", region: "山东·济南", status: "竞价中", bids: 15, endsIn: "01:40:12", company: "山东钢铁" },
+
+  // —— 固定价回收（8）——
+  { id: "F2611", title: "韶钢轻薄料固定价回收", category: "轻薄料", catKey: "light", channel: "固定价回收", price: 2380, unit: "元/吨", quantity: "800 吨", spec: "轻薄打包", region: "广东·韶关", status: "固定价", company: "宝武韶钢" },
+  { id: "F2612", title: "太钢生铁铸铁固定价回收", category: "生铁铸铁", catKey: "pig", channel: "固定价回收", price: 2900, unit: "元/吨", quantity: "1200 吨", spec: "机件生铁", region: "山西·太原", status: "固定价", company: "太钢集团" },
+  { id: "F2613", title: "安钢中废统料固定价回收", category: "中型废钢", catKey: "medium", channel: "固定价回收", price: 2560, unit: "元/吨", quantity: "1000 吨", spec: "中废混合", region: "河南·安阳", status: "固定价", company: "安阳钢铁" },
+  { id: "F2614", title: "唐山重废统料固定价回收", category: "重型废钢", catKey: "heavy", channel: "固定价回收", price: 2620, unit: "元/吨", quantity: "1800 吨", spec: "重型统料", region: "河北·唐山", status: "固定价", company: "华东钢铁厂" },
+  { id: "F2615", title: "无锡钢屑刨花固定价回收", category: "钢屑刨花", catKey: "turning", channel: "固定价回收", price: 1980, unit: "元/吨", quantity: "600 吨", spec: "压块屑", region: "江苏·无锡", status: "固定价", company: "锡钢再生" },
+  { id: "F2616", title: "济南中型废钢固定价回收", category: "中型废钢", catKey: "medium", channel: "固定价回收", price: 2540, unit: "元/吨", quantity: "1500 吨", spec: "中废统料", region: "山东·济南", status: "固定价", company: "山东钢铁" },
+  { id: "F2617", title: "邯郸剪切料固定价回收", category: "剪切料", catKey: "shear", channel: "固定价回收", price: 2700, unit: "元/吨", quantity: "1000 吨", spec: "1m 剪切", region: "河北·邯郸", status: "固定价", company: "河钢邯钢" },
+  { id: "F2618", title: "黄石合金钢固定价回收", category: "合金钢", catKey: "alloy", channel: "固定价回收", price: 3420, unit: "元/吨", quantity: "400 吨", spec: "低合金", region: "湖北·黄石", status: "固定价", company: "鄂城钢铁" },
+
+  // —— 竞价销售（8）——
+  { id: "S2621", title: "华东钢铁厂钢渣副产品竞价销售", category: "钢渣", catKey: "heavy", channel: "竞价销售", price: 320, unit: "元/吨", quantity: "8000 吨", spec: "转炉钢渣", region: "江苏·南京", status: "竞价中", bids: 9, endsIn: "03:45:00", company: "华东钢铁厂" },
+  { id: "S2622", title: "含铁氧化皮竞价销售", category: "氧化铁皮", catKey: "heavy", channel: "竞价销售", price: 780, unit: "元/吨", quantity: "1500 吨", spec: "轧钢氧化皮", region: "河北·唐山", status: "竞价中", bids: 14, endsIn: "00:52:20", company: "华东钢铁厂" },
+  { id: "S2623", title: "废旧钢结构件竞价销售", category: "重型废钢", catKey: "heavy", channel: "竞价销售", price: 2480, unit: "元/吨", quantity: "600 吨", spec: "拆解结构件", region: "山东·青岛", status: "报名中", bids: 0, endsIn: "2 天后开始", company: "青岛特钢" },
+  { id: "S2624", title: "报废产线设备金属竞价销售", category: "中型废钢", catKey: "medium", channel: "竞价销售", price: 2450, unit: "元/吨", quantity: "400 吨", spec: "报废设备", region: "湖北·武汉", status: "竞价中", bids: 6, endsIn: "05:12:00", company: "武钢集团" },
+  { id: "S2625", title: "拆解重废现货竞价销售", category: "重型废钢", catKey: "heavy", channel: "竞价销售", price: 2540, unit: "元/吨", quantity: "900 吨", spec: "拆解重废", region: "安徽·马鞍山", status: "竞价中", bids: 10, endsIn: "02:36:44", company: "马钢集团" },
+  { id: "S2626", title: "304 不锈钢边角料竞价销售", category: "不锈钢", catKey: "stainless", channel: "竞价销售", price: 8600, unit: "元/吨", quantity: "120 吨", spec: "304 边角", region: "广东·佛山", status: "竞价中", bids: 21, endsIn: "01:18:30", company: "广东联钢" },
+  { id: "S2627", title: "钢屑压块竞价销售", category: "钢屑刨花", catKey: "turning", channel: "竞价销售", price: 1980, unit: "元/吨", quantity: "300 吨", spec: "压块屑", region: "浙江·宁波", status: "报名中", bids: 0, endsIn: "1 天后开始", company: "宁波钢铁" },
+  { id: "S2628", title: "轻薄打包块竞价销售", category: "轻薄料", catKey: "light", channel: "竞价销售", price: 2280, unit: "元/吨", quantity: "500 吨", spec: "打包块", region: "江苏·无锡", status: "竞价中", bids: 8, endsIn: "04:05:15", company: "锡钢再生" },
+
+  // —— 固定价销售（4）——
+  { id: "G2631", title: "报废设备金属固定价销售", category: "中型废钢", catKey: "medium", channel: "固定价销售", price: 2450, unit: "元/吨", quantity: "400 吨", spec: "报废设备", region: "湖北·武汉", status: "固定价", company: "武钢集团" },
+  { id: "G2632", title: "不锈钢边角料固定价销售", category: "不锈钢", catKey: "stainless", channel: "固定价销售", price: 8600, unit: "元/吨", quantity: "120 吨", spec: "304 边角", region: "广东·佛山", status: "固定价", company: "广东联钢" },
+  { id: "G2633", title: "钢屑压块固定价销售", category: "钢屑刨花", catKey: "turning", channel: "固定价销售", price: 1980, unit: "元/吨", quantity: "300 吨", spec: "压块屑", region: "浙江·宁波", status: "固定价", company: "宁波钢铁" },
+  { id: "G2634", title: "铸造生铁固定价销售", category: "生铁铸铁", catKey: "pig", channel: "固定价销售", price: 2860, unit: "元/吨", quantity: "500 吨", spec: "铸造生铁", region: "湖南·湘潭", status: "固定价", company: "华菱湘钢" },
 ]
 
 export function listingsByChannel(channel: Channel): Listing[] {

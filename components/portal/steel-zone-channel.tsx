@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
+  listings,
   listingsByChannel,
   zoneDeals,
   zoneNews,
@@ -36,7 +37,7 @@ import {
 import { ZoneBanner } from "./steel-zone/zone-banner"
 import { DistributionTabs, SectionTitle } from "./steel-zone/demand-distribution"
 
-const topNav = ["首页", "废钢需求", "竞价大厅", "废钢采购", "废钢销售", "成交公告", "资讯服务", "特色服务"]
+const topNav = ["首页", "废钢需求", "竞价大厅", "废钢采购", "废钢出售", "成交公告", "资讯服务", "特色服务"]
 
 export function SteelZoneChannel() {
   const [publishOpen, setPublishOpen] = useState(false)
@@ -286,47 +287,83 @@ function Row({ k, v, strong }: { k: string; v: string; strong?: boolean }) {
   )
 }
 
-/* ------------------------- 废钢采购（卡片式，参考图3；去掉固定价销售） ------------------------- */
+/* ------------------------- 废钢采购（分类联动 + 竞价回收 / 固定价回收 各两行八卡） ------------------------- */
 function ScrapPurchase() {
-  const channels: Channel[] = ["竞价回收", "固定价回收", "竞价销售"]
-  const [tab, setTab] = useState<Channel>("竞价回收")
-  const items = listingsByChannel(tab)
+  const [cat, setCat] = useState("all")
+  const inCat = (l: Listing) => cat === "all" || l.catKey === cat
+  const bidItems = listings.filter((l) => l.channel === "竞价回收" && inCat(l)).slice(0, 8)
+  const fixedItems = listings.filter((l) => l.channel === "固定价回收" && inCat(l)).slice(0, 8)
 
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="废钢采购" />
-      <div className="mb-4 flex flex-wrap gap-2">
-        {channels.map((c) => (
-          <button
-            key={c}
-            onClick={() => setTab(c)}
-            className={cn(
-              "rounded-full border px-4 py-1.5 text-sm transition-colors",
-              tab === c
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
-            )}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {items.map((it) => (
-          <ScrapCard key={it.id} item={it} />
-        ))}
-      </div>
+      <SectionTitle
+        title="废钢采购"
+        action={
+          <div className="flex max-w-full flex-wrap justify-end gap-1.5">
+            {scrapCategories.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCat(c.key)}
+                className={cn(
+                  "rounded-full border px-2.5 py-1 text-xs transition-colors",
+                  cat === c.key
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                )}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        }
+      />
+
+      <PurchaseGroup label="竞价回收" icon={Gavel} items={bidItems} />
+      <PurchaseGroup label="固定价回收" icon={Scale} items={fixedItems} className="mt-8" />
     </section>
   )
 }
 
-/* ------------------------- 废钢销售（卡片式） ------------------------- */
+function PurchaseGroup({
+  label,
+  icon: Icon,
+  items,
+  className,
+}: {
+  label: string
+  icon: LucideIcon
+  items: Listing[]
+  className?: string
+}) {
+  return (
+    <div className={className}>
+      <div className="mb-3 flex items-center gap-2">
+        <Icon className="size-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">{items.length} 条</span>
+      </div>
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-card py-10 text-center text-sm text-muted-foreground">
+          该分类下暂无{label}挂牌
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {items.map((it) => (
+            <ScrapCard key={it.id} item={it} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ------------------------- 废钢出售（卡片式，两行八卡） ------------------------- */
 function ScrapSales() {
-  const items = [...listingsByChannel("竞价销售"), ...listingsByChannel("固定价销售")]
+  const items = [...listingsByChannel("竞价销售"), ...listingsByChannel("固定价销售")].slice(0, 8)
   return (
     <section className="mx-auto max-w-6xl px-6">
-      <SectionTitle title="废钢销售" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <SectionTitle title="废钢出售" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {items.map((it) => (
           <ScrapCard key={it.id} item={it} sale />
         ))}
