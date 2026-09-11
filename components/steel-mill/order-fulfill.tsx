@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import {
   ArrowLeft,
   FileSignature,
@@ -277,6 +277,8 @@ function ContractPanel({
   const [confirm, setConfirm] = useState(false)
   const [ok, setOk] = useState(done)
   const [preview, setPreview] = useState(false)
+  const [uploadName, setUploadName] = useState("")
+  const uploadRef = useRef<HTMLInputElement>(null)
 
   return (
     <Panel title="合同签署" desc="选择线上电子签署或上传线下已签合同">
@@ -317,11 +319,24 @@ function ContractPanel({
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background px-4 py-3 text-sm">
             <span className="inline-flex items-center gap-2 text-muted-foreground">
               <FileText className="size-4" />
-              线下合同 {contractNo}（双方已签署盖章）
+              {uploadName ? `已上传：${uploadName}` : `线下合同 ${contractNo}（双方已签署盖章）`}
             </span>
-            <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
-              预览合同
-            </Button>
+            <div className="flex items-center gap-2">
+              <input
+                ref={uploadRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="hidden"
+                onChange={(e) => setUploadName(e.target.files?.[0]?.name ?? "")}
+              />
+              <Button variant="outline" size="sm" onClick={() => uploadRef.current?.click()}>
+                <Upload className="mr-1 size-4" />
+                上传合同
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setPreview(true)}>
+                预览合同
+              </Button>
+            </div>
           </div>
         )}
       </div>
