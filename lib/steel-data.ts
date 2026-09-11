@@ -512,7 +512,7 @@ export const paymentBills: PaymentBill[] = [
   { id: "FK20260907-013", feeType: "货款", orderId: "DD20260907-013", payee: "华东再生资源", category: "重废", qty: "500 吨", amount: "¥1,325,000", period: "一次性结清", method: "线上支付", status: "待支付", applyDate: "2026-09-08", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260906-010", feeType: "货款", orderId: "DD20260906-010", payee: "城南再生资源回收站", category: "统废", qty: "820 吨", amount: "¥1,972,100", period: "2026-09（按月）", method: "线下转账", status: "支付中", applyDate: "2026-09-07", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260905-007", feeType: "货款", orderId: "DD20260905-007", payee: "盛通金属有限公司", category: "生铁", qty: "400 吨", amount: "¥1,180,000", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-05", payDate: "2026-09-06", invoiceStatus: "已收票" },
-  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "统废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "��收票" },
+  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "���废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "��收票" },
   { id: "FK20260903-002", feeType: "货款", orderId: "DD20260903-002", payee: "环宇物资回收站", category: "重废", qty: "420 吨", amount: "¥1,100,400", period: "一次性结清", method: "线下转账", status: "待支付", applyDate: "2026-09-03", payDate: null, invoiceStatus: "未开票" },
   { id: "FK20260902-018", feeType: "货款", orderId: "DD20260902-018", payee: "城南再生资源回收站", category: "重废", qty: "1,200 吨", amount: "¥3,192,000", period: "2026-09（按月）", method: "线下转账", status: "已支付", applyDate: "2026-09-02", payDate: "2026-09-03", invoiceStatus: "已收票" },
 ]
@@ -614,6 +614,35 @@ export const reversePayees: ReversePayee[] = [
       { id: "RP20260408-012", orderId: "DD20260408-012", category: "统废", qty: "500 吨", amount: 1_216_000, taxRate: "3%", issueDate: "2026-04-09", status: "已开具" },
     ],
   },
+]
+
+// 反向开票以「与自然人的订单」为主体：每笔订单一行，体现订单信息 + 该自然人年度额度上下文
+export interface ReverseOrder {
+  id: string // 订单号
+  payeeId: string // 关联自然人
+  payeeName: string
+  idNo: string
+  region: string
+  category: string
+  qty: string
+  unitPrice: string
+  amount: number // 订单金额（可开票金额）
+  deliveryDate: string
+  settleStatus: "已结算" | "待结算"
+  invoiceStatus: "待开票" | "已开票" | "已作废"
+  invoiceNo: string | null // 已开票时的反向开票单号
+  issueDate: string | null
+}
+
+export const reverseOrders: ReverseOrder[] = [
+  { id: "DD20260904-005", payeeId: "ZRR-001", payeeName: "张建国", idNo: "3205**********0917", region: "江苏·无锡", category: "统废", qty: "35 吨", unitPrice: "¥2,410/吨", amount: 84_350, deliveryDate: "2026-09-08", settleStatus: "已结算", invoiceStatus: "已开票", invoiceNo: "RP20260904-005", issueDate: "2026-09-05" },
+  { id: "DD20260918-031", payeeId: "ZRR-001", payeeName: "张建国", idNo: "3205**********0917", region: "江苏·无锡", category: "重废", qty: "60 吨", unitPrice: "¥2,650/吨", amount: 159_000, deliveryDate: "2026-09-22", settleStatus: "已结算", invoiceStatus: "待开票", invoiceNo: null, issueDate: null },
+  { id: "DD20260920-047", payeeId: "ZRR-001", payeeName: "张建国", idNo: "3205**********0917", region: "江苏·无锡", category: "统废", qty: "48 吨", unitPrice: "¥2,415/吨", amount: 115_920, deliveryDate: "2026-09-24", settleStatus: "待结算", invoiceStatus: "待开票", invoiceNo: null, issueDate: null },
+  { id: "DD20260815-033", payeeId: "ZRR-002", payeeName: "李秀兰", idNo: "3202**********2043", region: "江苏·苏州", category: "重废", qty: "820 吨", unitPrice: "¥2,610/吨", amount: 2_140_000, deliveryDate: "2026-08-18", settleStatus: "已结算", invoiceStatus: "已开票", invoiceNo: "RP20260815-033", issueDate: "2026-08-16" },
+  { id: "DD20260922-052", payeeId: "ZRR-002", payeeName: "李秀兰", idNo: "3202**********2043", region: "江苏·苏州", category: "重废", qty: "150 吨", unitPrice: "¥2,640/吨", amount: 396_000, deliveryDate: "2026-09-26", settleStatus: "已结算", invoiceStatus: "待开票", invoiceNo: null, issueDate: null },
+  { id: "DD20260910-020", payeeId: "ZRR-003", payeeName: "王志强", idNo: "3301**********1135", region: "浙江·嘉兴", category: "统废", qty: "90 吨", unitPrice: "¥2,405/吨", amount: 216_450, deliveryDate: "2026-09-14", settleStatus: "已结算", invoiceStatus: "待开票", invoiceNo: null, issueDate: null },
+  { id: "DD20260710-024", payeeId: "ZRR-004", payeeName: "陈美华", idNo: "3204**********0628", region: "江苏·常州", category: "统废", qty: "400 吨", unitPrice: "¥2,410/吨", amount: 964_000, deliveryDate: "2026-07-14", settleStatus: "已结算", invoiceStatus: "已开票", invoiceNo: "RP20260710-024", issueDate: "2026-07-11" },
+  { id: "DD20260925-061", payeeId: "ZRR-004", payeeName: "陈美华", idNo: "3204**********0628", region: "江苏·常州", category: "重废", qty: "220 吨", unitPrice: "¥2,655/吨", amount: 584_100, deliveryDate: "2026-09-28", settleStatus: "待结算", invoiceStatus: "待开票", invoiceNo: null, issueDate: null },
 ]
 
 // ---------- 供应商管理 ----------
