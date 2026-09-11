@@ -56,7 +56,33 @@ export function FinancePayment() {
     { key: "qty", header: "数量", render: (r) => <span className="tabular-nums">{r.qty}</span> },
     { key: "amount", header: "支付金额", render: (r) => <span className="tabular-nums font-medium text-foreground">{r.amount}</span> },
     { key: "period", header: "结算账期" },
-    { key: "method", header: "支付方式" },
+    {
+      key: "method",
+      header: "支付方式",
+      render: (r) =>
+        r.status === "已支付" ? (
+          <span className="inline-flex items-center gap-1.5 text-foreground">
+            {r.method === "线上支付" ? (
+              <CreditCard className="size-3.5 text-primary" />
+            ) : (
+              <Banknote className="size-3.5 text-primary" />
+            )}
+            {r.method}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
+      key: "payDate",
+      header: "支付时间",
+      render: (r) =>
+        r.payDate ? (
+          <span className="tabular-nums text-foreground">{r.payDate}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
     { key: "status", header: "状态", render: (r) => <StatusPill tone={billTone(r.status)} label={r.status} /> },
     {
       key: "invoiceStatus",
