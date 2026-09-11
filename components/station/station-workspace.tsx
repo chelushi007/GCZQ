@@ -29,6 +29,7 @@ import { FinancePayment } from "@/components/steel-mill/finance-payment"
 import { FinanceReverse } from "@/components/steel-mill/finance-reverse"
 import { SupplierFixed } from "./supplier-fixed"
 import { SupplierAgreement } from "./supplier-agreement"
+import { SupplierBase } from "./supplier-base"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -404,6 +405,11 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
   // 供应商 · 协议回收：协议单确认
   if (leaf === "station-supplier-agreement-confirm") {
     return <SupplierAgreement />
+  }
+
+  // 供应商 · 基地管理：接受钢厂邀约 / 申请成为合作基地
+  if (leaf === "station-supplier-base") {
+    return <SupplierBase />
   }
 
   // 供应商 · 订单管理：复用钢厂订单管理页面与内容（供应商履约视角）

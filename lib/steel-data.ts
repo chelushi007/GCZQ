@@ -106,6 +106,7 @@ export const stationTree: StationTreeNode[] = [
         children: [{ key: "station-supplier-agreement-confirm", label: "协议单确认" }],
       },
       { key: "station-supplier-orders", label: "订单管理" },
+      { key: "station-supplier-base", label: "基地管理" },
     ],
   },
   {
@@ -150,6 +151,7 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-supplier-fixed-service": ["供应商", "固定价管理", "缴纳服务费"],
   "station-supplier-agreement-confirm": ["供应商", "协议回收", "协议单确认"],
   "station-supplier-orders": ["供应商", "订单管理"],
+  "station-supplier-base": ["供应商", "基地管理"],
   "station-recycler": ["回收商"],
   "station-recycler-purchase-bidding": ["回收", "采购管理", "竞价回收"],
   "station-recycler-purchase-fixed": ["回收", "采购管理", "固定价回收"],
@@ -512,7 +514,7 @@ export const paymentBills: PaymentBill[] = [
   { id: "FK20260907-013", feeType: "货款", orderId: "DD20260907-013", payee: "华东再生资源", category: "重废", qty: "500 吨", amount: "¥1,325,000", period: "一次性结清", method: "线上支付", status: "待支付", applyDate: "2026-09-08", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260906-010", feeType: "货款", orderId: "DD20260906-010", payee: "城南再生资源回收站", category: "统废", qty: "820 吨", amount: "¥1,972,100", period: "2026-09（按月）", method: "线下转账", status: "支付中", applyDate: "2026-09-07", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260905-007", feeType: "货款", orderId: "DD20260905-007", payee: "盛通金属有限公司", category: "生铁", qty: "400 吨", amount: "¥1,180,000", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-05", payDate: "2026-09-06", invoiceStatus: "已收票" },
-  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "���废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "��收票" },
+  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "�����废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "��收票" },
   { id: "FK20260903-002", feeType: "货款", orderId: "DD20260903-002", payee: "环宇物资回收站", category: "重废", qty: "420 吨", amount: "¥1,100,400", period: "一次性结清", method: "线下转账", status: "待支付", applyDate: "2026-09-03", payDate: null, invoiceStatus: "未开票" },
   { id: "FK20260902-018", feeType: "货款", orderId: "DD20260902-018", payee: "城南再生资源回收站", category: "重废", qty: "1,200 吨", amount: "¥3,192,000", period: "2026-09（按月）", method: "线下转账", status: "已支付", applyDate: "2026-09-02", payDate: "2026-09-03", invoiceStatus: "已收票" },
 ]
@@ -664,4 +666,63 @@ export const supplierList: SupplierItem[] = [
   { id: "S003", name: "环宇物资回收站", type: "回收基地", contact: "赵主管 137****5502", region: "浙江·嘉兴", supplyCategory: "统废", totalQty: "3,120 吨", status: "待审核", cooperation: "普通供应商" },
   { id: "S004", name: "张建国", type: "自然人", contact: "张建国 135****9920", region: "江苏·无锡", supplyCategory: "统废", totalQty: "620 吨", status: "合作中", cooperation: "普通供应商" },
   { id: "S005", name: "利民废旧金属", type: "企业供应商", contact: "陈经理 136****1188", region: "安徽·马鞍山", supplyCategory: "重废", totalQty: "2,050 吨", status: "已停用", cooperation: "普通供应商" },
+]
+
+// ---------- 基地管理（钢厂视角：仅回收基地）----------
+export interface CoopBase {
+  id: string
+  name: string
+  contact: string
+  region: string
+  supplyCategory: string
+  scale: "大型基地" | "中型基地" | "小型基地"
+  totalQty: string
+  status: "合作中" | "待审核" | "已邀请" | "已停用"
+  cooperation: "协议基地" | "普通基地"
+  joinedAt: string
+}
+
+export const coopBaseList: CoopBase[] = [
+  { id: "B001", name: "城南再生资源回收基地", contact: "李经理 138****2043", region: "江苏·苏州", supplyCategory: "重废/统废", scale: "大型基地", totalQty: "9,860 吨", status: "合作中", cooperation: "协议基地", joinedAt: "2024-03-12" },
+  { id: "B002", name: "环宇物资回收基地", contact: "赵主管 137****5502", region: "浙江·嘉兴", supplyCategory: "统废", scale: "中型基地", totalQty: "3,120 吨", status: "待审核", cooperation: "普通基地", joinedAt: "—" },
+  { id: "B003", name: "华东再生资源基地", contact: "刘经理 139****3320", region: "江苏·南京", supplyCategory: "重废", scale: "大型基地", totalQty: "6,540 吨", status: "合作中", cooperation: "协议基地", joinedAt: "2024-07-08" },
+  { id: "B004", name: "宁波北仑金属回收基地", contact: "周主管 136****7781", region: "浙江·宁波", supplyCategory: "统废/生铁", scale: "中型基地", totalQty: "—", status: "已邀请", cooperation: "普通基地", joinedAt: "—" },
+  { id: "B005", name: "皖南废旧物资回收基地", contact: "陈经理 135****1188", region: "安徽·马鞍山", supplyCategory: "重废", scale: "中型基地", totalQty: "2,050 吨", status: "已停用", cooperation: "普通基地", joinedAt: "2023-11-20" },
+  { id: "B006", name: "苏北再生资源集散基地", contact: "孙经理 137****9902", region: "江苏·徐州", supplyCategory: "统废", scale: "大型基地", totalQty: "—", status: "已邀请", cooperation: "普通基地", joinedAt: "—" },
+]
+
+// ---------- 基地管理（回收基地视角）----------
+// 钢厂发来的合作邀约
+export interface MillInvite {
+  id: string
+  millName: string
+  region: string
+  category: string
+  settlement: string
+  message: string
+  invitedAt: string
+  status: "待回复" | "已接受" | "已拒绝"
+}
+
+export const millInviteList: MillInvite[] = [
+  { id: "IV001", millName: "华东特钢集团", region: "江苏·苏州", category: "重废 / 统废", settlement: "月结 · 电子合同", message: "诚邀贵基地成为我方长期协议合作回收基地，享优先派单与协议定价。", invitedAt: "2026-09-08", status: "待回复" },
+  { id: "IV002", millName: "江南钢铁股份", region: "江苏·南京", category: "生铁 / 重废", settlement: "货到结算", message: "我方拟拓展苏南废钢供应渠道，邀请贵基地建立固定价供货合作。", invitedAt: "2026-09-05", status: "待回复" },
+  { id: "IV003", millName: "宝武再生资源", region: "上海·宝山", category: "统废", settlement: "协议月结", message: "邀请贵基地加入我方合作基地名录，参与月度竞价与协议回收。", invitedAt: "2026-08-28", status: "已接受" },
+  { id: "IV004", millName: "沙钢集团", region: "江苏·张家港", category: "重废", settlement: "一票制月结", message: "邀请贵基地成为我方重废定点供应基地。", invitedAt: "2026-08-20", status: "已拒绝" },
+]
+
+// 回收基地主动提交的合作申请
+export interface CoopApplication {
+  id: string
+  millName: string
+  category: string
+  appliedAt: string
+  status: "审核中" | "已通过" | "已驳回"
+  note: string
+}
+
+export const coopApplicationList: CoopApplication[] = [
+  { id: "AP001", millName: "华东特钢集团", category: "重废 / 统废", appliedAt: "2026-09-02", status: "已通过", note: "已建立协议合作，等级：协议基地" },
+  { id: "AP002", millName: "马钢股份", category: "统废", appliedAt: "2026-09-06", status: "审核中", note: "资质材料审核中，预计 3 个工作日反馈" },
+  { id: "AP003", millName: "南钢联合", category: "生铁", appliedAt: "2026-08-30", status: "已驳回", note: "供货类别暂不匹配，建议补充重废品类后重新申请" },
 ]
