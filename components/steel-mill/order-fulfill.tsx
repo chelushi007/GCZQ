@@ -434,6 +434,8 @@ function ReconcilePanel({
   const [confirm, setConfirm] = useState(false)
   const [ok, setOk] = useState(done)
   const [addOpen, setAddOpen] = useState(false)
+  const [confirmedRows, setConfirmedRows] = useState<string[]>([])
+  const [rowConfirm, setRowConfirm] = useState<string | null>(null)
   const price = num(item.unitPrice)
 
   const history = useMemo(() => {
@@ -513,21 +515,55 @@ function ReconcilePanel({
         <div className="mt-5">
           <div className="mb-2 text-sm font-medium text-foreground">历史对账记录</div>
           <MiniTable
-            head={["对账单号", "对账期", "对账数量", "对账金额", "创建时间", "确认时间", "状态"]}
-            rows={history.map((h) => [
-              h.no,
-              h.period,
-              `${h.qty} ${unit}`,
-              money(h.amount),
-              h.createdAt,
-              h.confirmedAt || "—",
-              <StatusPill key="s" tone={h.status === "已确认" ? "green" : "amber"}>
-                {h.status}
-              </StatusPill>,
-            ])}
+            head={["对账单号", "对账期", "对账数量", "对账金额", "创建时间", "确认时间", "状态", ...(isPurchaser ? [] : ["操作"])]}
+            rows={history.map((h) => {
+              const confirmed = h.status === "已确认" || confirmedRows.includes(h.no)
+              return [
+                h.no,
+                h.period,
+                `${h.qty} ${unit}`,
+                money(h.amount),
+                h.createdAt,
+                confirmed ? h.confirmedAt || "2026-09-08" : "—",
+                <StatusPill key="s" tone={confirmed ? "green" : "amber"}>
+                  {confirmed ? "已确认" : "待确认"}
+                </StatusPill>,
+                ...(isPurchaser
+                  ? []
+                  : [
+                      confirmed ? (
+                        <span key="op" className="text-xs text-muted-foreground">
+                          已确认
+                        </span>
+                      ) : (
+                        <Button key="op" size="sm" variant="outline" onClick={() => setRowConfirm(h.no)}>
+                          确认对账
+                        </Button>
+                      ),
+                    ]),
+              ]
+            })}
           />
         </div>
       )}
+
+      <ConfirmModal
+        open={rowConfirm !== null}
+        onClose={() => setRowConfirm(null)}
+        title="确认对账单？"
+        desc={`核对采购方对账单 ${rowConfirm ?? ""}，确认无误后该期对账完成，进入收款环节。`}
+        onConfirm={() => {
+          if (rowConfirm) {
+            setConfirmedRows((prev) => [...prev, rowConfirm])
+            const remaining = history.filter((h) => h.status !== "已确认" && !confirmedRows.includes(h.no) && h.no !== rowConfirm)
+            if (remaining.length === 0) {
+              setOk(true)
+              onComplete()
+            }
+          }
+          setRowConfirm(null)
+        }}
+      />
 
       <ConfirmModal
         open={confirm}
