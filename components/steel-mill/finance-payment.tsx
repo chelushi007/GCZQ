@@ -27,6 +27,7 @@ export function FinancePayment() {
   const [keyword, setKeyword] = useState("")
   const [invoiceOf, setInvoiceOf] = useState<PaymentBill | null>(null)
   const [payOf, setPayOf] = useState<PaymentBill | null>(null)
+  const [payMethod, setPayMethod] = useState<"线上支付" | "线下转账">("线上支付")
 
   const rows = useMemo(
     () =>
@@ -197,13 +198,16 @@ export function FinancePayment() {
       <Modal
         open={!!payOf}
         onClose={() => setPayOf(null)}
-        title={`支付货款 · ${payOf?.id ?? ""}`}
+        title={`发起支付 · ${payOf?.id ?? ""}`}
+        size="lg"
         footer={
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setPayOf(null)}>
               取消
             </Button>
-            <Button onClick={() => setPayOf(null)}>确认支付</Button>
+            <Button onClick={() => setPayOf(null)}>
+              {payMethod === "线上支付" ? "确认在线付款" : "提交转账凭证"}
+            </Button>
           </div>
         }
       >
@@ -216,17 +220,66 @@ export function FinancePayment() {
                 {payOf.payee} · {payOf.category} {payOf.qty} · {payOf.period}
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-x-8 gap-y-2 rounded-lg border border-border bg-background p-4 text-sm">
               <Row k="关联订单" v={payOf.orderId} />
               <Row k="费用类型" v={payOf.feeType} />
               <Row k="付款方" v="华东特钢集团" />
               <Row k="收款方" v={payOf.payee} />
-              <Row k="支付方式" v={payOf.method} />
-              <Row k="申请日期" v={payOf.applyDate} />
             </div>
-            <p className="text-xs text-muted-foreground">
-              确认后按 {payOf.method} 向收款方支付货款，支付完成后可在发票列查看对应发票。
-            </p>
+
+            <div>
+              <div className="mb-2 text-sm font-medium text-foreground">支付方式</div>
+              <div className="grid grid-cols-2 gap-3">
+                {(["线上支付", "线下转账"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setPayMethod(m)}
+                    className={`flex items-center gap-3 rounded-lg border p-3 text-left transition ${
+                      payMethod === m
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <div
+                      className={`flex size-9 items-center justify-center rounded-lg ${
+                        payMethod === m ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {m === "线上支付" ? <CreditCard className="size-4" /> : <Banknote className="size-4" />}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{m}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {m === "线上支付" ? "对公账户在线付款" : "银行转账后上传凭证"}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {payMethod === "线上支付" ? (
+              <div className="space-y-2 rounded-lg border border-border bg-background p-4 text-sm">
+                <Row k="付款账户" v="华东特钢集团 · 工行苏州分行 ****2201" />
+                <Row k="收款账户" v={`${payOf.payee} · 工行苏州分行 ****3390`} />
+                <Row k="在线渠道" v="企业网银快捷支付" />
+                <p className="pt-1 text-xs text-muted-foreground">确认后系统将通过对公网银发起在线付款，实时到账后自动更新支付状态。</p>
+              </div>
+            ) : (
+              <div className="space-y-3 rounded-lg border border-border bg-background p-4 text-sm">
+                <Row k="收款户名" v={payOf.payee} />
+                <Row k="收款账号" v="工商银行苏州分行 6222 **** **** 3390" />
+                <Row k="转账金额" v={payOf.amount} />
+                <div>
+                  <div className="mb-1.5 text-muted-foreground">上传银行付款凭证</div>
+                  <div className="flex h-20 items-center justify-center rounded-lg border border-dashed border-border text-xs text-muted-foreground">
+                    点击上传转账回单（支持 PDF / JPG / PNG）
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>
