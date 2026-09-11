@@ -27,27 +27,51 @@ function usageTone(rate: number): "green" | "amber" | "red" {
 export function FinanceReverse() {
   const [region, setRegion] = useState("全部")
   const [keyword, setKeyword] = useState("")
-  const [recordOf, setRecordOf] = useState<ReversePayee | null>(null)
-  const [issueOf, setIssueOf] = useState<ReversePayee | null>(null)
+  const [recordId, setRecordId] = useState<string | null>(null)
+  const [issueId, setIssueId] = useState<string | null>(null)
+  const [payees, setPayees] = useState<ReversePayee[]>(() => reversePayees.map((p) => ({ ...p, records: [...p.records] })))
 
-  const regions = useMemo(() => ["全部", ...Array.from(new Set(reversePayees.map((p) => p.region)))], [])
+  const regions = useMemo(() => ["全部", ...Array.from(new Set(payees.map((p) => p.region)))], [payees])
 
   const rows = useMemo(
     () =>
-      reversePayees.filter((p) => {
+      payees.filter((p) => {
         if (region !== "全部" && p.region !== region) return false
         if (keyword && !`${p.name}${p.idNo}${p.id}`.toLowerCase().includes(keyword.toLowerCase())) return false
         return true
       }),
-    [region, keyword],
+    [region, keyword, payees],
   )
 
   const stats = useMemo(() => {
-    const people = reversePayees.length
-    const used = reversePayees.reduce((s, p) => s + p.annualUsed, 0)
-    const remain = reversePayees.reduce((s, p) => s + Math.max(0, REVERSE_ANNUAL_LIMIT - p.annualUsed), 0)
+    const people = payees.length
+    const used = payees.reduce((s, p) => s + p.annualUsed, 0)
+    const remain = payees.reduce((s, p) => s + Math.max(0, REVERSE_ANNUAL_LIMIT - p.annualUsed), 0)
     return { people, used, remain }
-  }, [])
+  }, [payees])
+
+  const recordOf = payees.find((p) => p.id === recordId) ?? null
+  const issueOf = payees.find((p) => p.id === issueId) ?? null
+
+  function handleIssue(payeeId: string, amount: number) {
+    setPayees((prev) =>
+      prev.map((p) => {
+        if (p.id !== payeeId) return p
+        const seq = p.records.length + 1
+        const newRecord = {
+          id: `${p.id.replace("ZRR", "FP")}-${String(seq).padStart(3, "0")}`,
+          orderId: "手工开具",
+          category: "货款",
+          qty: "—",
+          amount,
+          taxRate: "3%",
+          issueDate: new Date().toISOString().slice(0, 10),
+          status: "已开具" as const,
+        }
+        return { ...p, annualUsed: p.annualUsed + amount, records: [newRecord, ...p.records] }
+      }),
+    )
+  }
 
   const cols: Column<ReversePayee>[] = [
     {
@@ -95,10 +119,10 @@ export function FinanceReverse() {
       header: "操作",
       render: (r) => (
         <div className="flex items-center gap-1">
-          <Button size="sm" onClick={() => setIssueOf(r)}>
+          <Button size="sm" onClick={() => setIssueId(r.id)}>
             发起反向开票
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setRecordOf(r)}>
+          <Button variant="ghost" size="sm" onClick={() => setRecordId(r.id)}>
             开票记录
           </Button>
         </div>
@@ -147,8 +171,8 @@ export function FinanceReverse() {
         <DataTable rows={rows} columns={cols} rowKey={(r) => r.id} />
       </div>
 
-      <RecordModal payee={recordOf} onClose={() => setRecordOf(null)} />
-      <IssueModal payee={issueOf} onClose={() => setIssueOf(null)} />
+      <RecordModal payee={recordOf} onClose={() => setRecordId(null)} />
+      <IssueModal payee={issueOf} onClose={() => setIssueId(null)} onIssue={handleIssue} />
     </div>
   )
 }
@@ -173,7 +197,7 @@ function RecordModal({ payee, onClose }: { payee: ReversePayee | null; onClose: 
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 text-muted-foreground">
                   <tr>
-                    {["开票单号", "关联订单", "类别", "数量", "开票金额", "税率", "开票日期", "状态"].map((h) => (
+                    {["开票单号", "关联订单", "类别", "数量", "开票金��", "税率", "开票日期", "状态"].map((h) => (
                       <th key={h} className="px-3 py-2 text-left font-medium whitespace-nowrap">
                         {h}
                       </th>
@@ -209,7 +233,15 @@ function RecordModal({ payee, onClose }: { payee: ReversePayee | null; onClose: 
   )
 }
 
-function IssueModal({ payee, onClose }: { payee: ReversePayee | null; onClose: () => void }) {
+function IssueModal({
+  payee,
+  onClose,
+  onIssue,
+}: {
+  payee: ReversePayee | null
+  onClose: () => void
+  onIssue: (payeeId: string, amount: number) => void
+}) {
   const [amount, setAmount] = useState("")
   const [check, setCheck] = useState<CheckState>({ phase: "idle" })
 
@@ -217,6 +249,13 @@ function IssueModal({ payee, onClose }: { payee: ReversePayee | null; onClose: (
     setAmount("")
     setCheck({ phase: "idle" })
     onClose()
+  }
+
+  function confirmIssue() {
+    if (payee && check.phase === "pass") {
+      onIssue(payee.id, check.amount)
+    }
+    reset()
   }
 
   const amountNum = Number(amount.replace(/[^\d.]/g, "")) || 0
@@ -248,7 +287,7 @@ function IssueModal({ payee, onClose }: { payee: ReversePayee | null; onClose: (
             取消
           </Button>
           {check.phase === "pass" ? (
-            <Button onClick={reset}>确认开具发票</Button>
+            <Button onClick={confirmIssue}>确认开具发票</Button>
           ) : (
             <Button onClick={runCheck} disabled={amountNum <= 0 || check.phase === "checking"}>
               {check.phase === "checking" ? (
