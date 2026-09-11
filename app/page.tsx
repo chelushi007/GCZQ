@@ -7,6 +7,7 @@ import { PortalHome } from "@/components/portal-home"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
 import { StationWorkspace } from "@/components/station/station-workspace"
 import { PlaceholderWorkspace } from "@/components/placeholder-workspace"
+import type { SupplierSub } from "@/components/workspace-nav"
 import { workspaceNav, stationLeafPath, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
 
 const titleMap: Record<WorkspaceKey, { group: string; leaf: string }> = (() => {
@@ -31,6 +32,7 @@ export default function Page() {
   const [active, setActive] = useState<WorkspaceKey>("portal-home")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
   const [stationLeaf, setStationLeaf] = useState<string>("station-supplier-bidding-signup")
+  const [supplierSub, setSupplierSub] = useState<SupplierSub>("enterprise")
 
   const crumb = titleMap[active]
   const stationPath = active === "station" ? stationLeafPath[stationLeaf] : null
@@ -45,6 +47,8 @@ export default function Page() {
         onMillSectionChange={setMillSection}
         stationLeaf={stationLeaf}
         onStationLeafChange={setStationLeaf}
+        supplierSub={supplierSub}
+        onSupplierSubChange={setSupplierSub}
       />
 
       {/* 3. 工作台内容 */}
@@ -69,10 +73,10 @@ export default function Page() {
               <PortalHome onNavigateSteel={() => setActive("portal-steel")} />
             </div>
           )}
-          {active === "mill" && <SteelMillWorkspace section={millSection} />}
-          {active === "station" && <StationWorkspace leaf={stationLeaf} />}
+          {active === "mill" && <SteelMillWorkspace section={millSection} onNavigate={setMillSection} />}
+          {active === "station" && <StationWorkspace leaf={stationLeaf} onNavigate={setStationLeaf} />}
           {(active === "portal-steel" || active === "supplier" || active === "ops-tbd") && (
-            <PlaceholderWorkspace workspace={active} />
+            <PlaceholderWorkspace workspace={active} supplierSub={supplierSub} />
           )}
         </div>
       </main>

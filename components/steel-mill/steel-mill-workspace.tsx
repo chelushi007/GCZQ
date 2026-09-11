@@ -9,10 +9,16 @@ import { MillOrders } from "./mill-orders"
 import { MillSuppliers } from "./mill-suppliers"
 import { FinancePayment } from "./finance-payment"
 
-export function SteelMillWorkspace({ section }: { section: MillMenuKey }) {
+export function SteelMillWorkspace({
+  section,
+  onNavigate,
+}: {
+  section: MillMenuKey
+  onNavigate?: (section: MillMenuKey) => void
+}) {
   return (
     <div className="h-full overflow-y-auto p-6">
-      {section === "overview" && <MillOverview />}
+      {section === "overview" && <MillOverview onNavigate={onNavigate} />}
       {section === "purchase-bidding" && <PurchaseBidding />}
       {section === "purchase-fixed" && <PurchaseFixed />}
       {section === "purchase-agreement" && <PurchaseAgreement />}

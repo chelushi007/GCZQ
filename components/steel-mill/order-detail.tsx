@@ -216,7 +216,7 @@ export function OrderDetail({
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="pb-2 font-medium">{isPurchaser ? "收货单号" : "发货单���"}</th>
+                <th className="pb-2 font-medium">{isPurchaser ? "收货单号" : "发货单号"}</th>
                 <th className="pb-2 font-medium">货物名称</th>
                 <th className="pb-2 font-medium">数量</th>
                 <th className="pb-2 font-medium">物流公司</th>

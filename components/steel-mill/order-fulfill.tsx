@@ -500,7 +500,7 @@ function ReconcilePanel({
       <StatGrid
         rows={[
           ["对账单号", item.id.replace("DD", "DZ") + "-C"],
-          ["对账���期", cycle],
+          ["对账周期", cycle],
           ["本期对账数量", `${curQty} / ${total} ${unit}`],
           ["结算单价", item.unitPrice],
           ["本期对账金额", money(curAmount)],

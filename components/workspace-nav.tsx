@@ -60,12 +60,13 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
   ],
 }
 
-// 用户工作台各子项的占位子菜单（供应商）
-const leafSubMenu: Partial<Record<WorkspaceKey, { label: string; icon: LucideIcon }[]>> = {
+export type SupplierSub = "enterprise" | "person"
+
+// 用户工作台各子项的占位子菜单（供应商：企业供应商 / 自然人）
+const leafSubMenu: Partial<Record<WorkspaceKey, { key: SupplierSub; label: string; icon: LucideIcon }[]>> = {
   supplier: [
-    { label: "供货总览", icon: LayoutDashboard },
-    { label: "报价管理", icon: Tag },
-    { label: "合同管理", icon: FileSignature },
+    { key: "enterprise", label: "企业供应商", icon: Factory },
+    { key: "person", label: "自然人", icon: Users },
   ],
 }
 
@@ -76,6 +77,8 @@ export function WorkspaceNav({
   onMillSectionChange,
   stationLeaf,
   onStationLeafChange,
+  supplierSub,
+  onSupplierSubChange,
 }: {
   active: WorkspaceKey
   onSelect: (key: WorkspaceKey) => void
@@ -83,6 +86,8 @@ export function WorkspaceNav({
   onMillSectionChange: (key: MillMenuKey) => void
   stationLeaf: string
   onStationLeafChange: (key: string) => void
+  supplierSub: SupplierSub
+  onSupplierSubChange: (key: SupplierSub) => void
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [purchaseOpen, setPurchaseOpen] = useState(true)
@@ -340,12 +345,21 @@ export function WorkspaceNav({
                         <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                           {subMenu.map((n) => {
                             const NIcon = n.icon
+                            const subActive = active === leaf.key && supplierSub === n.key
                             return (
                               <button
-                                key={n.label}
-                                onClick={() => onSelect(leaf.key)}
+                                key={n.key}
+                                onClick={() => {
+                                  onSupplierSubChange(n.key)
+                                  onSelect(leaf.key)
+                                }}
                                 title={n.label}
-                                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                                className={cn(
+                                  "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
+                                  subActive
+                                    ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
+                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                                )}
                               >
                                 <NIcon className="size-3.5 shrink-0" />
                                 <span className="flex-1 text-left">{n.label}</span>

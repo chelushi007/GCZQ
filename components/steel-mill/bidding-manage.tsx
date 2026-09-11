@@ -204,7 +204,7 @@ function NoticeContent({ item }: { item: BiddingItem }) {
           <Field label="竞价开始时间" value={item.bidStart} />
           <Field label="竞价结束时间" value={item.bidEnd} />
           <Field label="延时竞价周期 (秒)" value="300" />
-          <Field label="竞价阶��� (元)" value="500" />
+          <Field label="竞价阶梯 (元)" value="500" />
           <Field label="起始价 (元/吨)" value="3,000" />
           <Field label="中标保证金退还" value="签约后 5 个工作日内退还" />
         </div>
@@ -257,7 +257,7 @@ interface SignupRow {
 }
 const initialSignupRows: SignupRow[] = [
   { id: "R1", name: "华东再生资源有限公司", contact: "王建国", phone: "138****6621", time: "2026-09-01 10:24", status: "审核通过", license: "苏A-资源-20210331", signupFee: "已缴", deposit: "已缴" },
-  { id: "R2", name: "江苏鑫盛物��回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812", signupFee: "已缴", deposit: "未缴" },
+  { id: "R2", name: "江苏鑫盛物资回收公司", contact: "李海涛", phone: "139****3308", time: "2026-09-01 14:12", status: "审核通过", license: "苏B-资源-20190812", signupFee: "已缴", deposit: "未缴" },
   { id: "R3", name: "浙江环晟金属科技", contact: "张伟", phone: "137****9902", time: "2026-09-02 09:33", status: "待审核", license: "浙C-资源-20220605", signupFee: "已缴", deposit: "未缴" },
   { id: "R4", name: "上海宝钢再生资源", contact: "陈明", phone: "136****1157", time: "2026-09-02 16:41", status: "待审核", license: "沪A-资源-20200118", signupFee: "未缴", deposit: "未缴" },
   { id: "R5", name: "安徽绿源废旧金属", contact: "刘芳", phone: "135****8820", time: "2026-09-03 08:05", status: "已驳回", license: "皖D-资源-20230920", signupFee: "未缴", deposit: "未缴" },
@@ -842,7 +842,7 @@ function ModifyTimeContent({ item }: { item: BiddingItem }) {
               onChange={(e) => setForm((f) => ({ ...f, newEnd: e.target.value }))}
             />
           </FormRow>
-          <FormRow label="申���原因" required>
+          <FormRow label="申请原因" required>
             <input
               className={inputCls}
               placeholder="请输入延长竞价时间的原因"
@@ -968,7 +968,7 @@ function SelectContent() {
       {confirmed ? (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           已完成择标，中标单位为 <span className="font-semibold">{picked}</span>
-          ，���统已生成中标结果，可前往「中标结果公告」发布。
+          ，系统已生成中标结果，可前往「中标结果公告」发布。
         </div>
       ) : (
         <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">

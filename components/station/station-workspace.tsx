@@ -30,6 +30,7 @@ import { FinanceReverse } from "@/components/steel-mill/finance-reverse"
 import { SupplierFixed } from "./supplier-fixed"
 import { SupplierAgreement } from "./supplier-agreement"
 import { SupplierBase } from "./supplier-base"
+import { StationOverview } from "./station-overview"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -341,7 +342,7 @@ function PaymentContent({ kind }: { kind: "fee" | "deposit" | "service" }) {
           <Button size="sm">去缴纳</Button>
         ) : (
           <Button variant="outline" size="sm">
-            查看凭���
+            查看凭证
           </Button>
         ),
     },
@@ -390,12 +391,27 @@ function StatCard({
   )
 }
 
-export function StationWorkspace({ leaf }: { leaf: string }) {
+export function StationWorkspace({
+  leaf,
+  onNavigate,
+}: {
+  leaf: string
+  onNavigate?: (leaf: string) => void
+}) {
   const meta = leafMeta[leaf] ?? leafMeta["station-recycler"]
   const [detail, setDetail] = useState<SupplierBidItem | null>(null)
 
   const showsSignupDetail = detail && leaf === "station-supplier-bidding-signup"
   const showsBidDetail = detail && leaf === "station-supplier-bidding-mine"
+
+  // 回收基地 · 总览：业务快捷操作 + 经营概况
+  if (leaf === "station-overview") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <StationOverview onNavigate={onNavigate} />
+      </div>
+    )
+  }
 
   // 供应商 · 固定价管理：网上报价 / 我的报价 / 缴纳服务费
   if (leaf.startsWith("station-supplier-fixed")) {
@@ -478,7 +494,7 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
             {leaf === "station-supplier-bidding-fee" && <PaymentContent kind="fee" />}
             {leaf === "station-supplier-bidding-deposit" && <PaymentContent kind="deposit" />}
             {leaf === "station-supplier-bidding-service" && <PaymentContent kind="service" />}
-            {(leaf === "station-recycler" || leaf === "station-seller") && (
+            {leaf === "station-recycler" && (
               <div className="flex h-[50vh] items-center justify-center">
                 <div className="w-full max-w-md rounded-xl border border-dashed border-border bg-card p-8 text-center">
                   <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -487,6 +503,19 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
                   <h2 className="mt-4 text-lg font-semibold text-foreground">{meta.title}</h2>
                   <p className="mt-1.5 text-sm text-muted-foreground">
                     该角色工作台规划中，后续将参照供应商结构展开各业务模块。
+                  </p>
+                </div>
+              </div>
+            )}
+            {leaf === "station-seller" && (
+              <div className="flex h-[50vh] items-center justify-center">
+                <div className="w-full max-w-lg rounded-xl border border-dashed border-border bg-card p-8 text-center">
+                  <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Recycle className="size-7" />
+                  </div>
+                  <h2 className="mt-4 text-lg font-semibold text-foreground">销售</h2>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    销售可在盘古平台 - 资源盘活 - 资源处置进行发布
                   </p>
                 </div>
               </div>

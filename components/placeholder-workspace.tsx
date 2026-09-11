@@ -1,5 +1,31 @@
-import { Recycle, Truck, Cog, Factory, type LucideIcon } from "lucide-react"
+import { Recycle, Truck, Cog, Factory, Users, type LucideIcon } from "lucide-react"
 import type { WorkspaceKey } from "@/lib/steel-data"
+import type { SupplierSub } from "@/components/workspace-nav"
+
+const supplierSubConfig: Record<SupplierSub, { icon: LucideIcon; title: string; desc: string; points: string[] }> = {
+  enterprise: {
+    icon: Factory,
+    title: "供应商 · 企业供应商",
+    desc: "功能如回收基地（除基地能力）。",
+    points: [
+      "参与钢厂竞价 / 固定价 / 协议供货",
+      "订单履约：合同签署、对账、货款收取、发货",
+      "财务管理：费用支付与发票管理",
+      "不含基地管理（合作基地邀约与申请）能力",
+    ],
+  },
+  person: {
+    icon: Users,
+    title: "供应商 · 自然人",
+    desc: "自然人供应商和销售方。",
+    points: [
+      "自然人身份向回收基地 / 钢厂供货与销售",
+      "仅支持发布销售需求，不支持采购",
+      "由回收基地 / 采购方进行反向开票",
+      "年度开票额度受金税系统校验（不超过 500 万元）",
+    ],
+  },
+}
 
 const config: Record<
   string,
@@ -46,8 +72,15 @@ const config: Record<
   },
 }
 
-export function PlaceholderWorkspace({ workspace }: { workspace: WorkspaceKey }) {
-  const c = config[workspace] ?? config["ops-tbd"]
+export function PlaceholderWorkspace({
+  workspace,
+  supplierSub,
+}: {
+  workspace: WorkspaceKey
+  supplierSub?: SupplierSub
+}) {
+  const c =
+    workspace === "supplier" && supplierSub ? supplierSubConfig[supplierSub] : (config[workspace] ?? config["ops-tbd"])
   const Icon = c.icon
   return (
     <div className="flex h-full items-center justify-center p-6">
