@@ -125,7 +125,10 @@ export const stationTree: StationTreeNode[] = [
       {
         key: "station-recycler-finance",
         label: "财务管理",
-        children: [{ key: "station-recycler-finance-payment", label: "费用支付" }],
+        children: [
+          { key: "station-recycler-finance-payment", label: "费用支付" },
+          { key: "station-recycler-finance-reverse", label: "反向开票" },
+        ],
       },
     ],
   },
@@ -153,6 +156,7 @@ export const stationLeafPath: Record<string, string[]> = {
   "station-recycler-purchase-agreement": ["回收", "采购管理", "协议回收"],
   "station-recycler-orders": ["回收", "订单管理"],
   "station-recycler-finance-payment": ["回收", "财务管理", "费用支付"],
+  "station-recycler-finance-reverse": ["回收", "财务管理", "反向开票"],
   "station-seller": ["销售方"],
 }
 
@@ -508,7 +512,7 @@ export const paymentBills: PaymentBill[] = [
   { id: "FK20260907-013", feeType: "货款", orderId: "DD20260907-013", payee: "华东再生资源", category: "重废", qty: "500 吨", amount: "¥1,325,000", period: "一次性结清", method: "线上支付", status: "待支付", applyDate: "2026-09-08", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260906-010", feeType: "货款", orderId: "DD20260906-010", payee: "城南再生资源回收站", category: "统废", qty: "820 吨", amount: "¥1,972,100", period: "2026-09（按月）", method: "线下转账", status: "支付中", applyDate: "2026-09-07", payDate: null, invoiceStatus: "已开票" },
   { id: "FK20260905-007", feeType: "货款", orderId: "DD20260905-007", payee: "盛通金属有限公司", category: "生铁", qty: "400 吨", amount: "¥1,180,000", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-05", payDate: "2026-09-06", invoiceStatus: "已收票" },
-  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "统废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "已收票" },
+  { id: "FK20260904-005", feeType: "货款", orderId: "DD20260904-005", payee: "张建国（自然人）", category: "统废", qty: "35 吨", amount: "¥84,350", period: "一次性结清", method: "线上支付", status: "已支付", applyDate: "2026-09-04", payDate: "2026-09-05", invoiceStatus: "��收票" },
   { id: "FK20260903-002", feeType: "货款", orderId: "DD20260903-002", payee: "环宇物资回收站", category: "重废", qty: "420 吨", amount: "¥1,100,400", period: "一次性结清", method: "线下转账", status: "待支付", applyDate: "2026-09-03", payDate: null, invoiceStatus: "未开票" },
   { id: "FK20260902-018", feeType: "货款", orderId: "DD20260902-018", payee: "城南再生资源回收站", category: "重废", qty: "1,200 吨", amount: "¥3,192,000", period: "2026-09（按月）", method: "线下转账", status: "已支付", applyDate: "2026-09-02", payDate: "2026-09-03", invoiceStatus: "已收票" },
 ]
@@ -531,6 +535,85 @@ export const invoiceRecords: InvoiceRecord[] = [
   { id: "FP20260905-007", billId: "FK20260905-007", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥1,180,000", taxRate: "13%", issueDate: "2026-09-06", status: "已认证" },
   { id: "FP20260904-005", billId: "FK20260904-005", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税普通发票", amount: "¥84,350", taxRate: "3%", issueDate: "2026-09-05", status: "已认证" },
   { id: "FP20260902-018", billId: "FK20260902-018", title: "华东特钢集团有限公司", taxNo: "91320500MA1X****3K", type: "增值税专用发票", amount: "¥3,192,000", taxRate: "13%", issueDate: "2026-09-03", status: "已认证" },
+]
+
+// ---------- 财务管理 · 反向开票（采购方为自然人代开发票，需调用国家金税系统校验年度额度） ----------
+// 自然人年度反向开票限额：500 万元
+export const REVERSE_ANNUAL_LIMIT = 5_000_000
+
+export interface ReverseInvoiceRecord {
+  id: string
+  orderId: string
+  category: string
+  qty: string
+  amount: number
+  taxRate: string
+  issueDate: string
+  status: "已开具" | "已作废"
+}
+
+export interface ReversePayee {
+  id: string
+  name: string
+  idNo: string
+  region: string
+  bankAccount: string
+  taxYear: string
+  annualUsed: number
+  records: ReverseInvoiceRecord[]
+}
+
+export const reversePayees: ReversePayee[] = [
+  {
+    id: "ZRR-001",
+    name: "张建国",
+    idNo: "3205**********0917",
+    region: "江苏·无锡",
+    bankAccount: "工商银行无锡分行 6222 **** **** 9920",
+    taxYear: "2026",
+    annualUsed: 843_500,
+    records: [
+      { id: "RP20260904-005", orderId: "DD20260904-005", category: "统废", qty: "35 吨", amount: 84_350, taxRate: "3%", issueDate: "2026-09-05", status: "已开具" },
+      { id: "RP20260712-041", orderId: "DD20260712-041", category: "统废", qty: "120 吨", amount: 289_200, taxRate: "3%", issueDate: "2026-07-13", status: "已开具" },
+      { id: "RP20260520-028", orderId: "DD20260520-028", category: "重废", qty: "180 吨", amount: 469_950, taxRate: "3%", issueDate: "2026-05-21", status: "已开具" },
+    ],
+  },
+  {
+    id: "ZRR-002",
+    name: "李秀兰",
+    idNo: "3202**********2043",
+    region: "江苏·苏州",
+    bankAccount: "农业银行苏州分行 6228 **** **** 5510",
+    taxYear: "2026",
+    annualUsed: 4_760_000,
+    records: [
+      { id: "RP20260815-033", orderId: "DD20260815-033", category: "重废", qty: "820 吨", amount: 2_140_000, taxRate: "3%", issueDate: "2026-08-16", status: "已开具" },
+      { id: "RP20260630-019", orderId: "DD20260630-019", category: "重废", qty: "1,000 吨", amount: 2_620_000, taxRate: "3%", issueDate: "2026-07-01", status: "已开具" },
+    ],
+  },
+  {
+    id: "ZRR-003",
+    name: "王志强",
+    idNo: "3301**********1135",
+    region: "浙江·嘉兴",
+    bankAccount: "建设银行嘉兴分行 6217 **** **** 3382",
+    taxYear: "2026",
+    annualUsed: 0,
+    records: [],
+  },
+  {
+    id: "ZRR-004",
+    name: "陈美华",
+    idNo: "3204**********0628",
+    region: "江苏·常州",
+    bankAccount: "中国银行常州分行 6217 **** **** 7741",
+    taxYear: "2026",
+    annualUsed: 2_180_000,
+    records: [
+      { id: "RP20260710-024", orderId: "DD20260710-024", category: "统废", qty: "400 吨", amount: 964_000, taxRate: "3%", issueDate: "2026-07-11", status: "已开具" },
+      { id: "RP20260408-012", orderId: "DD20260408-012", category: "统废", qty: "500 吨", amount: 1_216_000, taxRate: "3%", issueDate: "2026-04-09", status: "已开具" },
+    ],
+  },
 ]
 
 // ---------- 供应商管理 ----------

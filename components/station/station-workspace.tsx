@@ -26,6 +26,7 @@ import { PurchaseFixed } from "@/components/steel-mill/purchase-fixed"
 import { PurchaseAgreement } from "@/components/steel-mill/purchase-agreement"
 import { MillOrders } from "@/components/steel-mill/mill-orders"
 import { FinancePayment } from "@/components/steel-mill/finance-payment"
+import { FinanceReverse } from "@/components/steel-mill/finance-reverse"
 import { SupplierFixed } from "./supplier-fixed"
 import { SupplierAgreement } from "./supplier-agreement"
 
@@ -451,6 +452,10 @@ export function StationWorkspace({ leaf }: { leaf: string }) {
         <FinancePayment />
       </div>
     )
+  }
+  // 回收商 · 财务管理 · 反向开票：调用金税系统校验自然人年度开票额度
+  if (leaf === "station-recycler-finance-reverse") {
+    return <FinanceReverse />
   }
   return (
     <div className="h-full overflow-y-auto p-6">
