@@ -8,6 +8,7 @@ import { StatusPill, statusTone } from "@/components/shared/status-pill"
 import { DataTable, FilterBar, FilterChip, type Column } from "@/components/shared/data-table"
 import { orderList, type OrderItem } from "@/lib/steel-data"
 import { OrderFulfill, type FulfillPerspective } from "@/components/steel-mill/order-fulfill"
+import { OrderDetail } from "@/components/steel-mill/order-detail"
 
 const tabs = ["全部", "履约中", "履约结束"]
 const channelTone: Record<string, "blue" | "amber" | "violet"> = {
@@ -27,6 +28,7 @@ export function MillOrders({ perspective = "purchaser" }: { perspective?: Fulfil
   const [region, setRegion] = useState("全部")
   const [keyword, setKeyword] = useState("")
   const [fulfilling, setFulfilling] = useState<OrderItem | null>(null)
+  const [detail, setDetail] = useState<OrderItem | null>(null)
 
   const rows = orderList.filter((o) => {
     if (tab !== "全部" && o.status !== tab) return false
@@ -90,7 +92,7 @@ export function MillOrders({ perspective = "purchaser" }: { perspective?: Fulfil
             履约
           </Button>
         ) : (
-          <Button variant="ghost" size="sm" onClick={() => setFulfilling(r)}>
+          <Button variant="ghost" size="sm" onClick={() => setDetail(r)}>
             详情
           </Button>
         ),
@@ -99,6 +101,10 @@ export function MillOrders({ perspective = "purchaser" }: { perspective?: Fulfil
 
   if (fulfilling) {
     return <OrderFulfill item={fulfilling} perspective={perspective} onBack={() => setFulfilling(null)} />
+  }
+
+  if (detail) {
+    return <OrderDetail item={detail} perspective={perspective} onBack={() => setDetail(null)} />
   }
 
   return (

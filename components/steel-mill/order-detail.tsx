@@ -53,6 +53,55 @@ export function OrderDetail({
   const counterparty = isPurchaser ? item.supplier : buyer
   const shipNo = item.id.replace("DD", "WL")
 
+  function handleExport() {
+    const rows = nodes.map((n) => `<tr><td>${n.title}</td><td>已完成</td><td>${n.desc}</td><td>${n.time}</td></tr>`).join("")
+    const html = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>履约档案 ${item.id}</title>
+<style>
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1a1a1a;padding:40px;line-height:1.6}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:#666;font-size:13px;margin-bottom:24px}
+  h2{font-size:15px;margin:24px 0 8px;border-left:3px solid #333;padding-left:8px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid #ddd;padding:8px 10px;text-align:left}
+  th{background:#f5f5f5}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 24px;font-size:13px}
+  .grid div{padding:4px 0;border-bottom:1px solid #f0f0f0}
+  .grid span{color:#888;display:inline-block;width:80px}
+  @media print{body{padding:0}}
+</style></head><body>
+<h1>履约档案 · ${item.id}</h1>
+<div class="sub">成交方式：${item.channel}　|　履约状态：${item.status}　|　导出时间：${new Date().toLocaleString("zh-CN")}</div>
+<h2>订单基本信息</h2>
+<div class="grid">
+  <div><span>订单编号</span>${item.id}</div>
+  <div><span>${isPurchaser ? "供应商" : "采购单位"}</span>${counterparty}</div>
+  <div><span>物料类别</span>${item.category}</div>
+  <div><span>成交数量</span>${item.qty}</div>
+  <div><span>成交单价</span>${item.unitPrice}</div>
+  <div><span>订单金额</span>${item.amount ? item.amount : money(amountNum) + "（协议周期结算）"}</div>
+  <div><span>所在地区</span>${item.region}</div>
+  <div><span>下单日期</span>${item.createdAt}</div>
+  <div><span>交货日期</span>${item.deliveryDate}</div>
+  <div><span>结算状态</span>已结清</div>
+</div>
+<h2>履约进度</h2>
+<table><thead><tr><th>节点</th><th>状态</th><th>说明</th><th>时间</th></tr></thead><tbody>${rows}</tbody></table>
+<h2>结算汇总</h2>
+<div class="grid">
+  <div><span>对账金额</span>${money(amountNum)}</div>
+  <div><span>${isPurchaser ? "已付货款" : "已收货款"}</span>${money(amountNum)}</div>
+  <div><span>${isPurchaser ? "已收货量" : "已发货量"}</span>${item.qty}</div>
+  <div><span>物流单号</span>${shipNo}</div>
+</div>
+</body></html>`
+    const w = window.open("", "_blank", "width=900,height=700")
+    if (!w) return
+    w.document.write(html)
+    w.document.close()
+    w.focus()
+    setTimeout(() => w.print(), 300)
+  }
+
   const nodes: TimelineNode[] = isPurchaser
     ? [
         { title: "合同签署", icon: FileSignature, desc: "线上电子签署，合同已归档", time: `${item.createdAt} 09:20` },
@@ -89,7 +138,7 @@ export function OrderDetail({
             {item.category} · {item.qty} · <span className="text-primary">{item.unitPrice}</span>
           </p>
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5 bg-transparent">
+        <Button variant="outline" size="sm" className="gap-1.5 bg-transparent" onClick={handleExport}>
           <Download className="size-3.5" />
           导出履约档案
         </Button>
@@ -167,7 +216,7 @@ export function OrderDetail({
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="pb-2 font-medium">{isPurchaser ? "收货单号" : "发货单号"}</th>
+                <th className="pb-2 font-medium">{isPurchaser ? "收货单号" : "发货单���"}</th>
                 <th className="pb-2 font-medium">货物名称</th>
                 <th className="pb-2 font-medium">数量</th>
                 <th className="pb-2 font-medium">物流公司</th>
