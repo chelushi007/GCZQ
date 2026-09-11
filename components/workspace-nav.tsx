@@ -61,13 +61,15 @@ const millMenu: { top: MillNode[]; purchase: MillNode[]; bottom: MillNode[] } = 
 }
 
 // 用户工作台各子项的占位子菜单（供应商）
-const leafSubMenu: Partial<Record<WorkspaceKey, { label: string; icon: LucideIcon }[]>> = {
+const leafSubMenu: Partial<Record<WorkspaceKey, { label: string; icon: LucideIcon; sub: SupplierSub }[]>> = {
   supplier: [
-    { label: "供货总览", icon: LayoutDashboard },
-    { label: "报价管理", icon: Tag },
-    { label: "合同管理", icon: FileSignature },
+    { label: "企业供应商", icon: Factory, sub: "enterprise" },
+    { label: "自然人", icon: Users, sub: "person" },
   ],
 }
+
+export type SupplierSub = "enterprise" | "person"
+export type StationRole = "supplier" | "buyer"
 
 export function WorkspaceNav({
   active,
@@ -76,6 +78,9 @@ export function WorkspaceNav({
   onMillSectionChange,
   stationLeaf,
   onStationLeafChange,
+  stationRole,
+  supplierSub,
+  onSupplierSubChange,
 }: {
   active: WorkspaceKey
   onSelect: (key: WorkspaceKey) => void
@@ -83,6 +88,9 @@ export function WorkspaceNav({
   onMillSectionChange: (key: MillMenuKey) => void
   stationLeaf: string
   onStationLeafChange: (key: string) => void
+  stationRole: StationRole
+  supplierSub: SupplierSub
+  onSupplierSubChange: (sub: SupplierSub) => void
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [purchaseOpen, setPurchaseOpen] = useState(true)
@@ -328,10 +336,17 @@ export function WorkspaceNav({
                         </div>
                       )}
 
-                      {/* 回收站：内联展开多层树形菜单（供应商 / 回收商 / 销售方） */}
+                      {/* 回收站：按当前角色（供应商 / 采购方）展开对应子树 */}
                       {showChildren && hasStationTree && (
                         <div className="mb-1 ml-4 mt-1 border-l border-sidebar-border pl-3">
-                          <StationTree nodes={stationTree} depth={0} />
+                          <StationTree
+                            nodes={
+                              stationTree.find(
+                                (n) => n.key === (stationRole === "supplier" ? "station-supplier" : "station-recycler"),
+                              )?.children ?? []
+                            }
+                            depth={0}
+                          />
                         </div>
                       )}
 
@@ -340,12 +355,21 @@ export function WorkspaceNav({
                         <div className="mb-1 ml-4 mt-1 space-y-0.5 border-l border-sidebar-border pl-3">
                           {subMenu.map((n) => {
                             const NIcon = n.icon
+                            const subActive = active === leaf.key && supplierSub === n.sub
                             return (
                               <button
                                 key={n.label}
-                                onClick={() => onSelect(leaf.key)}
+                                onClick={() => {
+                                  onSelect(leaf.key)
+                                  onSupplierSubChange(n.sub)
+                                }}
                                 title={n.label}
-                                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                                className={cn(
+                                  "flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
+                                  subActive
+                                    ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground"
+                                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                                )}
                               >
                                 <NIcon className="size-3.5 shrink-0" />
                                 <span className="flex-1 text-left">{n.label}</span>

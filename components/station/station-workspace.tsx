@@ -30,6 +30,7 @@ import { FinanceReverse } from "@/components/steel-mill/finance-reverse"
 import { SupplierFixed } from "./supplier-fixed"
 import { SupplierAgreement } from "./supplier-agreement"
 import { SupplierBase } from "./supplier-base"
+import { StationOverview } from "./station-overview"
 
 const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }> = {
   "station-supplier-bidding-signup": {
@@ -41,8 +42,8 @@ const leafMeta: Record<string, { icon: LucideIcon; title: string; desc: string }
   "station-supplier-bidding-fee": { icon: Wallet, title: "缴纳报名费", desc: "缴纳竞价项目报名费，缴费后方可参与竞价" },
   "station-supplier-bidding-deposit": { icon: ShieldCheck, title: "缴纳保证金", desc: "缴纳投标保证金，未中标后按规则退还" },
   "station-supplier-bidding-service": { icon: HandCoins, title: "缴纳服务费", desc: "中标后缴纳平台交易服务费" },
-  "station-recycler": { icon: Recycle, title: "回收商", desc: "回收商角色工作台设计中" },
-  "station-recycler-orders": { icon: ClipboardList, title: "订单管理", desc: "回收商采购订单的查询、结算与合同管理" },
+  "station-recycler": { icon: Recycle, title: "采购方", desc: "采购方角色工作台" },
+  "station-recycler-orders": { icon: ClipboardList, title: "订单管理", desc: "采购方采购订单的查询、结算与合同管理" },
   "station-seller": { icon: Recycle, title: "销售方", desc: "销售方角色工作台设计中" },
 }
 
@@ -390,12 +391,34 @@ function StatCard({
   )
 }
 
-export function StationWorkspace({ leaf }: { leaf: string }) {
+export function StationWorkspace({
+  leaf,
+  onNavigate,
+}: {
+  leaf: string
+  onNavigate?: (leaf: string) => void
+}) {
   const meta = leafMeta[leaf] ?? leafMeta["station-recycler"]
   const [detail, setDetail] = useState<SupplierBidItem | null>(null)
 
   const showsSignupDetail = detail && leaf === "station-supplier-bidding-signup"
   const showsBidDetail = detail && leaf === "station-supplier-bidding-mine"
+
+  // 供应商 / 采购方 · 总览
+  if (leaf === "station-supplier-overview") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <StationOverview role="supplier" onNavigate={(l) => onNavigate?.(l)} />
+      </div>
+    )
+  }
+  if (leaf === "station-recycler-overview") {
+    return (
+      <div className="h-full overflow-y-auto p-6">
+        <StationOverview role="buyer" onNavigate={(l) => onNavigate?.(l)} />
+      </div>
+    )
+  }
 
   // 供应商 · 固定价管理：网上报价 / 我的报价 / 缴纳服务费
   if (leaf.startsWith("station-supplier-fixed")) {
