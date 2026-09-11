@@ -7,6 +7,7 @@ import { PortalHome } from "@/components/portal-home"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
 import { StationWorkspace } from "@/components/station/station-workspace"
 import { PlaceholderWorkspace } from "@/components/placeholder-workspace"
+import { SteelZoneChannel } from "@/components/portal/steel-zone-channel"
 import type { SupplierSub } from "@/components/workspace-nav"
 import { workspaceNav, stationLeafPath, type WorkspaceKey, type MillMenuKey } from "@/lib/steel-data"
 
@@ -75,7 +76,12 @@ export default function Page() {
           )}
           {active === "mill" && <SteelMillWorkspace section={millSection} onNavigate={setMillSection} />}
           {active === "station" && <StationWorkspace leaf={stationLeaf} onNavigate={setStationLeaf} />}
-          {(active === "portal-steel" || active === "supplier" || active === "ops-tbd") && (
+          {active === "portal-steel" && (
+            <div className="h-full overflow-y-auto">
+              <SteelZoneChannel />
+            </div>
+          )}
+          {(active === "supplier" || active === "ops-tbd") && (
             <PlaceholderWorkspace workspace={active} supplierSub={supplierSub} />
           )}
         </div>
