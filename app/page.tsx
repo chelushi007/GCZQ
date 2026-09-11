@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ChevronRight } from "lucide-react"
-import { WorkspaceNav, type StationRole, type SupplierSub } from "@/components/workspace-nav"
+import { WorkspaceNav } from "@/components/workspace-nav"
 import { PortalHome } from "@/components/portal-home"
 import { SteelMillWorkspace } from "@/components/steel-mill/steel-mill-workspace"
 import { StationWorkspace } from "@/components/station/station-workspace"
@@ -24,28 +24,16 @@ const millSectionLabel: Record<MillMenuKey, string> = {
   "purchase-agreement": "协议回收",
   orders: "订单管理",
   finance: "财务管理",
-  suppliers: "基地管理",
-}
-
-const stationRoleLabel: Record<StationRole, string> = {
-  supplier: "供应商",
-  buyer: "采购方",
+  suppliers: "供应商管理",
 }
 
 export default function Page() {
   const [active, setActive] = useState<WorkspaceKey>("portal-home")
   const [millSection, setMillSection] = useState<MillMenuKey>("overview")
-  const [stationLeaf, setStationLeaf] = useState<string>("station-supplier-overview")
-  const [stationRole, setStationRole] = useState<StationRole>("supplier")
-  const [supplierSub, setSupplierSub] = useState<SupplierSub>("enterprise")
+  const [stationLeaf, setStationLeaf] = useState<string>("station-supplier-bidding-signup")
 
   const crumb = titleMap[active]
-
-  function switchRole(role: StationRole) {
-    setStationRole(role)
-    setStationLeaf(role === "supplier" ? "station-supplier-overview" : "station-recycler-overview")
-    setActive("station")
-  }
+  const stationPath = active === "station" ? stationLeafPath[stationLeaf] : null
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
