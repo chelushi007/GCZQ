@@ -750,19 +750,17 @@ function CollectionPanel({
       <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-2 rounded-lg border border-border bg-background p-4 sm:grid-cols-2">
         <Row k="收款单号" v={item.id.replace("DD", "SK")} />
         <Row k="付款单位" v="华东特钢集团" />
-        <Row k="收款账期" v={term} />
         <Row k="收款账户" v="工商银行苏州分行 ****3390" />
       </div>
 
       <div className="mt-5">
         <div className="mb-2 text-sm font-medium text-foreground">收款历史记录</div>
         <MiniTable
-          head={["收款单号", "收款金额", "收款方式", "账期", "收款账户", "到账时间", "状态"]}
+          head={["收款单号", "收款金额", "收款方式", "收款账户", "到账时间", "状态"]}
           rows={history.map((h) => [
             h.no,
             money(h.amount),
             h.method,
-            h.term,
             h.account,
             h.date,
             <StatusPill key="s" tone="green">
